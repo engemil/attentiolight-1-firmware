@@ -6,9 +6,6 @@
 #include "portab.h"
 #include "usbcfg.h"
 
-#define PORTAB_USB1                 USBD1
-#define PORTAB_SDU1                 SDU1
-
 //#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
 //#define USB_DM_LINE                 PAL_LINE(GPIOA, 12U)
 //#define USB_DP_LINE_MODE            PAL_MODE_INPUT_ANALOG
@@ -30,8 +27,8 @@ int main(void) {
     /*
      * Initializes a serial-over-USB CDC driver.
      */
-    sduObjectInit(&SDU1);
-    sduStart(&SDU1, &serusbcfg);
+    sduObjectInit(&PORTAB_SDU1);
+    sduStart(&PORTAB_SDU1, &serusbcfg);
 
     /*
      * Activates the USB driver and then the USB bus pull-up on D+.
@@ -45,7 +42,7 @@ int main(void) {
 
     while (true) {
 
-        chprintf((BaseSequentialStream*)&SDU1, "Hello World!\r\n");
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Hello World!\r\n");
 
         chThdSleepMilliseconds(1500);
 
