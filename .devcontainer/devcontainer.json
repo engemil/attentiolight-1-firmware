@@ -1,7 +1,7 @@
 {
-    "name": "fw_development",
+    "name": "fw_al1_mb1_development",
     "dockerComposeFile": "docker-compose.yml",
-    "service": "fw_dev_service",
+    "service": "fw_dev_al1_mb1_service",
     "shutdownAction": "none",
     "workspaceFolder": "/workspace",
     "customizations": {

@@ -1,5 +1,5 @@
 services:
-  fw_dev_service:
+  fw_dev_al1_mb1_service:
     build:
       context: .
       dockerfile: Dockerfile # The path to our Dockerfile
