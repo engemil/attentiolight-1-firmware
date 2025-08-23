@@ -1,11 +1,14 @@
-# Base path for the EngEmil PMW3901MB DRIVER
-EE_PMW3901MB_DRIV := $(LIBS)/engemil_pmw3901mb_driver
+# Base path for libraries
+LIBS_DIR := $(LIBS)
 
-# List of all Source files
-LIBSSRC := $(wildcard $(EE_PMW3901MB_DRIV)/src/*.c)
+# List of library directories (add more as needed)
+LIB_DIRS := usbcfg portab
 
-# Required include directories
-LIBSINC := $(EE_PMW3901MB_DRIV)/include/
+# Collect all source files from library directories
+LIBSSRC := $(foreach dir,$(LIB_DIRS),$(wildcard $(LIBS_DIR)/$(dir)/*.c))
+
+# Collect all include directories
+LIBSINC := $(foreach dir,$(LIB_DIRS),$(LIBS_DIR)/$(dir))
 
 # Add to shared variables for ChibiOS build system
 ALLCSRC += $(LIBSSRC)

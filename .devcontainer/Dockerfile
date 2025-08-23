@@ -43,6 +43,9 @@ WORKDIR /
 # gdb - GNU project Debugger. https://packages.ubuntu.com/noble/gdb
 RUN apt-get install gdb-multiarch -y
 
+# minicom - Serial communication program. https://packages.ubuntu.com/noble/minicom
+RUN apt-get install minicom -y
+
 # Clean up
 RUN rm -rf /var/lib/apt/lists/*
 

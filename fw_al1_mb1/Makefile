@@ -114,6 +114,10 @@ include $(CHIBIOS)/tools/mk/autobuild.mk
 #include $(CHIBIOS)/test/oslib/oslib_test.mk
 include $(CHIBIOS)/os/hal/lib/streams/streams.mk
 
+# Project Libraries
+LIBS     := ./libs
+include $(LIBS)/libs.mk
+
 # Define linker script file here
 LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
 
