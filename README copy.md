@@ -1,4 +1,4 @@
-# AttentioLight-1 MainBoard1 Firmware
+# Firmware AttentioLight1-MainBoard1
 
 Hardware
 - Microcontroller: STM32C071RB
@@ -14,7 +14,7 @@ Firmware stack
 
 
 
-## Additonal Info
+## Addiitonal Info
 
 - Info from https://github.com/cbiffle/stm32c0-metapac-example
     - STM32C0 support was added to OpenOCD after the 0.12 release, so you will need it built from git. I used the openocd-git AUR package on Arch. If you've used OpenOCD for any length of time, you'll be accustomed to having to build it from git. :-)

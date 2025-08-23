@@ -1,0 +1,44 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cortex Debug",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${config:settings.project.folder}",
+            "executable": "${config:settings.project.compiledElfFile}",
+            "servertype": "openocd",
+            "device": "${config:settings.project.device}",
+            "configFiles": [
+                "${config:settings.openocd.interface}",
+                "${config:settings.openocd.board}" // Optional
+            ],
+            "preLaunchTask": "build",
+            "svdFile": "${config:settings.project.svdFile}", // Optional
+            "openOCDLaunchCommands": [],
+            "openOCDPreConfigLaunchCommands": [],
+            "showDevDebugOutput": "none"
+        },
+        {
+            "name": "Rebuild and Debug",
+            "type": "cortex-debug",
+            "request": "launch",
+            "cwd": "${config:settings.project.folder}",
+            "executable": "${config:settings.project.compiledElfFile}",
+            "servertype": "openocd",
+            "device": "${config:settings.project.device}",
+            "configFiles": [
+                "${config:settings.openocd.interface}",
+                "${config:settings.openocd.board}" // Optional
+            ],
+            "preLaunchTask": "rebuild",
+            "svdFile": "${config:settings.project.svdFile}", // Optional
+            "openOCDLaunchCommands": [],
+            "openOCDPreConfigLaunchCommands": [],
+            "showDevDebugOutput": "none"
+        }
+    ]
+}

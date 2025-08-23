@@ -1,0 +1,90 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+
+        // Task(s) for the Development Environment
+
+        {
+            "label": "get-chibios",
+            "type": "shell",
+            "command": "[ -d ${workspaceFolder}/ChibiOS ] || ( git clone https://github.com/ChibiOS/ChibiOS.git ${config:settings.project.folder}/ChibiOS && git -C ${config:settings.project.folder}/ChibiOS checkout ${config:settings.chibios.version} ) ",
+            "problemMatcher": [],
+            "detail": "Get (clone) the ChibiOS repository from Github",
+            "runOptions": {
+                "reevaluateOnRerun": false
+            }
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "rm -rf ${config:settings.project.folder}/.dep ${config:settings.project.folder}/build",
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": [],
+            "detail": "Clean build files"
+        },
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "make -C ${config:settings.project.folder}",
+            "args": [],
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the project"
+        },
+        {
+            "label": "flash",
+            "type": "shell",
+            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.board} -f ${config:settings.openocd.interface} & sleep 2 && gdb-multiarch ${config:settings.project.compiledElfFile} -ex \"set confirm off\" -ex \"set pagination off\" -ex \"target extended-remote localhost:3333\" -ex \"load\" -ex \"monitor reset\" -ex \"quit\" ",
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Flash the build file(s) to the chip"
+        },
+        {
+            "label": "rebuild",
+            "dependsOn": [
+                "clean",
+                "build"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Rebuild (clean and build) the project"
+        },
+        {
+            "label": "rebuild and flash",
+            "dependsOn": [
+                "clean",
+                "build",
+                "flash"
+            ],
+            "dependsOrder": "sequence",
+            "group": {
+                "kind": "build"
+            },
+            "detail": "Rebuild (clean and build) and flash the project to the chip"
+        }
+
+    ]
+}
+
