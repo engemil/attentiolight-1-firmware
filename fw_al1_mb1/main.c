@@ -39,13 +39,15 @@ int main(void) {
      * after a reset.
      */
     usbDisconnectBus(serusbcfg.usbp);
-    //chThdSleepMilliseconds(1500);
+    chThdSleepMilliseconds(1500);
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 
     while (true) {
 
         chprintf((BaseSequentialStream*)&SDU1, "Hello World!\r\n");
+
+        chThdSleepMilliseconds(1500);
 
     }
 
