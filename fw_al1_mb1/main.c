@@ -6,6 +6,8 @@
 #include "portab.h"
 #include "usbcfg.h"
 
+#include "ee_ws2812b_chibios_driver.h"
+
 //#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
 //#define USB_DM_LINE                 PAL_LINE(GPIOA, 12U)
 //#define USB_DP_LINE_MODE            PAL_MODE_INPUT_ANALOG

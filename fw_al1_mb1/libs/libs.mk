@@ -2,7 +2,7 @@
 LIBS_DIR := $(LIBS)
 
 # List of library directories (add more as needed)
-LIB_DIRS := usbcfg portab
+LIB_DIRS := usbcfg portab ee_ws2812b_chibios_driver
 
 # Collect all source files from library directories
 LIBSSRC := $(foreach dir,$(LIB_DIRS),$(wildcard $(LIBS_DIR)/$(dir)/*.c))
