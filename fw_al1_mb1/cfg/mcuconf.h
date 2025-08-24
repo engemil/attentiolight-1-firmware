@@ -169,7 +169,7 @@
  * ST driver system settings.
  */
 #define STM32_ST_IRQ_PRIORITY               2
-#define STM32_ST_USE_TIMER                  17 // TIM17
+#define STM32_ST_USE_TIMER                  17 // TIM17. NB! when TIM2 is fixed, change for it!
 
 /*
  * UART driver system settings.

@@ -46,6 +46,10 @@ int main(void) {
 
         chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Hello World!\r\n");
 
+        palClearLine(LINE_LED_GREEN);
+        chThdSleepMilliseconds(1000);
+        palSetLine(LINE_LED_GREEN);
+
         chThdSleepMilliseconds(1500);
 
     }
