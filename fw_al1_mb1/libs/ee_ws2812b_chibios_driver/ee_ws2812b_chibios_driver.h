@@ -33,7 +33,6 @@ SOFTWARE.
 #define _EE_WS2812B_CHIBIOS_DRIVER_
 
 #include <stdint.h>
-#include <string.h>
 
 #include "ch.h"
 #include "hal.h"
@@ -46,6 +45,27 @@ SOFTWARE.
 extern "C"
 {
 #endif
+
+
+/*
+typedef struct {
+    ee_ws2812b_config_t *config;
+    uint8_t dummy;
+} ee_ws2812b_driver_t;
+
+typedef struct {
+    uint8_t green;
+    uint8_t red;
+    uint8_t blue;
+} ee_ws2812b_config_t;
+*/
+
+//static ee_ws2812b_config_t ee_ws2812b_default_config = {
+//    .green = 0;
+//    .red = 0;
+//    .blue = 0;
+//};
+
 
 /**
  * @brief Initialize EngEmil PMW3901MB Driver.
