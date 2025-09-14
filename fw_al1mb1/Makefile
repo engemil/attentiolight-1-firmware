@@ -83,7 +83,7 @@ endif
 #
 
 # Define project name here
-PROJECT = fw_al1_mb1
+PROJECT = fw_al1mb1
 
 # Target settings.
 MCU  = cortex-m0

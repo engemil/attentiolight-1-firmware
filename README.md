@@ -1,8 +1,8 @@
-# AttentioLight-1 MainBoard1 Firmware
+# AttentioLight-1 MainBoard-1 Firmware
 
 (DEVELOPMENT IN-PROGRESS)
 
-This is the source code (firmware) for the AttentioLight1 MainBoard1 (`al1_mb1`).
+This is the source code (firmware) for the AttentioLight-1 MainBoard-1 (`al1mb1`).
 
 ## Hardware
 
