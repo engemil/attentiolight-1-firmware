@@ -1,34 +1,46 @@
 # AttentioLight-1 MainBoard1 Firmware
 
-Hardware
+(DEVELOPMENT IN-PROGRESS)
+
+This is the source code (firmware) for the AttentioLight1 MainBoard1 (`al1_mb1`).
+
+## Hardware
+
 - Microcontroller: STM32C071RB
 
 
-Firmware stack
+## Firmware stack
+
 - ChibiOS
 - more..
 
 
-(IN-PROGRESS)
+## Libraries and Drivers
+
+- EngEmil WS2812B ChibiOS Driver (application driver) (TO DO: Move to a drivers folder?)
+- usbcfg and portab (temporary USB related files) (TO DO move to cfg file and a portability/drivers/library folder?)
 
 
 
-## Fixing chThdSleep on STM32C071RB
+## Bugs and Issues
+
+
+### Fixing chThdSleep on STM32C071RB
 
 - Changes in projects files:
     - `cfg/mcuconf.h`
         ```
-        #define STM32_ST_USE_TIMER                  17 // TIM17
+        #define STM32_ST_USE_TIMER                  17 // TIM17. Note that TIM2 is not working with ChibiOS on STM32C071RB
         ```
     - `cfg/chconf.h`
         ```
-        #define CH_CFG_ST_RESOLUTION                16
-        #define CH_CFG_INTERVALS_SIZE               16
-        #define CH_CFG_TIME_TYPES_SIZE              16
+        #define CH_CFG_ST_RESOLUTION                16 // Adjust for 16-bit timer. Default was 32-bit.
+        #define CH_CFG_INTERVALS_SIZE               16 // Adjust for 16-bit timer. Default was 32-bit.
+        #define CH_CFG_TIME_TYPES_SIZE              16 // Adjust for 16-bit timer. Default was 32-bit.
         ```
 
 
-## Fixing Serial over USB on STM32C071RB
+### Fixing Serial over USB on STM32C071RB
 
 - Changes in projects files for Serial over USB
     - `cfg/halconf.h`
@@ -50,7 +62,7 @@ Firmware stack
         include $(CHIBIOS)/os/hal/lib/streams/streams.mk
         ```
 
-- Temporary missing USB port for STM32C0xx
+- Add temporary missing USB port for STM32C0xx
     - In `os/hal/ports/STM32/STM32C0xx/stm32_isr.h` (line 129 to 137), add the following
         ```
         /*
@@ -122,12 +134,18 @@ Firmware stack
         ```
 
 
-## Additonal Info
+### Setting up OpenOCD
 
-- Info from https://github.com/cbiffle/stm32c0-metapac-example
-    - STM32C0 support was added to OpenOCD after the 0.12 release, so you will need it built from git. I used the openocd-git AUR package on Arch. If you've used OpenOCD for any length of time, you'll be accustomed to having to build it from git. :-)
-    - The C0 series picked up the same odd behavior from the G0 series, where the EMPTY bit in the flash controller -- used to determine if there's code worth booting in the flash -- seems not to get re-evaluated at reset, and only at power-on. This means the very first time you program an STM32C0, if you reset it, it will bounce right back into the ROM like it's not programmed. To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
-    - Remember to mux your dual-function pins correctly in SYSCFG.
-- For float support, remember to set (`CHPRINTF_USE_FLOAT`) to TRUE in `ChibiOS/os/hal/lib/streams/chprintf.h`
+(Info from https://github.com/cbiffle/stm32c0-metapac-example)
 
+STM32C0xx support was added to OpenOCD after the 0.12 release, so you will need it built from git.
+
+
+### First time programming a STM32C071RB
+
+(Info from https://github.com/cbiffle/stm32c0-metapac-example)
+
+The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, where the EMPTY bit in the flash controller (used to determine if there's code worth booting in the flash) seems not to get re-evaluated at reset, and only at power-on. This means the very first time you program an STM32C0xx, if you reset it, it will bounce right back into the ROM like it's not programmed.
+
+To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 

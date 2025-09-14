@@ -136,7 +136,7 @@
 #define STM32_PWM_USE_TIM1                  FALSE
 #define STM32_PWM_USE_TIM3                  FALSE
 #define STM32_PWM_USE_TIM14                 FALSE
-#define STM32_PWM_USE_TIM16                 FALSE
+#define STM32_PWM_USE_TIM16                 TRUE
 #define STM32_PWM_USE_TIM17                 FALSE
 
 /*
@@ -169,7 +169,7 @@
  * ST driver system settings.
  */
 #define STM32_ST_IRQ_PRIORITY               2
-#define STM32_ST_USE_TIMER                  17 // TIM17. NB! when TIM2 is fixed, change for it!
+#define STM32_ST_USE_TIMER                  17 // TIM17. NB! when TIM2 (32-bit) is fixed, change for it!
 
 /*
  * UART driver system settings.
@@ -198,5 +198,11 @@
  * WDG driver system settings.
  */
 #define STM32_WDG_USE_IWDG                  FALSE
+
+/*
+ * DMA driver system settings.
+ */
+#define STM32_DMA_REQUIRED                  TRUE // Added for DMA support
+
 
 #endif /* MCUCONF_H */

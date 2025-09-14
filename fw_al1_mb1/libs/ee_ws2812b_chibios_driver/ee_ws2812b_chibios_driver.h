@@ -33,39 +33,47 @@ SOFTWARE.
 #define _EE_WS2812B_CHIBIOS_DRIVER_
 
 #include <stdint.h>
+#include <string.h>
 
 #include "ch.h"
 #include "hal.h"
+
+#ifndef STM32C011xx
+#ifndef STM32C031xx
+#ifndef STM32C051xx
+#ifndef STM32C071xx
+#ifndef STM32C091xx
+#ifndef STM32C092xx
+#error "EngEmil WS2812B ChibiOS Driver only supports STM32C0 series"
+#endif
+#endif
+#endif
+#endif
+#endif
+#endif
 
 #if !HAL_USE_PWM
 #error "PWM not enabled in halconf.h"
 #endif
 
+
+#if !HAL_USE_PWM
+#error "PWM not enabled in halconf.h"
+#endif
+
+#if !(STM32_PWM_USE_TIM1 || STM32_PWM_USE_TIM3 || STM32_PWM_USE_TIM14 || STM32_PWM_USE_TIM16 || STM32_PWM_USE_TIM17)
+#error "At least one PWM timer must be enabled in mcuconf.h"
+#endif
+
+#if !STM32_DMA_REQUIRED
+#error "STM32_DMA_REQUIRED not enabled in mcuconf.h"
+#endif
+
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-
-/*
-typedef struct {
-    ee_ws2812b_config_t *config;
-    uint8_t dummy;
-} ee_ws2812b_driver_t;
-
-typedef struct {
-    uint8_t green;
-    uint8_t red;
-    uint8_t blue;
-} ee_ws2812b_config_t;
-*/
-
-//static ee_ws2812b_config_t ee_ws2812b_default_config = {
-//    .green = 0;
-//    .red = 0;
-//    .blue = 0;
-//};
-
 
 /**
  * @brief Initialize EngEmil PMW3901MB Driver.
@@ -74,7 +82,40 @@ typedef struct {
  */
 uint8_t ee_ws2812b_init_driver(void);
 
+/**
+ * @brief Start EngEmil PMW3901MB Driver.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t ee_ws2812b_start_driver(void);
 
+/**
+ * @brief Stop EngEmil PMW3901MB Driver.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t ee_ws2812b_stop_driver(void);
+
+/**
+ * @brief Sets the color (RGB) of the WS2812B LED.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t ee_ws2812b_set_color_rgb(uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * @brief Renders the WS2812B LED.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t ee_ws2812b_render(void);
+
+/**
+ * @brief Sets the color (RGB) and renders the WS2812B LED.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t ee_ws2812b_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b);
 
 
 #ifdef __cplusplus

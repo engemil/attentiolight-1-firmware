@@ -5,7 +5,6 @@
 
 #include "portab.h"
 #include "usbcfg.h"
-
 #include "ee_ws2812b_chibios_driver.h"
 
 //#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
@@ -42,15 +41,28 @@ int main(void) {
     usbStart(serusbcfg.usbp, &usbcfg);
     usbConnectBus(serusbcfg.usbp);
 
+    /*
+     * Initializes EngEmil WS2812B Driver.
+     */
+    ee_ws2812b_init_driver();
+
     while (true) {
 
         chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Hello World!\r\n");
 
         palClearLine(LINE_LED_GREEN);
-        chThdSleepMilliseconds(1000);
+        chThdSleepMilliseconds(500);
         palSetLine(LINE_LED_GREEN);
 
-        chThdSleepMilliseconds(1500);
+        chThdSleepMilliseconds(500);
+
+        ee_ws2812b_set_color_rgb_and_render(0xFF, 0x00, 0x00);
+        chThdSleepMilliseconds(500);
+        ee_ws2812b_set_color_rgb_and_render(0x00, 0xFF, 0x00);
+        chThdSleepMilliseconds(500);
+        ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0xFF);
+        chThdSleepMilliseconds(500);
+
 
     }
 
