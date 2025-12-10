@@ -1,6 +1,6 @@
 
-ChibiOS
+*/ChibiOS
 docs/doxygen/html
 docs/doxygen/latex
-fw_al1_mb1/build
-fw_al1_mb1/.dep
+*/build
+*/.dep
