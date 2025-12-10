@@ -7,15 +7,39 @@
 #include "usbcfg.h"
 #include "ee_ws2812b_chibios_driver.h"
 
+// Added in portab.h
 //#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
 //#define USB_DM_LINE                 PAL_LINE(GPIOA, 12U)
 //#define USB_DP_LINE_MODE            PAL_MODE_INPUT_ANALOG
 //#define USB_DM_LINE_MODE            PAL_MODE_INPUT_ANALOG
 
+
+#define VIRTUAL_COM_TX_LINE         PAL_LINE(GPIOA, 3U)
+#define VIRTUAL_COM_RX_LINE         PAL_LINE(GPIOA, 2U)
+#define VIRTUAL_COM_TX_LINE_MODE    PAL_MODE_ALTERNATE(1) | \
+                                    PAL_STM32_OSPEED_MID2 | \
+                                    PAL_STM32_PUPDR_FLOATING | \
+                                    PAL_STM32_OTYPE_PUSHPULL
+#define VIRTUAL_COM_RX_LINE_MODE    PAL_MODE_ALTERNATE(1) | \
+                                    PAL_STM32_OSPEED_MID2 | \
+                                    PAL_STM32_PUPDR_FLOATING | \
+                                    PAL_STM32_OTYPE_PUSHPULL
+/* Serial Configuration for Virtual COM Port */
+static SerialConfig serial_cfg = {
+    .speed  = 115200,           // Baud rate
+    .cr1    = 0,                // No parity, 8-bit data (default)
+    .cr2    = 0,                // No specific control settings
+    .cr3    = 0                 // No hardware flow control
+};
+
+
+
+
 int main(void) {
     halInit();
     chSysInit();
     
+    // Added in portab.c by portab_setup()
     /* Configure USB DP and DM Pins */
     //palSetLineMode(USB_DP_LINE, USB_DP_LINE_MODE);
     //palSetLineMode(USB_DM_LINE, USB_DM_LINE_MODE);
@@ -44,24 +68,32 @@ int main(void) {
     /*
      * Initializes EngEmil WS2812B Driver.
      */
-    ee_ws2812b_init_driver();
+    //ee_ws2812b_init_driver();
+
+
+    /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
+    palSetLineMode(VIRTUAL_COM_TX_LINE, VIRTUAL_COM_TX_LINE_MODE);
+    palSetLineMode(VIRTUAL_COM_RX_LINE, VIRTUAL_COM_RX_LINE_MODE);
+    sdStart(&SD2, &serial_cfg);
 
     while (true) {
 
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Hello World!\r\n");
-
-        palClearLine(LINE_LED_GREEN);
-        chThdSleepMilliseconds(500);
-        palSetLine(LINE_LED_GREEN);
-
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST EMIL 2 GO GO GO!\r\n");
+        chprintf((BaseSequentialStream*)&SD2, "TEST EMIL LETS GO!\r\n");
         chThdSleepMilliseconds(500);
 
-        ee_ws2812b_set_color_rgb_and_render(0xFF, 0x00, 0x00);
-        chThdSleepMilliseconds(500);
-        ee_ws2812b_set_color_rgb_and_render(0x00, 0xFF, 0x00);
-        chThdSleepMilliseconds(500);
-        ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0xFF);
-        chThdSleepMilliseconds(500);
+        //palClearLine(LINE_LED_GREEN);
+        //chThdSleepMilliseconds(500);
+        //palSetLine(LINE_LED_GREEN);
+
+        //chThdSleepMilliseconds(500);
+
+        //ee_ws2812b_set_color_rgb_and_render(0xFF, 0x00, 0x00);
+        //chThdSleepMilliseconds(500);
+        //ee_ws2812b_set_color_rgb_and_render(0x00, 0xFF, 0x00);
+        //chThdSleepMilliseconds(500);
+        //ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0xFF);
+        //chThdSleepMilliseconds(500);
 
 
     }
