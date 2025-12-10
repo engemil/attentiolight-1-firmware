@@ -93,6 +93,7 @@ CHIBIOS  := ./ChibiOS
 CONFDIR  := ./cfg
 BUILDDIR := ./build
 DEPDIR   := ./.dep
+BOARDSDIR := ./boards
 
 # Licensing files.
 include $(CHIBIOS)/os/license/license.mk
@@ -101,7 +102,8 @@ include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32c0xx.m
 # HAL-OSAL files (optional).
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/hal/ports/STM32/STM32C0xx/platform.mk
-include $(CHIBIOS)/os/hal/boards/ST_NUCLEO64_C071RB/board.mk
+#include $(CHIBIOS)/os/hal/boards/ST_NUCLEO64_C071RB/board.mk
+include $(BOARDSDIR)/AL1_MB1/board.mk
 include $(CHIBIOS)/os/hal/osal/rt-nil/osal.mk
 # RTOS files (optional).
 include $(CHIBIOS)/os/rt/rt.mk
