@@ -44,13 +44,16 @@ SOFTWARE.
 #define BITS_PER_PIXEL (24)
 #define PWM_BUFFER_SIZE (BITS_PER_PIXEL + 1U) // Include 1 extra bit
 #define PWM_RESET_BUFFER_SIZE (40U) // 40 * 1.25us = 50us reset time
-#define PWM_DRIVER (&PWMD16)
+//#define PWM_DRIVER (&PWMD16)
+#define PWM_DRIVER (&PWMD1)
 
 #define DMA_DRIVER (1U) // DMA1
 #define DMA_CHANNEL (1U) // Channel 1
 #define DMA_PRIORITY (0U) // Low priority
-#define DMA_REQUEST (44U) // DMAMUX request 44 for TIM16_CH1 (See RM0490 Reference Manual, Table 49)
-#define DMA_PERIPHERAL (&(TIM16->CCR1)) // DMA peripheral address
+//#define DMA_REQUEST (44U) // DMAMUX request 44 for TIM16_CH1 (See RM0490 Reference Manual, Table 49)
+//#define DMA_PERIPHERAL (&(TIM16->CCR1)) // DMA peripheral address
+#define DMA_REQUEST (22U) // DMAMUX request 22 for TIM1_CH3 (See RM0490 Reference Manual, Table 49)
+#define DMA_PERIPHERAL (&(TIM1->CCR3)) // DMA peripheral address
 
 // Common DMA mode settings (with MINC)
 #define DMA_MODE_1 ( \
@@ -85,16 +88,16 @@ static const PWMConfig pwm_cfg = {
     .period     = 20,        // PWM period in ticks (ARR + 1)
     .callback   = NULL,
     .channels   = {
-        {.mode  = PWM_OUTPUT_ACTIVE_HIGH, .callback = NULL},
+        {.mode  = PWM_OUTPUT_DISABLED, .callback = NULL},
         {.mode  = PWM_OUTPUT_DISABLED,    .callback = NULL},
-        {.mode  = PWM_OUTPUT_DISABLED,    .callback = NULL},
+        {.mode  = PWM_OUTPUT_ACTIVE_HIGH,    .callback = NULL},
         {.mode  = PWM_OUTPUT_DISABLED,    .callback = NULL}
     },
     .cr2        = STM32_TIM_CR2_CCDS,  // DMA requests on capture/compare events
 #if STM32_ADVANCED_DMA
     .bdtr       = 0,
 #endif
-    .dier       = STM32_TIM_DIER_CC1DE  // Enable DMA on CC1 event
+    .dier       = STM32_TIM_DIER_CC3DE  // Enable DMA on CC3 event (TIMx_CH3 / PWM Channel 3)
 };
 
 
@@ -112,7 +115,12 @@ static void dma_callback(void *p, uint32_t flags) {
 uint8_t ee_ws2812b_init_driver(void){
     
     // Set PA0 to alternate function for TIM16_CH1 (AF2)
-    palSetPadMode(GPIOA, GPIOA_PIN0, PAL_MODE_ALTERNATE(2));
+    //palSetPadMode(GPIOA, GPIOA_PIN0, PAL_MODE_ALTERNATE(2));
+    
+    // Set PC10 to alternate function for TIM1_CH3 (AF2)
+    palSetPadMode(GPIOC, GPIOC_PIN10, PAL_MODE_ALTERNATE(2));
+
+
 
     ee_ws2812b_start_driver();
 

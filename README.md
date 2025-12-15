@@ -149,3 +149,14 @@ The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, 
 
 To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 
+
+## Test
+
+Serial Communication, both VCP (through STLINK) and USB.
+
+- `lsusb`
+- `ls /dev/ttyACM* /dev/ttyUSB*`
+- `minicom -D /dev/ttyACM0 -b 115200`
+- `minicom -D /dev/ttyACM1 -b 115200`
+
+

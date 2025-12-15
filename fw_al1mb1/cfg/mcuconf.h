@@ -133,10 +133,10 @@
 /*
  * PWM driver system settings.
  */
-#define STM32_PWM_USE_TIM1                  FALSE
+#define STM32_PWM_USE_TIM1                  TRUE
 #define STM32_PWM_USE_TIM3                  FALSE
 #define STM32_PWM_USE_TIM14                 FALSE
-#define STM32_PWM_USE_TIM16                 TRUE
+#define STM32_PWM_USE_TIM16                 FALSE
 #define STM32_PWM_USE_TIM17                 FALSE
 
 /*
