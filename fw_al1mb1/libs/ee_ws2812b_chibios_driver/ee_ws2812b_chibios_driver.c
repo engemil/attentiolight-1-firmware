@@ -207,7 +207,7 @@ uint8_t ee_ws2812b_render(void) {
 }
 
 uint8_t ee_ws2812b_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b){
-    ee_ws2812b_set_color_rgb(0x00, 0x00, 0x00);
+    ee_ws2812b_set_color_rgb(r, g, b);
     ee_ws2812b_render();
 
     return 0;
