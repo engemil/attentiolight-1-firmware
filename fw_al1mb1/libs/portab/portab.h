@@ -33,13 +33,6 @@
 
 #define PORTAB_SDU1                 SDU1
 
-#define PORTAB_BLINK_LED1           LINE_LED_GREEN
-
-#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
-#define USB_DM_LINE                 PAL_LINE(GPIOA, 12U)
-#define USB_DP_LINE_MODE            PAL_MODE_INPUT_ANALOG
-#define USB_DM_LINE_MODE            PAL_MODE_INPUT_ANALOG
-
 /*===========================================================================*/
 /* Module pre-compile time settings.                                         */
 /*===========================================================================*/

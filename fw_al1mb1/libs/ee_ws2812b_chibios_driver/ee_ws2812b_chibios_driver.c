@@ -113,17 +113,7 @@ static void dma_callback(void *p, uint32_t flags) {
 }
 
 uint8_t ee_ws2812b_init_driver(void){
-    
-    // Set PA0 to alternate function for TIM16_CH1 (AF2)
-    //palSetPadMode(GPIOA, GPIOA_PIN0, PAL_MODE_ALTERNATE(2));
-    
-    // Set PC10 to alternate function for TIM1_CH3 (AF2)
-    palSetPadMode(GPIOC, GPIOC_PIN10, PAL_MODE_ALTERNATE(2));
-
-
-
     ee_ws2812b_start_driver();
-
     return 0;
 }
 
