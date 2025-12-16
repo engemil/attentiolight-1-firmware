@@ -16,10 +16,10 @@
 
 // USB
 // Added in portab.h
-//#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
-//#define USB_DM_LINE                 PAL_LINE(GPIOA, 12U)
-//#define USB_DP_LINE_MODE            PAL_MODE_INPUT_ANALOG
-//#define USB_DM_LINE_MODE            PAL_MODE_INPUT_ANALOG
+#define USB_DP_LINE                 PAL_LINE(GPIOA, 11U)
+#define USB_DM_LINE                 PAL_LINE(GPIOA, 12U)
+#define USB_DP_LINE_MODE            PAL_MODE_INPUT_ANALOG
+#define USB_DM_LINE_MODE            PAL_MODE_INPUT_ANALOG
 
 
 // Virtual COM Port
@@ -95,9 +95,9 @@ int main(void) {
         
         // TEST USER BUTTON
         if (palReadLine(USER_BUTTON_LINE) == PAL_HIGH) {
-            chprintf((BaseSequentialStream*)&SD2, "BUTTON NOT PRESSED!\r\n");
+            //chprintf((BaseSequentialStream*)&SD2, "BUTTON NOT PRESSED!\r\n");
         } else {
-            chprintf((BaseSequentialStream*)&SD2, "BUTTON PRESSED!\r\n");
+            //chprintf((BaseSequentialStream*)&SD2, "BUTTON PRESSED!\r\n");
         }
 
         chThdSleepMilliseconds(500);
