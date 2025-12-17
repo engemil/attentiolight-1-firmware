@@ -6,6 +6,7 @@
 #include "portab.h"
 #include "usbcfg.h"
 #include "ee_ws2812b_chibios_driver.h"
+#include "ee_esp32_wifi_ble_if_driver.h"
 
 /* NOTES Controlling ESP32 C3 WROOM
     - Enable pin for ESP32 is; output, otype pushpull, low speed, pullup, ODR High (disabled)
