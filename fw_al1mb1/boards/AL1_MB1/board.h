@@ -346,7 +346,7 @@
  * PB5  - PIN5                      (input pullup).
  * PB6  - WBM_TX                    (alternate 2).
  * PB7  - WBM_RX                    (alternate 2).
- * PB8  - WBM_EN                    (output pullup low speed).
+ * PB8  - WBM_EN                    (output floating low speed). (externally pulled up).
  * PB9  - WBM_BOOT_OPT              (output floating opendrain low speed).
  * PB10 - PIN10                     (input pullup).
  * PB11 - PIN11                     (input pullup).
@@ -411,7 +411,7 @@
                                      PIN_PUPDR_PULLUP(GPIOB_PIN5) |         \
                                      PIN_PUPDR_FLOATING(GPIOB_WBM_TX) |     \
                                      PIN_PUPDR_FLOATING(GPIOB_WBM_RX) |     \
-                                     PIN_PUPDR_PULLUP(GPIOB_WBM_EN) |       \
+                                     PIN_PUPDR_FLOATING(GPIOB_WBM_EN) |     \
                                      PIN_PUPDR_FLOATING(GPIOB_WBM_BOOT_OPT) | \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN10) |        \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN11) |        \
@@ -465,8 +465,8 @@
  * PC7  - PIN7                      (input pullup).
  * PC8  - PIN8                      (input pullup).
  * PC9  - PIN9                      (input pullup).
- * PC10 - LED_DATA                  (alternate 2).
- * PC11 - USER_BUTTON               (input floating).
+ * PC10 - LED_DATA                  (floating alternate 2). (externally pulled up).
+ * PC11 - USER_BUTTON               (input floating). (externally pulled up).
  * PC12 - PIN12                     (input pullup).
  * PC13 - PIN13                     (input pullup).
  * PC14 - OSC32_IN                  (input floating).
@@ -530,7 +530,7 @@
                                      PIN_PUPDR_PULLUP(GPIOC_PIN7) |         \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN8) |         \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN9) |         \
-                                     PIN_PUPDR_PULLUP(GPIOC_LED_DATA) |     \
+                                     PIN_PUPDR_FLOATING(GPIOC_LED_DATA) |   \
                                      PIN_PUPDR_FLOATING(GPIOC_USER_BUTTON) | \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN12) |        \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN13) |        \
