@@ -58,14 +58,17 @@ int main(void) {
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);
+    
+    uint32_t test_serial_usb = 0;
+    uint32_t test_serial_vcp = 0;
 
     while (true) {
 
         // TEST VCP SERIAL COMMUNICATION
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB!\r\n");
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
         
         // TEST USB SERIAL COMMUNICATION
-        chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP!\r\n");
+        chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
         
         // TEST USER BUTTON
         if (palReadLine(LINE_USER_BUTTON) == PAL_HIGH) {
@@ -73,6 +76,9 @@ int main(void) {
         } else {
             chprintf((BaseSequentialStream*)&SD2, "BUTTON PRESSED!!!!!!!!!!!!\r\n");
         }
+
+        test_serial_usb++;
+        test_serial_vcp++;
 
         chThdSleepMilliseconds(500);
 
