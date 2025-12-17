@@ -240,8 +240,8 @@
  */
 #define VAL_GPIOA_MODER             (PIN_MODE_INPUT(GPIOA_PIN0) |           \
                                      PIN_MODE_INPUT(GPIOA_PIN1) |           \
-                                     PIN_MODE_ALTERNATE(GPIOA_STLK_VCP_RX) |\
-                                     PIN_MODE_ALTERNATE(GPIOA_STLK_VCP_TX) |\
+                                     PIN_MODE_ALTERNATE(GPIOA_STLK_VCP_RX) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_STLK_VCP_TX) | \
                                      PIN_MODE_INPUT(GPIOA_PIN4) |           \
                                      PIN_MODE_INPUT(GPIOA_PIN5) |           \
                                      PIN_MODE_INPUT(GPIOA_PIN6) |           \
@@ -256,8 +256,8 @@
                                      PIN_MODE_INPUT(GPIOA_PIN15))
 #define VAL_GPIOA_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOA_PIN0) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOA_PIN1) |       \
-                                     PIN_OTYPE_PUSHPULL(GPIOA_STLK_VCP_RX) |\
-                                     PIN_OTYPE_PUSHPULL(GPIOA_STLK_VCP_TX) |\
+                                     PIN_OTYPE_PUSHPULL(GPIOA_STLK_VCP_RX) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_STLK_VCP_TX) | \
                                      PIN_OTYPE_PUSHPULL(GPIOA_PIN4) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOA_PIN5) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOA_PIN6) |       \
@@ -288,8 +288,8 @@
                                      PIN_OSPEED_HIGH(GPIOA_PIN15))
 #define VAL_GPIOA_PUPDR             (PIN_PUPDR_PULLUP(GPIOA_PIN0) |         \
                                      PIN_PUPDR_PULLUP(GPIOA_PIN1) |         \
-                                     PIN_PUPDR_FLOATING(GPIOA_STLK_VCP_RX) |\
-                                     PIN_PUPDR_FLOATING(GPIOA_STLK_VCP_TX) |\
+                                     PIN_PUPDR_FLOATING(GPIOA_STLK_VCP_RX) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_STLK_VCP_TX) | \
                                      PIN_PUPDR_PULLUP(GPIOA_PIN4) |         \
                                      PIN_PUPDR_PULLUP(GPIOA_PIN5) |         \
                                      PIN_PUPDR_PULLUP(GPIOA_PIN6) |         \
@@ -344,10 +344,10 @@
  * PB3  - PIN3                      (input pullup).
  * PB4  - PIN4                      (input pullup).
  * PB5  - PIN5                      (input pullup).
- * PB6  - WBM_TX                    (input pullup). TO DO: UART (ALT MODE!?)
- * PB7  - WBM_RX                    (input pullup). TO DO: UART (ALT MODE!?)
- * PB8  - WBM_EN                    (input pullup). TO DO: PULLUP
- * PB9  - WBM_BOOT_OPT              (input pullup). TO DO: FLOAT?
+ * PB6  - WBM_TX                    (alternate 2).
+ * PB7  - WBM_RX                    (alternate 2).
+ * PB8  - WBM_EN                    (output pullup low speed).
+ * PB9  - WBM_BOOT_OPT              (output floating opendrain low speed).
  * PB10 - PIN10                     (input pullup).
  * PB11 - PIN11                     (input pullup).
  * PB12 - PIN12                     (input pullup).
@@ -361,10 +361,10 @@
                                      PIN_MODE_INPUT(GPIOB_PIN3) |           \
                                      PIN_MODE_INPUT(GPIOB_PIN4) |           \
                                      PIN_MODE_INPUT(GPIOB_PIN5) |           \
-                                     PIN_MODE_INPUT(GPIOB_WBM_TX) |         \
-                                     PIN_MODE_INPUT(GPIOB_WBM_RX) |         \
-                                     PIN_MODE_INPUT(GPIOB_WBM_EN) |         \
-                                     PIN_MODE_INPUT(GPIOB_WBM_BOOT_OPT) |   \
+                                     PIN_MODE_ALTERNATE(GPIOB_WBM_TX) |     \
+                                     PIN_MODE_ALTERNATE(GPIOB_WBM_RX) |     \
+                                     PIN_MODE_OUTPUT(GPIOB_WBM_EN) |         \
+                                     PIN_MODE_OUTPUT(GPIOB_WBM_BOOT_OPT) |   \
                                      PIN_MODE_INPUT(GPIOB_PIN10) |          \
                                      PIN_MODE_INPUT(GPIOB_PIN11) |          \
                                      PIN_MODE_INPUT(GPIOB_PIN12) |          \
@@ -380,7 +380,7 @@
                                      PIN_OTYPE_PUSHPULL(GPIOB_WBM_TX) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOB_WBM_RX) |     \
                                      PIN_OTYPE_PUSHPULL(GPIOB_WBM_EN) |     \
-                                     PIN_OTYPE_PUSHPULL(GPIOB_WBM_BOOT_OPT) |\
+                                     PIN_OTYPE_OPENDRAIN(GPIOB_WBM_BOOT_OPT) | \
                                      PIN_OTYPE_PUSHPULL(GPIOB_PIN10) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOB_PIN11) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOB_PIN12) |      \
@@ -393,10 +393,10 @@
                                      PIN_OSPEED_HIGH(GPIOB_PIN3) |          \
                                      PIN_OSPEED_HIGH(GPIOB_PIN4) |          \
                                      PIN_OSPEED_HIGH(GPIOB_PIN5) |          \
-                                     PIN_OSPEED_HIGH(GPIOB_WBM_TX) |        \
-                                     PIN_OSPEED_HIGH(GPIOB_WBM_RX) |        \
-                                     PIN_OSPEED_HIGH(GPIOB_WBM_EN) |        \
-                                     PIN_OSPEED_HIGH(GPIOB_WBM_BOOT_OPT) |  \
+                                     PIN_OSPEED_MEDIUM(GPIOB_WBM_TX) |      \
+                                     PIN_OSPEED_MEDIUM(GPIOB_WBM_RX) |      \
+                                     PIN_OSPEED_LOW(GPIOB_WBM_EN) |         \
+                                     PIN_OSPEED_LOW(GPIOB_WBM_BOOT_OPT) |   \
                                      PIN_OSPEED_HIGH(GPIOB_PIN10) |         \
                                      PIN_OSPEED_HIGH(GPIOB_PIN11) |         \
                                      PIN_OSPEED_HIGH(GPIOB_PIN12) |         \
@@ -409,10 +409,10 @@
                                      PIN_PUPDR_PULLUP(GPIOB_PIN3) |         \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN4) |         \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN5) |         \
-                                     PIN_PUPDR_PULLUP(GPIOB_WBM_TX) |       \
-                                     PIN_PUPDR_PULLUP(GPIOB_WBM_RX) |       \
+                                     PIN_PUPDR_FLOATING(GPIOB_WBM_TX) |     \
+                                     PIN_PUPDR_FLOATING(GPIOB_WBM_RX) |     \
                                      PIN_PUPDR_PULLUP(GPIOB_WBM_EN) |       \
-                                     PIN_PUPDR_PULLUP(GPIOB_WBM_BOOT_OPT) | \
+                                     PIN_PUPDR_FLOATING(GPIOB_WBM_BOOT_OPT) | \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN10) |        \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN11) |        \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN12) |        \
@@ -441,8 +441,8 @@
                                      PIN_AFIO_AF(GPIOB_PIN3, 0U) |          \
                                      PIN_AFIO_AF(GPIOB_PIN4, 0U) |          \
                                      PIN_AFIO_AF(GPIOB_PIN5, 0U) |          \
-                                     PIN_AFIO_AF(GPIOB_WBM_TX, 0U) |        \
-                                     PIN_AFIO_AF(GPIOB_WBM_RX, 0U))
+                                     PIN_AFIO_AF(GPIOB_WBM_TX, 2U) |        \
+                                     PIN_AFIO_AF(GPIOB_WBM_RX, 2U))
 #define VAL_GPIOB_AFRH              (PIN_AFIO_AF(GPIOB_WBM_EN, 0U) |        \
                                      PIN_AFIO_AF(GPIOB_WBM_BOOT_OPT, 0U) |  \
                                      PIN_AFIO_AF(GPIOB_PIN10, 0U) |         \
@@ -499,7 +499,7 @@
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN8) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN9) |       \
                                      PIN_OTYPE_PUSHPULL(GPIOC_LED_DATA) |   \
-                                     PIN_OTYPE_PUSHPULL(GPIOC_USER_BUTTON) |\
+                                     PIN_OTYPE_PUSHPULL(GPIOC_USER_BUTTON) | \
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN12) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOC_PIN13) |      \
                                      PIN_OTYPE_PUSHPULL(GPIOC_OSC32_IN) |   \
@@ -531,7 +531,7 @@
                                      PIN_PUPDR_PULLUP(GPIOC_PIN8) |         \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN9) |         \
                                      PIN_PUPDR_PULLUP(GPIOC_LED_DATA) |     \
-                                     PIN_PUPDR_FLOATING(GPIOC_USER_BUTTON) |\
+                                     PIN_PUPDR_FLOATING(GPIOC_USER_BUTTON) | \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN12) |        \
                                      PIN_PUPDR_PULLUP(GPIOC_PIN13) |        \
                                      PIN_PUPDR_FLOATING(GPIOC_OSC32_IN) |   \
