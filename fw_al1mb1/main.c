@@ -8,14 +8,6 @@
 #include "ee_ws2812b_chibios_driver.h"
 #include "ee_esp32_wifi_ble_if_driver.h"
 
-/* NOTES Controlling ESP32 C3 WROOM
-    - Enable pin for ESP32 is; output, otype pushpull, low speed, pullup, ODR High (disabled)
-        - To enable ESP32, call palClearPad(), wait x ms, then call palSetPad()
-    - Boot option pin for ESP32 is; output, otype opendrain, low speed, floating, ODR High (normal boot)
-        - To enter bootloader mode, call palClearPad() before enabling ESP32
-        - After programming, set pin back to palSetPad()
-*/
-
 
 /* Serial Configuration for Virtual COM Port */
 static SerialConfig serial_cfg = {
