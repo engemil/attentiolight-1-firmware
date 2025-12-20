@@ -346,7 +346,7 @@
  * PB5  - PIN5                      (input pullup).
  * PB6  - WBM_TX                    (alternate 2).
  * PB7  - WBM_RX                    (alternate 2).
- * PB8  - WBM_EN                    (output floating low speed). (externally pulled up).
+ * PB8  - WBM_EN                    (output pullup low speed, ODR low).
  * PB9  - WBM_BOOT_OPT              (output floating opendrain low speed).
  * PB10 - PIN10                     (input pullup).
  * PB11 - PIN11                     (input pullup).
@@ -411,7 +411,7 @@
                                      PIN_PUPDR_PULLUP(GPIOB_PIN5) |         \
                                      PIN_PUPDR_FLOATING(GPIOB_WBM_TX) |     \
                                      PIN_PUPDR_FLOATING(GPIOB_WBM_RX) |     \
-                                     PIN_PUPDR_FLOATING(GPIOB_WBM_EN) |     \
+                                     PIN_PUPDR_PULLUP(GPIOB_WBM_EN) |       \
                                      PIN_PUPDR_FLOATING(GPIOB_WBM_BOOT_OPT) | \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN10) |        \
                                      PIN_PUPDR_PULLUP(GPIOB_PIN11) |        \
@@ -427,7 +427,7 @@
                                      PIN_ODR_HIGH(GPIOB_PIN5) |             \
                                      PIN_ODR_HIGH(GPIOB_WBM_TX) |           \
                                      PIN_ODR_HIGH(GPIOB_WBM_RX) |           \
-                                     PIN_ODR_HIGH(GPIOB_WBM_EN) |           \
+                                     PIN_ODR_LOW(GPIOB_WBM_EN) |            \
                                      PIN_ODR_HIGH(GPIOB_WBM_BOOT_OPT) |     \
                                      PIN_ODR_HIGH(GPIOB_PIN10) |            \
                                      PIN_ODR_HIGH(GPIOB_PIN11) |            \

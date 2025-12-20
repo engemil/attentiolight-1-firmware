@@ -35,13 +35,17 @@ SOFTWARE.
 uint8_t init_ee_esp32_wifi_ble_if_driver(void){
     // Initialization code here
 
-    palClearLine(LINE_WBM_EN); // Enable ESP32 by setting EN pin low
-    chThdSleepMilliseconds(50); // 50ms delay
-    palSetLine(LINE_WBM_EN); // Set pin back to normal. It does not disable the ESP32.
-
+    enable_ee_esp32_wifi_ble_if_driver();
+    
     return 0;
 }
-uint8_t start_ee_esp32_wifi_ble_if_driver(void){
-    // Start code here
+
+uint8_t enable_ee_esp32_wifi_ble_if_driver(void){    
+    palSetLine(LINE_WBM_EN); // Set pin back to normal. It does not disable the ESP32.
+    return 0;
+}
+
+uint8_t disable_ee_esp32_wifi_ble_if_driver(void){    
+    palClearLine(LINE_WBM_EN); // Set pin back to normal. It does not disable the ESP32.
     return 0;
 }

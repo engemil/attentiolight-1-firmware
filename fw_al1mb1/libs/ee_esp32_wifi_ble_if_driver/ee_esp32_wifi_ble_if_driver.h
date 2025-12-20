@@ -50,11 +50,18 @@ extern "C"
 uint8_t init_ee_esp32_wifi_ble_if_driver(void);
 
 /**
- * @brief Start EngEmil ESP32 Wifi Bluetooth Interface Driver.
+ * @brief Enable EngEmil ESP32 Wifi Bluetooth Interface Driver.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t start_ee_esp32_wifi_ble_if_driver(void);
+uint8_t enable_ee_esp32_wifi_ble_if_driver(void)
+
+/**
+ * @brief Disable EngEmil ESP32 Wifi Bluetooth Interface Driver.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t disable_ee_esp32_wifi_ble_if_driver(void);
 
 
 #ifdef __cplusplus

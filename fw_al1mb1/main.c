@@ -47,6 +47,11 @@ int main(void) {
      */
     ee_ws2812b_init_driver();
 
+    /*
+     * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
+     */
+    //init_ee_esp32_wifi_ble_if_driver();
+    //disable_ee_esp32_wifi_ble_if_driver();
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);
@@ -74,11 +79,11 @@ int main(void) {
 
         chThdSleepMilliseconds(500);
 
-        ee_ws2812b_set_color_rgb_and_render(0xFF, 0x00, 0x00);
+        ee_ws2812b_set_color_rgb_and_render(0x01, 0x00, 0x00);
         chThdSleepMilliseconds(500);
-        ee_ws2812b_set_color_rgb_and_render(0x00, 0xFF, 0x00);
+        ee_ws2812b_set_color_rgb_and_render(0x00, 0x01, 0x00);
         chThdSleepMilliseconds(500);
-        ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0xFF);
+        ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0x01);
         chThdSleepMilliseconds(500);
 
     }
