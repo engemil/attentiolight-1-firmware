@@ -43,35 +43,6 @@ WORKDIR /
 # gdb - GNU project Debugger. https://packages.ubuntu.com/noble/gdb
 RUN apt install gdb-multiarch -y
 
-
-#### FOR ESP ####
-# https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html
-
-RUN apt install git wget flex bison gperf python3 python3-pip python3-venv cmake ninja-build ccache libffi-dev libssl-dev dfu-util libusb-1.0-0 -y
-
-#RUN mkdir -p /esp-idf
-#RUN cd /esp-idf
-RUN cd /
-RUN git clone --single-branch --recursive https://github.com/espressif/esp-idf.git esp-idf
-
-RUN cd /esp-idf
-#RUN ./install.sh all
-RUN ./install.sh esp32,esp32c3
-
-# Set ESP-IDF environment variables? (should I activate this when?)
-#RUN . ./export.sh
-
-# Run this in the terminal you are going to use: . /esp-idf/export.sh
-# Alternatively, add this:
-# alias get_idf='. $HOME/esp/esp-idf/export.sh'
-# or add this:
-# alias get_idf='. /esp-idf/export.sh'
-# in the ~/.profile, ~/.bashrc, ~/.zshrc or ~/.zprofile, etc.. file to source it automatically when opening a terminal.
-# Then run: source ~/.bashrc (or the respective file you added the line to)
-
-
-#################
-
 # minicom - Serial communication program. https://packages.ubuntu.com/noble/minicom
 RUN apt install minicom -y
 

@@ -13,5 +13,5 @@ services:
     #devices:
     #  - "/dev/bus/usb/:/dev/bus/usb"
     volumes:
-      - ..:/workspace:cached # To be able to spin up from devcontainers
+      - ../..:/workspace:cached # To be able to spin up from devcontainers
       - /dev:/dev #
