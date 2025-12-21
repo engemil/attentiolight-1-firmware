@@ -54,7 +54,7 @@ uint8_t init_ee_esp32_wifi_ble_if_driver(void);
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t enable_ee_esp32_wifi_ble_if_driver(void)
+uint8_t enable_ee_esp32_wifi_ble_if_driver(void);
 
 /**
  * @brief Disable EngEmil ESP32 Wifi Bluetooth Interface Driver.
@@ -62,6 +62,13 @@ uint8_t enable_ee_esp32_wifi_ble_if_driver(void)
  * @return uint8_t status code, 0 success, nonzero on error
  */
 uint8_t disable_ee_esp32_wifi_ble_if_driver(void);
+
+/**
+ * @brief Set to Program mode EngEmil ESP32 Wifi Bluetooth Interface Driver.
+ * 
+ * @return uint8_t status code, 0 success, nonzero on error
+ */
+uint8_t set_program_mode_ee_esp32_wifi_ble_if_driver(void);
 
 
 #ifdef __cplusplus

@@ -50,8 +50,9 @@ int main(void) {
     /*
      * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
      */
-    //init_ee_esp32_wifi_ble_if_driver();
+    init_ee_esp32_wifi_ble_if_driver();
     //disable_ee_esp32_wifi_ble_if_driver();
+    //set_program_mode_ee_esp32_wifi_ble_if_driver();
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);

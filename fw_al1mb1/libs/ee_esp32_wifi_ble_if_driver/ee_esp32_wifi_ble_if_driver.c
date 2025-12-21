@@ -46,6 +46,20 @@ uint8_t enable_ee_esp32_wifi_ble_if_driver(void){
 }
 
 uint8_t disable_ee_esp32_wifi_ble_if_driver(void){    
-    palClearLine(LINE_WBM_EN); // Set pin back to normal. It does not disable the ESP32.
+    palClearLine(LINE_WBM_EN); // Set pin back to normal. It disables the ESP32.
+    return 0;
+}
+
+uint8_t set_program_mode_ee_esp32_wifi_ble_if_driver(void){
+    palClearLine(LINE_WBM_EN); /// Reset/"turn off" the ESP32.
+    chThdSleepMilliseconds(500);
+
+    palClearLine(LINE_WBM_BOOT_OPT); // to GND, for bootloader mode.
+    palSetLine(LINE_WBM_EN); /// Turn on ESP32 in bootloader mode
+
+    chThdSleepMilliseconds(1000);
+    
+    palSetLine(LINE_WBM_BOOT_OPT); // Release from GND (not need to hold it low after boot).
+
     return 0;
 }
