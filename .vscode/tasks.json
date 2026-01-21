@@ -84,6 +84,56 @@
                 "kind": "build"
             },
             "detail": "Rebuild (clean and build) and flash the project to the chip"
+        },
+
+        {
+            "label": "Serial ACM0 (minicom ttyACM0)",
+            "type": "shell",
+            "command": "sleep 1 ; minicom -D /dev/ttyACM0 -b 115200",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "group": "serial-ports",
+                "name": "ttyACM0 @ 115200"
+            },
+            "isBackground": true,
+            "problemMatcher": [],
+            "runOptions": {
+                "reevaluateOnRerun": "onInput"
+            }
+        },
+        {
+            "label": "Serial ACM1 (minicom ttyACM1)",
+            "type": "shell",
+            "command": "sleep 1 ; minicom -D /dev/ttyACM1 -b 115200",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "group": "serial-ports",
+                "name": "ttyACM1 @ 115200"
+            },
+            "isBackground": true,
+            "problemMatcher": [],
+            "runOptions": {
+                "reevaluateOnRerun": "onInput"
+            }
+        },
+        {
+            "label": "Monitor All Serial Comm. (STM32 USB, STM32 VCP)",
+            "dependsOn": [
+                "Serial ACM0 (minicom ttyACM0)",
+                "Serial ACM1 (minicom ttyACM1)"
+            ],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "shell",
+                "isDefault": true
+            },
+            "problemMatcher": []
         }
 
     ]

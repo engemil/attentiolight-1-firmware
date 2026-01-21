@@ -50,9 +50,9 @@ int main(void) {
     /*
      * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
      */
-    init_ee_esp32_wifi_ble_if_driver();
+    //init_ee_esp32_wifi_ble_if_driver();
     //disable_ee_esp32_wifi_ble_if_driver();
-    //set_program_mode_ee_esp32_wifi_ble_if_driver();
+    set_program_mode_ee_esp32_wifi_ble_if_driver();
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);
@@ -80,11 +80,13 @@ int main(void) {
 
         chThdSleepMilliseconds(500);
 
-        ee_ws2812b_set_color_rgb_and_render(0x01, 0x00, 0x00);
+        // NB! The first bit is the LSB, not the MSB, hence 0x80 is the same as 1 for the LED.
+        // Add a function to handle MSB/LSB first in the ee_ws2812b driver, and add option to initialize with a bool for MSB/LSBfirst and a default of LSBfirst.
+        ee_ws2812b_set_color_rgb_and_render(0x80, 0x00, 0x00);
         chThdSleepMilliseconds(500);
-        ee_ws2812b_set_color_rgb_and_render(0x00, 0x01, 0x00);
+        ee_ws2812b_set_color_rgb_and_render(0x00, 0x80, 0x00);
         chThdSleepMilliseconds(500);
-        ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0x01);
+        ee_ws2812b_set_color_rgb_and_render(0x00, 0x00, 0x80);
         chThdSleepMilliseconds(500);
 
     }
