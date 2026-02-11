@@ -5,18 +5,7 @@
     "tasks": [
 
         // Task(s) for the Development Environment
-
-        {
-            "label": "get-chibios",
-            "type": "shell",
-            //"command": "[ -d ${workspaceFolder}/ChibiOS ] || ( git clone https://github.com/ChibiOS/ChibiOS.git ${config:settings.project.folder}/ChibiOS && git -C ${config:settings.project.folder}/ChibiOS checkout ${config:settings.chibios.version} ) ",
-            "command": "[ -d ${workspaceFolder}/ChibiOS ] || ( git clone https://github.com/ChibiOS/ChibiOS.git ${config:settings.project.folder}/ChibiOS && git -C ${config:settings.project.folder}/ChibiOS checkout ${config:settings.chibios.version} ) ",
-            "problemMatcher": [],
-            "detail": "Get (clone) the ChibiOS repository from Github",
-            "runOptions": {
-                "reevaluateOnRerun": false
-            }
-        },
+        
         {
             "label": "clean",
             "type": "shell",

@@ -6,8 +6,6 @@
     "settings.openocd.interface": "interface/stlink.cfg", // OpenOCD Debugger interface file (e.g. "interface/stlink.cfg")
     "settings.openocd.board": "board/st_nucleo_c0.cfg", // OpenOCD Board file (e.g. "board/st_nucleo_f4.cfg")
     "settings.project.device": "STM32C071RB", // Chip name (e.g. "STM32C071RB")
-    //"settings.chibios.version": "stable_21.11.x", // ChibiOS version to use (e.g. "stable_21.11.x". Check branch names at https://github.com/ChibiOS/ChibiOS)
-    "settings.chibios.version": "2ac805d6f8d59fa3e82aa7446d149783b6025983", // ChibiOS version to use (e.g. "stable_21.11.x". Check branch names at https://github.com/ChibiOS/ChibiOS)
     "files.associations": {
         "ch.h": "c",
         "ee_ws2812b_chibios_driver.h": "c"

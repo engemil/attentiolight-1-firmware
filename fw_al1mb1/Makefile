@@ -86,10 +86,11 @@ endif
 PROJECT = fw_al1mb1
 
 # Target settings.
-MCU  = cortex-m0
+MCU  = cortex-m0plus
 
 # Imported source files and paths.
-CHIBIOS  := ./ChibiOS
+#CHIBIOS  := ./chibios
+CHIBIOS  := ../ext/ChibiOS
 CONFDIR  := ./cfg
 BUILDDIR := ./build
 DEPDIR   := ./.dep
@@ -97,37 +98,51 @@ BOARDSDIR := ./boards
 
 # Licensing files.
 include $(CHIBIOS)/os/license/license.mk
+
 # Startup files.
 include $(CHIBIOS)/os/common/startup/ARMCMx/compilers/GCC/mk/startup_stm32c0xx.mk
-# HAL-OSAL files (optional).
+
+# HAL files (optional)
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/hal/ports/STM32/STM32C0xx/platform.mk
+
+# Board files. Only uncomment one of the following lines, depending on the board you are using.
 #include $(CHIBIOS)/os/hal/boards/ST_NUCLEO64_C071RB/board.mk
 include $(BOARDSDIR)/AL1_MB1/board.mk
+#include $(BOARDSDIR)/ST_NUCLEO64_C071RB/board.mk
+
+# HAL-OSAL files (optional).
 include $(CHIBIOS)/os/hal/osal/rt-nil/osal.mk
 # RTOS files (optional).
 include $(CHIBIOS)/os/rt/rt.mk
 include $(CHIBIOS)/os/common/ports/ARMv6-M/compilers/GCC/mk/port.mk
+
 # Auto-build files in ./source recursively.
 include $(CHIBIOS)/tools/mk/autobuild.mk
-# Other files (optional).
+
+# Streams files (optional).
+include $(CHIBIOS)/os/hal/lib/streams/streams.mk
+
+# ChibiOS test files (optional).
 #include $(CHIBIOS)/os/test/test.mk
 #include $(CHIBIOS)/test/rt/rt_test.mk
 #include $(CHIBIOS)/test/oslib/oslib_test.mk
-include $(CHIBIOS)/os/hal/lib/streams/streams.mk
 
 # Project Libraries
 LIBS     := ./libs
 include $(LIBS)/libs.mk
 
 # Define linker script file here
-LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
+# ChibiOS provides a default linker script for STM32C0xx devices, but we use 
+#LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
+LDSCRIPT= STM32C071xB_bootloader.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CSRC = $(ALLCSRC) \
        $(TESTSRC) \
-       main.c
+       main.c \
+       app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -157,13 +172,13 @@ CPPWARN = -Wall -Wextra -Wundef
 #
 
 # List all user C define here, like -D_DEBUG=1
-UDEFS =
+UDEFS = -DCRT0_VTOR_INIT=1
 
 # Define ASM defines here
-UADEFS =
+UADEFS = -DCRT0_VTOR_INIT=1
 
 # List all user directories here
-UINCDIR =
+UINCDIR = ./app_header
 
 # List the user directory to look for the libraries here
 ULIBDIR =
@@ -190,6 +205,26 @@ include $(RULESPATH)/rules.mk
 ##############################################################################
 # Custom rules
 #
+
+# Path to signing script
+SIGN_SCRIPT = ../scripts/sign_app_header.sh
+
+# Sign binary with size and CRC32 (runs automatically after build)
+POST_MAKE_ALL_RULE_HOOK: sign_firmware
+
+sign_firmware: $(BUILDDIR)/$(PROJECT).bin
+	@echo ""
+	@echo "=========================================="
+	@echo "Signing firmware with size and CRC32..."
+	@echo "=========================================="
+	@bash $(SIGN_SCRIPT) $(BUILDDIR)/$(PROJECT).bin $(BUILDDIR)/$(PROJECT)_signed.bin
+	@echo ""
+	@echo "✓ Build and signing complete!"
+	@echo "  Unsigned: $(BUILDDIR)/$(PROJECT).bin (do not upload)"
+	@echo "  Signed:   $(BUILDDIR)/$(PROJECT)_signed.bin (ready to upload)"
+	@echo ""
+
+.PHONY: sign_firmware
 
 #
 # Custom rules

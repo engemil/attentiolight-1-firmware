@@ -4,9 +4,80 @@
 
 This is the source code (firmware) for the AttentioLight-1 MainBoard-1 (`al1mb1`).
 
+(TO DO: Add more info)
+
+
+## Dependencies
+
+### Required Tools
+- **arm-none-eabi-gcc** (13.2.1 or later) - ARM cross-compiler.
+- **make** (4.3 or later) - Build system.
+- **st-flash** or **openocd** - Hardware programming.
+  - NB! **stlink** v1.8.0 does not have STM32C071xx included. On Ubuntu 24.04 MUST build from source with `develop`-branch [link](https://github.com/stlink-org/stlink).
+  - NB! **openocd** v0.12.0 or newer. On Ubuntu 24.04 you MUST build from source [link](https://github.com/openocd-org/openocd).
+- **dfu-util** (0.11 or later) - USB Device Firmware Upgrade (DFU). Firmware uploads over USB.
+
+
+### Installation (Ubuntu/Debian)
+```bash
+sudo apt update
+sudo apt install git build-essential gcc-arm-none-eabi \
+  binutils-arm-none-eabi libnewlib-arm-none-eabi \
+  python3 dfu-util -y
+
+# NB! We also need stlink-tools and openocd, but they are outdated on ubuntu 24.04.
+# see the .devcontainer/Dockerfile for how to install from source, or use docker container
+#sudo apt install stlink-tools openocd -y
+```
+
+### Setup Repository
+
+```bash
+git clone https://github.com/engemil/ee_stm32_bootloader.git
+cd ee_stm32_bootloader
+git submodule update --init --recursive
+```
+
+See `ext/README.md` for detailed submodule management.
+
+
+## Quick Start
+
+**(If not already done) upload Bootloader Firmware via ST-Link (probe):**
+
+```bash
+# Build bootloader
+cd bootloader && make clean && make
+# Flash to device over debugger (the first stlink it sees)
+st-flash --reset write build/bootloader.bin 0x08000000
+# Go back to project root folder
+cd ..
+# Verify successful flash of bootloader to see if device has entered USB DFU mode
+sudo apt install usbutils -y
+lsusb
+```
+
+**Upload Application Firmware via USB DFU (with Bootloader installed):**
+```bash
+
+# Upload application firmware over USB
+cd fw_al1mb1 && make clean && make
+
+# Upload test firmware
+sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/fw_al1mb1_signed.bin
+```
+
+
+## Project Structure
+
+(TO DO: To be added)
+
+
 ## Hardware
 
 - Microcontroller: STM32C071RB
+
+(TO DO: Add more info)
 
 
 ## Firmware stack
@@ -14,12 +85,17 @@ This is the source code (firmware) for the AttentioLight-1 MainBoard-1 (`al1mb1`
 - ChibiOS
 - more..
 
+(TO DO: Add more info)
+
 
 ## Libraries and Drivers
 
-- EngEmil WS2812B ChibiOS Driver (application driver) (TO DO: Move to a drivers folder?)
-- usbcfg and portab (temporary USB related files) (TO DO move to cfg file and a portability/drivers/library folder?)
+- usbcfg and portab (temporary USB related files)
 
+(TO DO move to cfg file and a portability/drivers/library folder?)
+
+**Project-based Libraries/Drivers**
+- EngEmil WS2812B ChibiOS Driver (application driver) 
 
 
 ## Bugs and Issues
@@ -134,12 +210,6 @@ This is the source code (firmware) for the AttentioLight-1 MainBoard-1 (`al1mb1`
         ```
 
 
-### Setting up OpenOCD
-
-(Info from https://github.com/cbiffle/stm32c0-metapac-example)
-
-STM32C0xx support was added to OpenOCD after the 0.12 release, so you will need it built from git.
-
 
 ### First time programming a STM32C071RB
 
@@ -150,7 +220,7 @@ The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, 
 To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 
 
-## Test
+## Test (TO DO: Remove later)
 
 Serial Communication, both VCP (through STLINK) and USB.
 
@@ -160,3 +230,16 @@ Serial Communication, both VCP (through STLINK) and USB.
 - `minicom -D /dev/ttyACM1 -b 115200`
 
 
+
+## License
+
+MIT License, see `LICENSE`-file for details.
+
+Portions of this project incorporate code from:
+- **ChibiOS**, Apache License 2.0.
+- **STMicroelectronics**, Apache License 2.0.
+- **ee_stm32_bootloader**, MIT License.
+- **ee_ws2812b_chibios_driver**, MIT License.
+- **ee_esp32_wifi_ble_if_driver**, MIT License.
+
+For submodule lincenses, see individual repository LICENSE files for details.

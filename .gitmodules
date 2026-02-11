@@ -1,0 +1,6 @@
+[submodule "bootloader"]
+	path = bootloader
+	url = https://github.com/engemil/ee_stm32_bootloader.git
+[submodule "ext/ChibiOS"]
+	path = ext/ChibiOS
+	url = https://github.com/ChibiOS/ChibiOS.git
