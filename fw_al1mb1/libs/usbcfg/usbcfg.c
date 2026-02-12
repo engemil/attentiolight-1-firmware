@@ -14,6 +14,11 @@
     limitations under the License.
 */
 
+/*
+   With compliance of the license:
+   Portions modified from original.
+*/
+
 #include "hal.h"
 #include "portab.h"
 

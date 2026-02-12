@@ -15,6 +15,11 @@
 */
 
 /*
+   With compliance of the license:
+   Portions modified from original.
+*/
+
+/*
  * STM32C071 drivers configuration.
  * The following settings override the default settings present in
  * the various device driver implementation headers.

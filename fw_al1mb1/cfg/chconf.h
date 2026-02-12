@@ -14,6 +14,11 @@
     limitations under the License.
 */
 
+/*
+   With compliance of the license:
+   Portions modified from original.
+*/
+
 /**
  * @file    rt/templates/chconf.h
  * @brief   Configuration file template.

@@ -15,9 +15,9 @@
 */
 
 /*
- * This file has been automatically generated using ChibiStudio board
- * generator plugin. Do not edit manually.
- */
+   With compliance of the license:
+   Portions modified from original.
+*/
 
 #include "hal.h"
 #include "stm32_gpio.h"

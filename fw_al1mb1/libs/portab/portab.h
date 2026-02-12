@@ -14,6 +14,11 @@
     limitations under the License.
 */
 
+/*
+   With compliance of the license:
+   Portions modified from original.
+*/
+
 /**
  * @file    portab.h
  * @brief   Application portability macros and structures.

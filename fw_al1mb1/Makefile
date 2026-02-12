@@ -142,6 +142,7 @@ LDSCRIPT= STM32C071xB_bootloader.ld
 CSRC = $(ALLCSRC) \
        $(TESTSRC) \
        app/main.c \
+       app/button_driver/button_driver.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -178,7 +179,8 @@ UDEFS = -DCRT0_VTOR_INIT=1
 UADEFS = -DCRT0_VTOR_INIT=1
 
 # List all user directories here
-UINCDIR = ./app_header
+UINCDIR = ./app_header \
+          ./app/button_driver
 
 # List the user directory to look for the libraries here
 ULIBDIR =

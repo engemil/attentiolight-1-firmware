@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2026 EngEmil
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 #include "ch.h"
 #include "hal.h"
 #include "chprintf.h"
@@ -7,6 +31,7 @@
 #include "usbcfg.h"
 #include "ee_ws2812b_chibios_driver.h"
 #include "ee_esp32_wifi_ble_if_driver.h"
+#include "button_driver.h"
 
 
 /* Serial Configuration for Virtual COM Port */
@@ -16,6 +41,32 @@ static SerialConfig serial_cfg = {
     .cr2    = 0,                // No specific control settings
     .cr3    = 0                 // No hardware flow control
 };
+
+/*
+ * Button event callback function.
+ * Called from button thread context (safe to use RTOS functions).
+ */
+static void on_button_event(button_event_t event) {
+    switch (event) {
+    case BTN_EVT_SHORT_PRESS:
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: SHORT PRESS\r\n");
+        break;
+    case BTN_EVT_LONG_PRESS_START:
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONG PRESS started...\r\n");
+        break;
+    case BTN_EVT_LONG_PRESS_RELEASE:
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONG PRESS released\r\n");
+        break;
+    case BTN_EVT_LONGEST_PRESS_START:
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONGEST PRESS started!\r\n");
+        break;
+    case BTN_EVT_LONGEST_PRESS_RELEASE:
+        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONGEST PRESS released\r\n");
+        break;
+    default:
+        break;
+    }
+}
 
 int main(void) {
     halInit();
@@ -56,6 +107,14 @@ int main(void) {
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);
+
+    /*
+     * Initializes Button Driver.
+     * Uses interrupt-driven detection with a dedicated thread.
+     */
+    button_init(LINE_USER_BUTTON, PAL_LOW);
+    button_register_callback(on_button_event);
+    button_start();
     
     uint32_t test_serial_usb = 0;
     uint32_t test_serial_vcp = 0;
@@ -63,17 +122,10 @@ int main(void) {
     while (true) {
 
         // TEST VCP SERIAL COMMUNICATION
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
+        //chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
         
         // TEST USB SERIAL COMMUNICATION
         chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
-        
-        // TEST USER BUTTON
-        if (palReadLine(LINE_USER_BUTTON) == PAL_HIGH) {
-            chprintf((BaseSequentialStream*)&SD2, "BUTTON NOT PRESSED!\r\n");
-        } else {
-            chprintf((BaseSequentialStream*)&SD2, "BUTTON PRESSED!!!!!!!!!!!!\r\n");
-        }
 
         test_serial_usb++;
         test_serial_vcp++;

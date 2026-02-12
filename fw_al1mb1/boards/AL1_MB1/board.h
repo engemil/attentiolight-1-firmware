@@ -19,7 +19,6 @@
    Portions modified from original.
 */
 
-
 #ifndef BOARD_H
 #define BOARD_H
 

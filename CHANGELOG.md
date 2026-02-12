@@ -13,6 +13,10 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ## [Development] (2026-02-11)
 
+Added
+
+- **License note** added and adjusted on most source files.
+- **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
 
 ---
 
