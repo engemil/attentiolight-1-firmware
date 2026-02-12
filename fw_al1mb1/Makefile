@@ -144,6 +144,7 @@ CSRC = $(ALLCSRC) \
        app/main.c \
        app/button_driver/button_driver.c \
        app/ws2812b_led_driver/ws2812b_led_driver.c \
+       app/led_test/led_test.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -182,7 +183,8 @@ UADEFS = -DCRT0_VTOR_INIT=1
 # List all user directories here
 UINCDIR = ./app_header \
           ./app/button_driver \
-          ./app/ws2812b_led_driver
+          ./app/ws2812b_led_driver \
+          ./app/led_test
 
 # List the user directory to look for the libraries here
 ULIBDIR =

@@ -18,6 +18,7 @@ NB! Notes added here during development to keep track of changes.
 Added
 - **License note** added/adjusted on most source files.
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
+- **LED Test Thread** for testing LED rendering in it's own thread.
 
 Changed
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.

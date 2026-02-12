@@ -32,6 +32,7 @@ SOFTWARE.
 #include "ws2812b_led_driver.h"
 #include "ee_esp32_wifi_ble_if_driver.h"
 #include "button_driver.h"
+#include "led_test.h"
 
 
 /* Serial Configuration for Virtual COM Port */
@@ -94,19 +95,25 @@ int main(void) {
     usbConnectBus(serusbcfg.usbp);
 
     /*
+     * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
+     */
+    //init_ee_esp32_wifi_ble_if_driver();
+    //disable_ee_esp32_wifi_ble_if_driver();
+    //set_program_mode_ee_esp32_wifi_ble_if_driver();
+
+    /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
+    sdStart(&SD2, &serial_cfg);
+
+    /*
      * Initializes WS2812B LED Driver.
      */
     ws2812b_led_driver_init();
 
     /*
-     * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
+     * Initializes and starts LED Test thread.
      */
-    //init_ee_esp32_wifi_ble_if_driver();
-    //disable_ee_esp32_wifi_ble_if_driver();
-    set_program_mode_ee_esp32_wifi_ble_if_driver();
-
-    /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
-    sdStart(&SD2, &serial_cfg);
+    led_test_init();
+    led_test_start();
 
     /*
      * Initializes Button Driver.
@@ -130,15 +137,6 @@ int main(void) {
         test_serial_usb++;
         test_serial_vcp++;
 
-        chThdSleepMilliseconds(500);
-
-        // NB! The first bit is the LSB, not the MSB, hence 0x80 is the same as 1 for the LED.
-        // Add a function to handle MSB/LSB first in the ws2812b_led_driver, and add option to initialize with a bool for MSB/LSBfirst and a default of LSBfirst.
-        ws2812b_led_driver_set_color_rgb_and_render(0x80, 0x00, 0x00);
-        chThdSleepMilliseconds(500);
-        ws2812b_led_driver_set_color_rgb_and_render(0x00, 0x80, 0x00);
-        chThdSleepMilliseconds(500);
-        ws2812b_led_driver_set_color_rgb_and_render(0x00, 0x00, 0x80);
         chThdSleepMilliseconds(500);
 
     }
