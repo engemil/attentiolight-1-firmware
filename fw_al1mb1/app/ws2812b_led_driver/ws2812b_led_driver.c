@@ -30,13 +30,13 @@ SOFTWARE.
 // TO DO: Add functionality to control the power to the LED (on/off) (e.g., via a GPIO pin)
 
 /**
- * @file ee_ws2812b_chibios_driver.c
+ * @file ws2812b_led_driver.c
  * 
- * @brief EngEmil WS2812B ChibiOS Driver.
+ * @brief WS2812B LED Driver.
  * 
  */
 
-#include "ee_ws2812b_chibios_driver.h"
+#include "ws2812b_led_driver.h"
 
 
 #define PWM_HI (14)
@@ -112,12 +112,12 @@ static void dma_callback(void *p, uint32_t flags) {
     // Handle errors if flags & STM32_DMA_ISR_TEIF, etc.
 }
 
-uint8_t ee_ws2812b_init_driver(void){
-    ee_ws2812b_start_driver();
+uint8_t ws2812b_led_driver_init(void){
+    ws2812b_led_driver_start();
     return 0;
 }
 
-uint8_t ee_ws2812b_start_driver(void){
+uint8_t ws2812b_led_driver_start(void){
     // Start PWM
     pwmStart(PWM_DRIVER, &pwm_cfg);
 
@@ -134,7 +134,7 @@ uint8_t ee_ws2812b_start_driver(void){
     return 0;
 }
 
-uint8_t ee_ws2812b_stop_driver(void){
+uint8_t ws2812b_led_driver_stop(void){
     dmaStreamDisable(dma_stream);
     dmaStreamFree(dma_stream); // NB! Illegal operation if already freed/released
     dma_stream = NULL;
@@ -143,7 +143,7 @@ uint8_t ee_ws2812b_stop_driver(void){
     return 0;
 }
 
-uint8_t ee_ws2812b_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
+uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
     for(int i = 0; i < 8; i++){
         pwm_buf[i] = (g & (1 << i)) ? PWM_HI : PWM_LO;
         pwm_buf[i + 8] = (r & (1 << i)) ? PWM_HI : PWM_LO;
@@ -154,7 +154,7 @@ uint8_t ee_ws2812b_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
     return 0;
 }
 
-uint8_t ee_ws2812b_reset_render(void){
+uint8_t ws2812b_led_driver_reset_render(void){
 
     while (!dma_ready) {
         chThdSleepMilliseconds(1);  // Wait for previous DMA to complete
@@ -173,11 +173,11 @@ uint8_t ee_ws2812b_reset_render(void){
     return 0;
 }
 
-uint8_t ee_ws2812b_render(void) {
+uint8_t ws2812b_led_driver_render(void) {
     uint8_t status = 0;
 
     // First reset the render
-    status = ee_ws2812b_reset_render();
+    status = ws2812b_led_driver_reset_render();
 
     while (!dma_ready) {
         chThdSleepMilliseconds(1);  // Wait for previous DMA to complete
@@ -196,9 +196,9 @@ uint8_t ee_ws2812b_render(void) {
     return status;
 }
 
-uint8_t ee_ws2812b_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b){
-    ee_ws2812b_set_color_rgb(r, g, b);
-    ee_ws2812b_render();
+uint8_t ws2812b_led_driver_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b){
+    ws2812b_led_driver_set_color_rgb(r, g, b);
+    ws2812b_led_driver_render();
 
     return 0;
 }

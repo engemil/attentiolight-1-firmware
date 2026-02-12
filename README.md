@@ -239,7 +239,6 @@ Portions of this project incorporate code from:
 - **ChibiOS**, Apache License 2.0.
 - **STMicroelectronics**, Apache License 2.0.
 - **ee_stm32_bootloader**, MIT License.
-- **ee_ws2812b_chibios_driver**, MIT License.
 - **ee_esp32_wifi_ble_if_driver**, MIT License.
 
 For submodule lincenses, see individual repository LICENSE files for details.

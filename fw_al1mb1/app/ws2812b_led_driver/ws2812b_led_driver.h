@@ -23,14 +23,14 @@ SOFTWARE.
 */
 
 /**
- * @file ee_ws2812b_chibios_driver.h
+ * @file ws2812b_led_driver.h
  * 
- * @brief EngEmil WS2812B ChibiOS Driver.
+ * @brief WS2812B LED Driver.
  * 
  */
 
-#ifndef _EE_WS2812B_CHIBIOS_DRIVER_
-#define _EE_WS2812B_CHIBIOS_DRIVER_
+#ifndef _WS2812B_LED_DRIVER_
+#define _WS2812B_LED_DRIVER_
 
 #include <stdint.h>
 #include <string.h>
@@ -44,7 +44,7 @@ SOFTWARE.
 #ifndef STM32C071xx
 #ifndef STM32C091xx
 #ifndef STM32C092xx
-#error "EngEmil WS2812B ChibiOS Driver only supports STM32C0 series"
+#error "WS2812B LED Driver only supports STM32C0 series"
 #endif
 #endif
 #endif
@@ -76,50 +76,50 @@ extern "C"
 #endif
 
 /**
- * @brief Initialize EngEmil PMW3901MB Driver.
+ * @brief Initialize WS2812B LED Driver.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t ee_ws2812b_init_driver(void);
+uint8_t ws2812b_led_driver_init(void);
 
 /**
- * @brief Start EngEmil PMW3901MB Driver.
+ * @brief Start WS2812B LED Driver.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t ee_ws2812b_start_driver(void);
+uint8_t ws2812b_led_driver_start(void);
 
 /**
- * @brief Stop EngEmil PMW3901MB Driver.
+ * @brief Stop WS2812B LED Driver.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t ee_ws2812b_stop_driver(void);
+uint8_t ws2812b_led_driver_stop(void);
 
 /**
  * @brief Sets the color (RGB) of the WS2812B LED.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t ee_ws2812b_set_color_rgb(uint8_t r, uint8_t g, uint8_t b);
+uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b);
 
 /**
  * @brief Renders the WS2812B LED.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t ee_ws2812b_render(void);
+uint8_t ws2812b_led_driver_render(void);
 
 /**
  * @brief Sets the color (RGB) and renders the WS2812B LED.
  * 
  * @return uint8_t status code, 0 success, nonzero on error
  */
-uint8_t ee_ws2812b_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b);
+uint8_t ws2812b_led_driver_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _EE_WS2812B_CHIBIOS_DRIVER_ */
+#endif /* _WS2812B_LED_DRIVER_ */

@@ -8,6 +8,6 @@
     "settings.project.device": "STM32C071RB", // Chip name (e.g. "STM32C071RB")
     "files.associations": {
         "ch.h": "c",
-        "ee_ws2812b_chibios_driver.h": "c"
+        "ws2812b_led_driver.h": "c"
     },
 }

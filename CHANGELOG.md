@@ -11,12 +11,17 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-11)
+## [Development] (2026-02-12)
+
+NB! Notes added here during development to keep track of changes.
 
 Added
-
-- **License note** added and adjusted on most source files.
+- **License note** added/adjusted on most source files.
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
+
+Changed
+- Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.
+
 
 ---
 
