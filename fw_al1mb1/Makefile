@@ -141,7 +141,7 @@ LDSCRIPT= STM32C071xB_bootloader.ld
 # setting.
 CSRC = $(ALLCSRC) \
        $(TESTSRC) \
-       main.c \
+       app/main.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
