@@ -35,6 +35,9 @@ SOFTWARE.
 #include "modes/modes.h"
 #include "animation/animation_thread.h"
 
+/* Debug support */
+#include "app_debug.h"
+
 /*===========================================================================*/
 /* Global Variables (exported to other modules)                              */
 /*===========================================================================*/
@@ -169,6 +172,11 @@ static void shutdown_complete_cb(virtual_timer_t *vtp, void *arg) {
  * @brief   Transitions to a new system state.
  */
 static void transition_to_state(app_sm_system_state_t new_state) {
+    app_sm_system_state_t old_state = system_state;
+    DBG_UNUSED(old_state);
+
+    DBG_DEBUG("SM EXIT state: %s", system_state_names[old_state]);
+
     /* Exit current state */
     switch (system_state) {
         case APP_SM_SYS_BOOT:
@@ -188,8 +196,12 @@ static void transition_to_state(app_sm_system_state_t new_state) {
             break;
     }
 
+    DBG_INFO("SM %s -> %s", system_state_names[old_state], system_state_names[new_state]);
+
     /* Update state */
     system_state = new_state;
+
+    DBG_DEBUG("SM ENTER state: %s", system_state_names[new_state]);
 
     /* Enter new state */
     switch (new_state) {
@@ -278,8 +290,11 @@ static THD_FUNCTION(sm_thread_func, arg) {
     (void)arg;
     chRegSetThreadName("state_machine_thread");
 
+    DBG_DEBUG("SM thread started");
+
     /* Enter boot state */
     transition_to_state(APP_SM_SYS_BOOT);
+
     /* Boot immediately triggers startup */
     transition_to_state(APP_SM_SYS_STARTUP);
 
@@ -289,9 +304,11 @@ static THD_FUNCTION(sm_thread_func, arg) {
         /* Wait for input event */
         if (chMBFetchTimeout(&input_mailbox, &msg, TIME_MS2I(100)) == MSG_OK) {
             app_sm_input_t input = (app_sm_input_t)msg;
+            DBG_DEBUG("SM INPUT: %s (state=%s)", input_names[input], system_state_names[system_state]);
             process_input_internal(input);
         }
     }
+    DBG_DEBUG("SM thread terminating");
 }
 
 /*===========================================================================*/
@@ -300,6 +317,7 @@ static THD_FUNCTION(sm_thread_func, arg) {
 
 uint8_t app_sm_init(void) {
     if (driver_state != APP_SM_STATE_UNINIT) {
+        DBG_ERROR("SM init failed - already initialized");
         return 1;
     }
 
@@ -310,14 +328,17 @@ uint8_t app_sm_init(void) {
     modes_init();
 
     driver_state = APP_SM_STATE_STOPPED;
+    DBG_DEBUG("SM init OK");
     return 0;
 }
 
 uint8_t app_sm_start(void) {
     if (driver_state == APP_SM_STATE_UNINIT) {
+        DBG_ERROR("SM start failed - not initialized");
         return 1;
     }
     if (driver_state == APP_SM_STATE_RUNNING) {
+        DBG_WARN("SM start - already running");
         return 2;
     }
 
@@ -327,6 +348,7 @@ uint8_t app_sm_start(void) {
                                       sm_thread_func, NULL);
 
     driver_state = APP_SM_STATE_RUNNING;
+    DBG_DEBUG("SM started");
     return 0;
 }
 

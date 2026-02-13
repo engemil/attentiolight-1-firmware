@@ -11,11 +11,16 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-12)
+## [Development] (2026-02-14)
 
 NB! Notes added here during development to keep track of changes.
 
+Fixed
+- **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
+
 Added
+
+- **Debug** prints to serial communication (over USB) with levels.
 - Script to check Memory Useage (in scripts folder).
 - New threads: **Animation Thread** and **State Machine Threads**.
 - **Modes** (available in the **Active** state): solid, strength, blink, pulse, traffic light, night light, animations, and external control.

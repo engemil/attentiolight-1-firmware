@@ -198,6 +198,7 @@ UADEFS = -DCRT0_VTOR_INIT=1
 
 # List all user directories here
 UINCDIR = ./app_header \
+          ./app \
           ./app/button_driver \
           ./app/ws2812b_led_driver \
           ./app/led_test \
@@ -251,6 +252,43 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 	@echo ""
 
 .PHONY: sign_firmware
+
+##############################################################################
+# Debug build targets
+#
+# Usage:
+#   make                  - Normal release build (no debug output)
+#   make debug            - Debug build with INFO level (default LEVEL=3)
+#   make debug LEVEL=1    - Errors only
+#   make debug LEVEL=2    - Errors + warnings
+#   make debug LEVEL=3    - Errors + warnings + info (state/mode changes)
+#   make debug LEVEL=4    - Everything (verbose)
+#   make release          - Explicit release build (no debug)
+#
+# Debug levels are hierarchical:
+#   0 = NONE  - No output (release build)
+#   1 = ERROR - Critical errors only
+#   2 = WARN  - Errors + warnings
+#   3 = INFO  - + state/mode changes
+#   4 = DEBUG - + verbose details
+#
+
+.PHONY: debug release clean-build
+
+# Debug build - forces clean rebuild with debug flags
+# Default LEVEL=3 (INFO) if not specified
+debug: clean-build
+	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),3)"
+
+# Explicit release build (no debug output)
+release: clean-build
+	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=0"
+
+# Clean build directory for fresh rebuild
+clean-build:
+	@echo "Cleaning build directory for fresh rebuild..."
+	@rm -rf $(BUILDDIR)
+	@rm -rf $(DEPDIR)
 
 #
 # Custom rules

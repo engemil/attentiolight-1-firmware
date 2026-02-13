@@ -31,6 +31,9 @@ SOFTWARE.
 #include "ws2812b_led_driver.h"
 #include "../app_state_machine_config.h"
 
+/* Debug support */
+#include "app_debug.h"
+
 /*===========================================================================*/
 /* Local Definitions                                                         */
 /*===========================================================================*/
@@ -464,6 +467,7 @@ static THD_FUNCTION(anim_thread_func, arg) {
 
 uint8_t anim_thread_init(void) {
     if (anim_thread_state != ANIM_THREAD_UNINIT) {
+        DBG_ERROR("ANIM init failed - already initialized");
         return 1;
     }
 
@@ -476,14 +480,17 @@ uint8_t anim_thread_init(void) {
     anim_state.brightness = APP_SM_DEFAULT_BRIGHTNESS;
 
     anim_thread_state = ANIM_THREAD_STOPPED;
+    DBG_DEBUG("ANIM init OK");
     return 0;
 }
 
 uint8_t anim_thread_start(void) {
     if (anim_thread_state == ANIM_THREAD_UNINIT) {
+        DBG_ERROR("ANIM start failed - not initialized");
         return 1;
     }
     if (anim_thread_state == ANIM_THREAD_RUNNING) {
+        DBG_WARN("ANIM start - already running");
         return 2;
     }
 
@@ -496,6 +503,7 @@ uint8_t anim_thread_start(void) {
                                         anim_thread_func, NULL);
 
     anim_thread_state = ANIM_THREAD_RUNNING;
+    DBG_DEBUG("ANIM started");
     return 0;
 }
 

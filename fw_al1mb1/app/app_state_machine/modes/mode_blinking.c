@@ -32,10 +32,20 @@ SOFTWARE.
 #include "modes.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "app_debug.h"
 
 /*===========================================================================*/
 /* Blink Speeds                                                              */
 /*===========================================================================*/
+
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+/**
+ * @brief   Blink speed names for debug output.
+ */
+static const char* const speed_names[5] = {
+    "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
+};
+#endif
 
 /**
  * @brief   Blink interval options (ms).
@@ -67,18 +77,27 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 static void blinking_enter(void) {
+    DBG_INFO("MODE Blinking enter: speed=%s (%dms)",
+             speed_names[current_speed_index], blink_speeds[current_speed_index]);
     /* Start blinking animation */
     anim_thread_blink(blink_color_r, blink_color_g, blink_color_b,
                       global_brightness, blink_speeds[current_speed_index]);
 }
 
 static void blinking_exit(void) {
+    DBG_INFO("MODE Blinking exit");
     /* Nothing to clean up - animation will be replaced */
 }
 
 static void blinking_on_short_press(void) {
+    uint8_t old_idx = current_speed_index;
+    DBG_UNUSED(old_idx);
     /* Cycle to next blink speed */
     current_speed_index = (current_speed_index + 1) % BLINK_SPEED_COUNT;
+
+    DBG_INFO("MODE Blinking speed %s -> %s (%dms -> %dms)",
+             speed_names[old_idx], speed_names[current_speed_index],
+             blink_speeds[old_idx], blink_speeds[current_speed_index]);
 
     /* Update blink animation */
     anim_thread_blink(blink_color_r, blink_color_g, blink_color_b,
@@ -86,6 +105,7 @@ static void blinking_on_short_press(void) {
 }
 
 static void blinking_on_long_start(void) {
+    DBG_DEBUG("MODE Blinking long_start");
     /* No special action for long press start in this mode */
 }
 

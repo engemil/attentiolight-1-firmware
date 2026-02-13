@@ -32,10 +32,21 @@ SOFTWARE.
 #include "modes.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "app_debug.h"
 
 /*===========================================================================*/
 /* Color Palette                                                             */
 /*===========================================================================*/
+
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+/**
+ * @brief   Color names for debug output.
+ */
+static const char* const color_names[APP_SM_COLOR_COUNT] = {
+    "RED", "ORANGE", "YELLOW", "LIME", "GREEN", "SPRING",
+    "CYAN", "AZURE", "BLUE", "PURPLE", "MAGENTA", "PINK"
+};
+#endif
 
 /**
  * @brief   12-color extended palette.
@@ -67,6 +78,8 @@ static uint8_t current_brightness = APP_SM_DEFAULT_BRIGHTNESS;
 /*===========================================================================*/
 
 static void solid_color_enter(void) {
+    DBG_INFO("MODE SolidColor enter: color=%s brightness=%d",
+             color_names[current_color_index], current_brightness);
     /* Display current color */
     anim_thread_set_solid(
         solid_color_palette[current_color_index][0],
@@ -77,12 +90,18 @@ static void solid_color_enter(void) {
 }
 
 static void solid_color_exit(void) {
+    DBG_INFO("MODE SolidColor exit");
     /* Nothing to clean up */
 }
 
 static void solid_color_on_short_press(void) {
+    uint8_t old_idx = current_color_index;
+    DBG_UNUSED(old_idx);
     /* Cycle to next color */
     current_color_index = (current_color_index + 1) % APP_SM_COLOR_COUNT;
+
+    DBG_INFO("MODE SolidColor color %s -> %s",
+             color_names[old_idx], color_names[current_color_index]);
 
     /* Display new color */
     anim_thread_set_solid(
@@ -94,6 +113,7 @@ static void solid_color_on_short_press(void) {
 }
 
 static void solid_color_on_long_start(void) {
+    DBG_DEBUG("MODE SolidColor long_start");
     /* No special action for long press start in this mode */
 }
 

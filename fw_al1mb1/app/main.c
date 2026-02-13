@@ -33,7 +33,8 @@ SOFTWARE.
 #include "ee_esp32_wifi_ble_if_driver.h"
 #include "button_driver.h"
 /* #include "led_test.h" */  /* Replaced by app_state_machine */
-//#include "app_state_machine.h"
+#include "app_state_machine.h"
+#include "app_debug.h"
 
 
 /* Serial Configuration for Virtual COM Port */
@@ -53,24 +54,24 @@ static void on_button_event(button_event_t event) {
     /* Route button events to state machine */
     switch (event) {
     case BTN_EVT_SHORT_PRESS:
-        //app_sm_process_input(APP_SM_INPUT_BTN_SHORT);
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: SHORT PRESS\r\n");
+        app_sm_process_input(APP_SM_INPUT_BTN_SHORT);
+        DBG_DEBUG("BTN SHORT_PRESS");
         break;
     case BTN_EVT_LONG_PRESS_START:
-        //app_sm_process_input(APP_SM_INPUT_BTN_LONG_START);
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONG PRESS started...\r\n");
+        app_sm_process_input(APP_SM_INPUT_BTN_LONG_START);
+        DBG_DEBUG("BTN LONG_START");
         break;
     case BTN_EVT_LONG_PRESS_RELEASE:
-        //app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONG PRESS released\r\n");
+        app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
+        DBG_DEBUG("BTN LONG_RELEASE");
         break;
     case BTN_EVT_LONGEST_PRESS_START:
-        //app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_START);
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONGEST PRESS started!\r\n");
+        app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_START);
+        DBG_DEBUG("BTN LONGEST_START");
         break;
     case BTN_EVT_LONGEST_PRESS_RELEASE:
-        //app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_RELEASE);
-        chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Button: LONGEST PRESS released\r\n");
+        app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_RELEASE);
+        DBG_DEBUG("BTN LONGEST_RELEASE");
         break;
     default:
         break;
@@ -113,10 +114,12 @@ int main(void) {
     sdStart(&SD2, &serial_cfg);
 
     /*
-     * Initializes WS2812B LED Driver.
+     * NOTE: WS2812B LED Driver is now initialized by the app_state_machine
+     * via anim_thread_start() -> ws2812b_led_driver_start().
+     * The driver has protection against double-initialization.
      */
-    ws2812b_led_driver_init();
-
+    //ws2812b_led_driver_init();
+    
     /*
      * Initializes and starts LED Test thread.
      * REPLACED BY APP STATE MACHINE - kept for reference.
@@ -127,8 +130,11 @@ int main(void) {
     /*
      * Initializes and starts Application State Machine.
      */
-    //app_sm_init();
-    //app_sm_start();
+    DBG_DEBUG("MAIN app_sm_init()...");
+    app_sm_init();
+    DBG_DEBUG("MAIN app_sm_start()...");
+    app_sm_start();
+    DBG_INFO("MAIN state machine started");
 
     /*
      * Initializes Button Driver.
@@ -145,7 +151,6 @@ int main(void) {
 
         // TEST VCP SERIAL COMMUNICATION
         //chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
-        
         // TEST USB SERIAL COMMUNICATION
         chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
 

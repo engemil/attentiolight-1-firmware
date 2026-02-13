@@ -33,10 +33,20 @@ SOFTWARE.
 #include "modes.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "app_debug.h"
 
 /*===========================================================================*/
 /* Pulse Speeds                                                              */
 /*===========================================================================*/
+
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+/**
+ * @brief   Pulse speed names for debug output.
+ */
+static const char* const speed_names[5] = {
+    "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
+};
+#endif
 
 /**
  * @brief   Pulse period options (ms for full cycle).
@@ -68,18 +78,27 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 static void pulsation_enter(void) {
+    DBG_INFO("MODE Pulsation enter: speed=%s (%dms period)",
+             speed_names[current_speed_index], pulse_periods[current_speed_index]);
     /* Start pulse animation */
     anim_thread_pulse(pulse_color_r, pulse_color_g, pulse_color_b,
                       global_brightness, pulse_periods[current_speed_index]);
 }
 
 static void pulsation_exit(void) {
+    DBG_INFO("MODE Pulsation exit");
     /* Nothing to clean up - animation will be replaced */
 }
 
 static void pulsation_on_short_press(void) {
+    uint8_t old_idx = current_speed_index;
+    DBG_UNUSED(old_idx);
     /* Cycle to next pulse speed */
     current_speed_index = (current_speed_index + 1) % PULSE_SPEED_COUNT;
+
+    DBG_INFO("MODE Pulsation speed %s -> %s (%dms -> %dms)",
+             speed_names[old_idx], speed_names[current_speed_index],
+             pulse_periods[old_idx], pulse_periods[current_speed_index]);
 
     /* Update pulse animation */
     anim_thread_pulse(pulse_color_r, pulse_color_g, pulse_color_b,
@@ -87,6 +106,7 @@ static void pulsation_on_short_press(void) {
 }
 
 static void pulsation_on_long_start(void) {
+    DBG_DEBUG("MODE Pulsation long_start");
     /* No special action for long press start in this mode */
 }
 

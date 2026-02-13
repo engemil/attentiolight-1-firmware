@@ -67,9 +67,27 @@ lsusb
 # Upload application firmware over USB
 cd fw_al1mb1 && make clean && make
 
-# Upload test firmware
+# Upload test firmware (NB! This may take 5 min or more.)
 sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/fw_al1mb1_signed.bin
 ```
+
+
+## Debug Builds
+
+```bash
+cd fw_al1mb1
+
+make                  # Release build (no debug output)
+make debug            # Debug build with INFO level (state/mode changes)
+make debug LEVEL=4    # Debug build with all verbose output
+```
+
+Debug levels (hierarchical):
+- `0` = NONE (release)
+- `1` = ERROR
+- `2` = WARN  
+- `3` = INFO (default for `make debug`)
+- `4` = DEBUG (verbose)
 
 
 ## Project Structure
@@ -237,7 +255,13 @@ The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, 
 To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 
 
-## Debugging / Troubleshooting
+## Troubleshooting
+
+Useful CLI tools for debugging/troubleshooting: `minicom`,  `multiarch-gdb`, `usbutils` (`lsusb`)
+
+As well as the already mentioned tools `st-flash`/`st-erase`, `dfu-util`, `openocd`
+
+Use `make debug LEVEL=4` as mentioned, for debug info over serial communication.
 
 (TO DO: Add more info)
 
@@ -273,6 +297,10 @@ NB! Bootloader doesn't work so good with the debug setup in VS Code (extensions,
 -->
 
 
+## Additional Sources
+
+- ChibiOS 21.11.4 Full documentation: https://chibiforge.org/doc/21.11/full_rm/
+- ChibiOS repository: https://github.com/ChibiOS/ChibiOS
 
 
 ## License

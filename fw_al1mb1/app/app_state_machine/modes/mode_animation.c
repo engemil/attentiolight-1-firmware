@@ -37,10 +37,20 @@ SOFTWARE.
 #include "modes.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "app_debug.h"
 
 /*===========================================================================*/
 /* Local Variables                                                           */
 /*===========================================================================*/
+
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+/**
+ * @brief   Submode names for debug output.
+ */
+static const char* const submode_names[APP_SM_ANIM_COUNT] = {
+    "RAINBOW", "STROBE", "COLOR_CYCLE"
+};
+#endif
 
 static app_sm_animation_submode_t current_submode = APP_SM_ANIM_RAINBOW;
 
@@ -81,24 +91,32 @@ static void start_current_submode(void) {
 /*===========================================================================*/
 
 static void animation_enter(void) {
+    DBG_INFO("MODE Animation enter: submode=%s", submode_names[current_submode]);
     /* Start current animation submode */
     start_current_submode();
 }
 
 static void animation_exit(void) {
+    DBG_INFO("MODE Animation exit");
     /* Nothing to clean up - animation will be replaced */
 }
 
 static void animation_on_short_press(void) {
+    app_sm_animation_submode_t old_submode = current_submode;
+    DBG_UNUSED(old_submode);
     /* Cycle to next animation submode */
     current_submode = (app_sm_animation_submode_t)
                       ((current_submode + 1) % APP_SM_ANIM_COUNT);
+
+    DBG_INFO("MODE Animation submode %s -> %s",
+             submode_names[old_submode], submode_names[current_submode]);
 
     /* Start new animation */
     start_current_submode();
 }
 
 static void animation_on_long_start(void) {
+    DBG_DEBUG("MODE Animation long_start");
     /* No special action for long press start in this mode */
 }
 

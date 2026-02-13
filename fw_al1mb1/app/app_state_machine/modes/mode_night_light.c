@@ -33,10 +33,20 @@ SOFTWARE.
 #include "modes.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "app_debug.h"
 
 /*===========================================================================*/
 /* Night Light Brightness Levels                                             */
 /*===========================================================================*/
+
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+/**
+ * @brief   Night light level names for debug output.
+ */
+static const char* const level_names[4] = {
+    "BARELY_VISIBLE", "VERY_DIM", "DIM", "LOW"
+};
+#endif
 
 /**
  * @brief   Night light brightness levels (very dim).
@@ -61,6 +71,9 @@ static uint8_t current_level_index = 2;  /* Default to dim */
 /*===========================================================================*/
 
 static void night_light_enter(void) {
+    DBG_INFO("MODE NightLight enter: level=%s (%d)",
+             level_names[current_level_index],
+             night_brightness_levels[current_level_index]);
     /* Display warm color at current night light brightness */
     anim_thread_set_solid(
         APP_SM_NIGHT_LIGHT_R,
@@ -71,12 +84,20 @@ static void night_light_enter(void) {
 }
 
 static void night_light_exit(void) {
+    DBG_INFO("MODE NightLight exit");
     /* Nothing to clean up */
 }
 
 static void night_light_on_short_press(void) {
+    uint8_t old_idx = current_level_index;
+    DBG_UNUSED(old_idx);
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % NIGHT_LIGHT_LEVELS;
+
+    DBG_INFO("MODE NightLight level %s -> %s (%d -> %d)",
+             level_names[old_idx], level_names[current_level_index],
+             night_brightness_levels[old_idx],
+             night_brightness_levels[current_level_index]);
 
     /* Update display */
     anim_thread_set_solid(
@@ -88,6 +109,7 @@ static void night_light_on_short_press(void) {
 }
 
 static void night_light_on_long_start(void) {
+    DBG_DEBUG("MODE NightLight long_start");
     /* No special action for long press start in this mode */
 }
 
