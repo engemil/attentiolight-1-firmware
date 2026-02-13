@@ -16,6 +16,11 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 NB! Notes added here during development to keep track of changes.
 
 Added
+- Script to check Memory Useage (in scripts folder).
+- New threads: **Animation Thread** and **State Machine Threads**.
+- **Modes** (available in the **Active** state): solid, strength, blink, pulse, traffic light, night light, animations, and external control.
+- **Operational Modes**, aka. different ways the RGB LED light is used.
+- **Application State Machine** with boot, startup, active, shutdown, and off states.
 - **License note** added/adjusted on most source files.
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
 - **LED Test Thread** for testing LED rendering in it's own thread.

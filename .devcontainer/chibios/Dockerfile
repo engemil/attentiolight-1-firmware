@@ -28,7 +28,7 @@ RUN apt install libftdi-dev -y
 RUN apt install libftdi1 -y
 RUN apt install libjim-dev -y
 #RUN apt install gdb -y
-#RUN apt install gdb-multiarch -y
+RUN apt install gdb-multiarch -y
 RUN apt install minicom -y
 #RUN apt install stlink-tools -y
 #RUN apt install openocd -y

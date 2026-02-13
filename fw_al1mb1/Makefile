@@ -145,6 +145,22 @@ CSRC = $(ALLCSRC) \
        app/button_driver/button_driver.c \
        app/ws2812b_led_driver/ws2812b_led_driver.c \
        app/led_test/led_test.c \
+       app/app_state_machine/app_state_machine.c \
+       app/app_state_machine/animation/animation_thread.c \
+       app/app_state_machine/system_states/state_boot.c \
+       app/app_state_machine/system_states/state_startup.c \
+       app/app_state_machine/system_states/state_active.c \
+       app/app_state_machine/system_states/state_shutdown.c \
+       app/app_state_machine/system_states/state_off.c \
+       app/app_state_machine/modes/modes.c \
+       app/app_state_machine/modes/mode_solid_color.c \
+       app/app_state_machine/modes/mode_strength.c \
+       app/app_state_machine/modes/mode_blinking.c \
+       app/app_state_machine/modes/mode_pulsation.c \
+       app/app_state_machine/modes/mode_animation.c \
+       app/app_state_machine/modes/mode_traffic_light.c \
+       app/app_state_machine/modes/mode_night_light.c \
+       app/app_state_machine/modes/mode_external_control.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -184,7 +200,11 @@ UADEFS = -DCRT0_VTOR_INIT=1
 UINCDIR = ./app_header \
           ./app/button_driver \
           ./app/ws2812b_led_driver \
-          ./app/led_test
+          ./app/led_test \
+          ./app/app_state_machine \
+          ./app/app_state_machine/animation \
+          ./app/app_state_machine/system_states \
+          ./app/app_state_machine/modes
 
 # List the user directory to look for the libraries here
 ULIBDIR =

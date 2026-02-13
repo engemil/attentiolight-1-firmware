@@ -28,6 +28,9 @@ sudo apt install git build-essential gcc-arm-none-eabi \
 # NB! We also need stlink-tools and openocd, but they are outdated on ubuntu 24.04.
 # see the .devcontainer/Dockerfile for how to install from source, or use docker container
 #sudo apt install stlink-tools openocd -y
+
+# Debugging/Troubleshootng
+RUN apt install gdb-multiarch minicom usbutils -y 
 ```
 
 ### Setup Repository
@@ -46,14 +49,15 @@ See `ext/README.md` for detailed submodule management.
 **(If not already done) upload Bootloader Firmware via ST-Link (probe):**
 
 ```bash
-# Build bootloader
+# Update submodules for bootloader
+cd bootloader && git submodule update --init --recursive
+# Build bootloader (enter subfolder bootloader/bootloader)
 cd bootloader && make clean && make
 # Flash to device over debugger (the first stlink it sees)
-st-flash --reset write build/bootloader.bin 0x08000000
+st-flash erase && st-flash --reset write build/bootloader.bin 0x08000000
 # Go back to project root folder
-cd ..
+cd ../..
 # Verify successful flash of bootloader to see if device has entered USB DFU mode
-sudo apt install usbutils -y
 lsusb
 ```
 
@@ -86,6 +90,19 @@ sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/fw_al1mb1_signed.bi
 - more..
 
 (TO DO: Add more info)
+
+
+## Memory Usage
+
+Check Flash and RAM usage after building:
+
+```bash
+./scripts/check_memory_usage.sh fw_al1mb1/build/fw_al1mb1.elf
+```
+
+**STM32C071RB limits:** 128 KB Flash (112 KB for app), 24 KB RAM.
+
+The `.heap` section shows 100% usage by design - ChibiOS allocates all remaining RAM to the heap.
 
 
 ## Libraries and Drivers
@@ -220,7 +237,9 @@ The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, 
 To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 
 
-## Test (TO DO: Remove later)
+## Debugging / Troubleshooting
+
+(TO DO: Add more info)
 
 Serial Communication, both VCP (through STLINK) and USB.
 
@@ -228,6 +247,31 @@ Serial Communication, both VCP (through STLINK) and USB.
 - `ls /dev/ttyACM* /dev/ttyUSB*`
 - `minicom -D /dev/ttyACM0 -b 115200`
 - `minicom -D /dev/ttyACM1 -b 115200`
+
+
+NB! Bootloader doesn't work so good with the debug setup in VS Code (extensions, etc.). 
+
+<!-- Do the following:
+- Change in Makefile:
+    ```Makefile
+    # uncomment
+    LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
+    # Comment out
+    #LDSCRIPT= STM32C071xB_bootloader.ld
+    ```
+- Do not use bootloader, and flash *not signed* firmware bin file with st-flash.
+    ```bash
+    # Upload application firmware over USB
+    cd fw_al1mb1 && make clean && make
+    st-flash erase && st-flash --reset write build/fw_al1mb1.bin 0x08000000
+     ```
+- When you want to use bootloader again:
+    - Clean the MCU: `st-flash erase`.
+    - Program the bootloader again.
+    - Undo change in `Makefile`.
+    - Compile application again and flash (with dfu-util).
+-->
+
 
 
 
