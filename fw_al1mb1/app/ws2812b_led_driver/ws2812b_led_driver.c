@@ -144,10 +144,11 @@ uint8_t ws2812b_led_driver_stop(void){
 }
 
 uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
+    // Send bits MSB-first (bit 7 first, bit 0 last) as required by WS2812B protocol
     for(int i = 0; i < 8; i++){
-        pwm_buf[i] = (g & (1 << i)) ? PWM_HI : PWM_LO;
-        pwm_buf[i + 8] = (r & (1 << i)) ? PWM_HI : PWM_LO;
-        pwm_buf[i + 16] = (b & (1 << i)) ? PWM_HI : PWM_LO;
+        pwm_buf[i] = (g & (1 << (7 - i))) ? PWM_HI : PWM_LO;
+        pwm_buf[i + 8] = (r & (1 << (7 - i))) ? PWM_HI : PWM_LO;
+        pwm_buf[i + 16] = (b & (1 << (7 - i))) ? PWM_HI : PWM_LO;
     }
     // pwm_buf[24] remains 0
 
