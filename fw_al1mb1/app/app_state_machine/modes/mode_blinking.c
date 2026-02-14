@@ -77,7 +77,7 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 static void blinking_enter(void) {
-    DBG_INFO("MODE Blinking enter: speed=%s (%dms)",
+    DBG_INFO("MODE Blinking: enter speed=%s (%dms)",
              speed_names[current_speed_index], blink_speeds[current_speed_index]);
     /* Start blinking animation */
     anim_thread_blink(blink_color_r, blink_color_g, blink_color_b,
@@ -85,7 +85,7 @@ static void blinking_enter(void) {
 }
 
 static void blinking_exit(void) {
-    DBG_INFO("MODE Blinking exit");
+    DBG_INFO("MODE Blinking: exit");
     /* Nothing to clean up - animation will be replaced */
 }
 
@@ -95,7 +95,7 @@ static void blinking_on_short_press(void) {
     /* Cycle to next blink speed */
     current_speed_index = (current_speed_index + 1) % BLINK_SPEED_COUNT;
 
-    DBG_INFO("MODE Blinking speed %s -> %s (%dms -> %dms)",
+    DBG_INFO("MODE Blinking: speed set from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              blink_speeds[old_idx], blink_speeds[current_speed_index]);
 
@@ -105,7 +105,7 @@ static void blinking_on_short_press(void) {
 }
 
 static void blinking_on_long_start(void) {
-    DBG_DEBUG("MODE Blinking long_start");
+    DBG_DEBUG("MODE Blinking: long_start");
     /* No special action for long press start in this mode */
 }
 

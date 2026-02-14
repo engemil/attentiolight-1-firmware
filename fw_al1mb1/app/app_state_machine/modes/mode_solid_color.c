@@ -78,7 +78,7 @@ static uint8_t current_brightness = APP_SM_DEFAULT_BRIGHTNESS;
 /*===========================================================================*/
 
 static void solid_color_enter(void) {
-    DBG_INFO("MODE SolidColor enter: color=%s brightness=%d",
+    DBG_INFO("MODE SolidColor: enter: color=%s brightness=%d",
              color_names[current_color_index], current_brightness);
     /* Display current color */
     anim_thread_set_solid(
@@ -90,7 +90,7 @@ static void solid_color_enter(void) {
 }
 
 static void solid_color_exit(void) {
-    DBG_INFO("MODE SolidColor exit");
+    DBG_INFO("MODE SolidColor: exit");
     /* Nothing to clean up */
 }
 
@@ -100,7 +100,7 @@ static void solid_color_on_short_press(void) {
     /* Cycle to next color */
     current_color_index = (current_color_index + 1) % APP_SM_COLOR_COUNT;
 
-    DBG_INFO("MODE SolidColor color %s -> %s",
+    DBG_INFO("MODE SolidColor: color set from %s to %s",
              color_names[old_idx], color_names[current_color_index]);
 
     /* Display new color */
@@ -113,7 +113,7 @@ static void solid_color_on_short_press(void) {
 }
 
 static void solid_color_on_long_start(void) {
-    DBG_DEBUG("MODE SolidColor long_start");
+    DBG_DEBUG("MODE SolidColor: long_start");
     /* No special action for long press start in this mode */
 }
 

@@ -91,13 +91,13 @@ static void start_current_submode(void) {
 /*===========================================================================*/
 
 static void animation_enter(void) {
-    DBG_INFO("MODE Animation enter: submode=%s", submode_names[current_submode]);
+    DBG_INFO("MODE Animation: enter submode=%s", submode_names[current_submode]);
     /* Start current animation submode */
     start_current_submode();
 }
 
 static void animation_exit(void) {
-    DBG_INFO("MODE Animation exit");
+    DBG_INFO("MODE Animation: exit");
     /* Nothing to clean up - animation will be replaced */
 }
 
@@ -108,7 +108,7 @@ static void animation_on_short_press(void) {
     current_submode = (app_sm_animation_submode_t)
                       ((current_submode + 1) % APP_SM_ANIM_COUNT);
 
-    DBG_INFO("MODE Animation submode %s -> %s",
+    DBG_INFO("MODE Animation: submode %s -> %s",
              submode_names[old_submode], submode_names[current_submode]);
 
     /* Start new animation */
@@ -116,7 +116,7 @@ static void animation_on_short_press(void) {
 }
 
 static void animation_on_long_start(void) {
-    DBG_DEBUG("MODE Animation long_start");
+    DBG_DEBUG("MODE Animation: long_start");
     /* No special action for long press start in this mode */
 }
 

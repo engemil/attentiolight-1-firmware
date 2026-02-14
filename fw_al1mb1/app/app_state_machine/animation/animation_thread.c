@@ -112,6 +112,26 @@ static uint8_t last_rendered_b = 0;
 static bool force_render = true;  /* Force first render */
 
 /**
+ * @brief   Render mode for animation types.
+ */
+typedef enum {
+    RENDER_STATIC,      /* Render once, then idle */
+    RENDER_TRANSITIONS, /* Render on internal state changes */
+    RENDER_CONTINUOUS   /* Render every tick for smooth animation */
+} render_mode_t;
+
+/**
+ * @brief   Current render mode (set on command).
+ */
+static render_mode_t current_render_mode = RENDER_STATIC;
+
+/**
+ * @brief   Transition state tracking for RENDER_TRANSITIONS modes.
+ * @details Set to 0xFF to force first render on mode change.
+ */
+static uint8_t last_transition_state = 0xFF;
+
+/**
  * @brief   Color palette for color cycle animation.
  */
 static const uint8_t color_palette[APP_SM_COLOR_COUNT][3] = {
@@ -196,6 +216,39 @@ static void render_force_next(void) {
 }
 
 /**
+ * @brief   Renders LED off and updates tracking.
+ */
+static void render_off(void) {
+    ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
+    last_rendered_r = 0;
+    last_rendered_g = 0;
+    last_rendered_b = 0;
+}
+
+/**
+ * @brief   Gets render mode for animation type.
+ */
+static render_mode_t get_render_mode(anim_cmd_type_t type) {
+    switch (type) {
+        case ANIM_CMD_SOLID:
+        case ANIM_CMD_STOP:
+            return RENDER_STATIC;
+        case ANIM_CMD_BLINK:
+        case ANIM_CMD_STROBE:
+        case ANIM_CMD_TRAFFIC_LIGHT:
+        case ANIM_CMD_COLOR_CYCLE:
+        case ANIM_CMD_FLASH_FEEDBACK:
+            return RENDER_TRANSITIONS;
+        case ANIM_CMD_PULSE:
+        case ANIM_CMD_RAINBOW:
+        case ANIM_CMD_FADE_IN:
+        case ANIM_CMD_FADE_OUT:
+        default:
+            return RENDER_CONTINUOUS;
+    }
+}
+
+/**
  * @brief   Renders current color to LED (with skip-if-unchanged optimization).
  * @return  true if actually rendered, false if skipped.
  */
@@ -273,7 +326,7 @@ static void process_fade_out(void) {
         anim_state.current_b = 0;
         anim_state.current_type = ANIM_CMD_STOP;
         anim_state.active = false;
-        ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
+        render_off();
     } else {
         /* Interpolate */
         uint8_t progress = (uint8_t)(255 - ((elapsed * 255) / anim_state.period_ms));
@@ -295,13 +348,17 @@ static void process_blink(void) {
     uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
     uint32_t cycle_pos = elapsed % anim_state.period_ms;
 
-    if (cycle_pos < (anim_state.period_ms / 2)) {
-        /* LED on */
-        render_color(anim_state.target_r, anim_state.target_g,
-                     anim_state.target_b, anim_state.brightness);
-    } else {
-        /* LED off */
-        ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
+    uint8_t current_state = (cycle_pos < (anim_state.period_ms / 2)) ? 1 : 0;
+
+    /* Only render on state transition */
+    if (current_state != last_transition_state) {
+        last_transition_state = current_state;
+        if (current_state) {
+            render_color(anim_state.target_r, anim_state.target_g,
+                         anim_state.target_b, anim_state.brightness);
+        } else {
+            render_off();
+        }
     }
 }
 
@@ -354,12 +411,17 @@ static void process_strobe(void) {
     uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
     uint32_t cycle_pos = elapsed % anim_state.period_ms;
 
-    /* Very short on time, mostly off */
-    if (cycle_pos < (anim_state.period_ms / 10)) {
-        render_color(anim_state.target_r, anim_state.target_g,
-                     anim_state.target_b, anim_state.brightness);
-    } else {
-        ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
+    uint8_t current_state = (cycle_pos < (anim_state.period_ms / 10)) ? 1 : 0;
+
+    /* Only render on state transition */
+    if (current_state != last_transition_state) {
+        last_transition_state = current_state;
+        if (current_state) {
+            render_color(anim_state.target_r, anim_state.target_g,
+                         anim_state.target_b, anim_state.brightness);
+        } else {
+            render_off();
+        }
     }
 }
 
@@ -378,10 +440,14 @@ static void process_color_cycle(void) {
         color_idx = 0;
     }
 
-    render_color(color_palette[color_idx][0],
-                 color_palette[color_idx][1],
-                 color_palette[color_idx][2],
-                 anim_state.brightness);
+    /* Only render on color transition */
+    if (color_idx != last_transition_state) {
+        last_transition_state = color_idx;
+        render_color(color_palette[color_idx][0],
+                     color_palette[color_idx][1],
+                     color_palette[color_idx][2],
+                     anim_state.brightness);
+    }
 }
 
 /**
@@ -395,15 +461,24 @@ static void process_traffic_light(void) {
                             APP_SM_TRAFFIC_GREEN_MS;
     uint32_t cycle_pos = elapsed % total_period;
 
+    uint8_t current_state;
     if (cycle_pos < APP_SM_TRAFFIC_RED_MS) {
-        /* Red */
-        render_color(255, 0, 0, anim_state.brightness);
+        current_state = 0;  /* Red */
     } else if (cycle_pos < (APP_SM_TRAFFIC_RED_MS + APP_SM_TRAFFIC_YELLOW_MS)) {
-        /* Yellow */
-        render_color(255, 200, 0, anim_state.brightness);
+        current_state = 1;  /* Yellow */
     } else {
-        /* Green */
-        render_color(0, 255, 0, anim_state.brightness);
+        current_state = 2;  /* Green */
+    }
+
+    /* Only render on state transition */
+    if (current_state != last_transition_state) {
+        last_transition_state = current_state;
+        switch (current_state) {
+            case 0: render_color(255, 0, 0, anim_state.brightness); break;
+            case 1: render_color(255, 200, 0, anim_state.brightness); break;
+            case 2: render_color(0, 255, 0, anim_state.brightness); break;
+            default: break;
+        }
     }
 }
 
@@ -414,15 +489,20 @@ static void process_flash_feedback(void) {
     uint32_t now = chVTGetSystemTime();
     uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
 
-    if (elapsed < anim_state.period_ms) {
-        /* Show flash color */
-        render_color(anim_state.target_r, anim_state.target_g,
-                     anim_state.target_b, 255);
-    } else {
-        /* Return to previous state - just go to solid for now */
-        anim_state.current_type = ANIM_CMD_STOP;
-        anim_state.active = false;
-        ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
+    uint8_t current_state = (elapsed < anim_state.period_ms) ? 1 : 0;
+
+    /* Only render on state transition */
+    if (current_state != last_transition_state) {
+        last_transition_state = current_state;
+        if (current_state) {
+            render_color(anim_state.target_r, anim_state.target_g,
+                         anim_state.target_b, 255);
+        } else {
+            /* Return to previous state - just go to stop for now */
+            anim_state.current_type = ANIM_CMD_STOP;
+            anim_state.active = false;
+            render_off();
+        }
     }
 }
 
@@ -441,12 +521,17 @@ static void process_command(const anim_command_t* cmd) {
     anim_state.phase = 0;
     anim_state.active = (cmd->type != ANIM_CMD_STOP);
 
+    /* Set render mode for this animation */
+    current_render_mode = get_render_mode(cmd->type);
+
+    /* Reset transition state tracking (0xFF forces first render) */
+    last_transition_state = 0xFF;
+
     /* Force render on mode change */
     render_force_next();
 
     if (cmd->type == ANIM_CMD_STOP) {
-        ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
-        last_rendered_r = last_rendered_g = last_rendered_b = 0;
+        render_off();
     } else if (cmd->type == ANIM_CMD_SOLID) {
         process_solid();
     }

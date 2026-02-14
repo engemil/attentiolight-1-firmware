@@ -90,7 +90,7 @@ static void set_traffic_color(traffic_state_t state) {
 /*===========================================================================*/
 
 static void traffic_light_enter(void) {
-    DBG_INFO("MODE TrafficLight enter: mode=%s", auto_mode ? "AUTO" : "MANUAL");
+    DBG_INFO("MODE TrafficLight: enter mode=%s", auto_mode ? "AUTO" : "MANUAL");
     if (auto_mode) {
         /* Start automatic traffic light animation */
         anim_thread_traffic_light(global_brightness);
@@ -101,7 +101,7 @@ static void traffic_light_enter(void) {
 }
 
 static void traffic_light_exit(void) {
-    DBG_INFO("MODE TrafficLight exit");
+    DBG_INFO("MODE TrafficLight: exit");
     /* Nothing to clean up */
 }
 
@@ -110,7 +110,7 @@ static void traffic_light_on_short_press(void) {
         /* Switch to manual mode */
         auto_mode = false;
         manual_state = TRAFFIC_RED;
-        DBG_INFO("MODE TrafficLight AUTO -> MANUAL (state=%s)",
+        DBG_INFO("MODE TrafficLight: Set from AUTO to MANUAL (state=%s)",
                  traffic_state_names[manual_state]);
         set_traffic_color(manual_state);
     } else {
@@ -121,11 +121,11 @@ static void traffic_light_on_short_press(void) {
         if (manual_state == TRAFFIC_RED) {
             /* Completed one cycle, switch back to auto */
             auto_mode = true;
-            DBG_INFO("MODE TrafficLight MANUAL %s -> AUTO",
+            DBG_INFO("MODE TrafficLight: Set from MANUAL %s to AUTO",
                      traffic_state_names[old_state]);
             anim_thread_traffic_light(global_brightness);
         } else {
-            DBG_INFO("MODE TrafficLight state %s -> %s",
+            DBG_INFO("MODE TrafficLight: Set state from %s to %s",
                      traffic_state_names[old_state], traffic_state_names[manual_state]);
             set_traffic_color(manual_state);
         }
@@ -133,7 +133,7 @@ static void traffic_light_on_short_press(void) {
 }
 
 static void traffic_light_on_long_start(void) {
-    DBG_DEBUG("MODE TrafficLight long_start");
+    DBG_DEBUG("MODE TrafficLight: long_start");
     /* No special action for long press start in this mode */
 }
 

@@ -76,7 +76,7 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 static void strength_enter(void) {
-    DBG_INFO("MODE Strength enter: level=%s (%d)",
+    DBG_INFO("MODE Strength: enter level=%s (%d)",
              brightness_names[current_level_index],
              brightness_levels[current_level_index]);
     /* Display white at current brightness level */
@@ -84,7 +84,7 @@ static void strength_enter(void) {
 }
 
 static void strength_exit(void) {
-    DBG_INFO("MODE Strength exit: global_brightness=%d",
+    DBG_INFO("MODE Strength: exit global_brightness=%d",
              brightness_levels[current_level_index]);
     /* Update global brightness for other modes to use */
     global_brightness = brightness_levels[current_level_index];
@@ -96,7 +96,7 @@ static void strength_on_short_press(void) {
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % APP_SM_BRIGHTNESS_LEVELS;
 
-    DBG_INFO("MODE Strength level %s -> %s (%d -> %d)",
+    DBG_INFO("MODE Strength: level set from %s to %s (%d to %d)",
              brightness_names[old_idx], brightness_names[current_level_index],
              brightness_levels[old_idx], brightness_levels[current_level_index]);
 
@@ -108,7 +108,7 @@ static void strength_on_short_press(void) {
 }
 
 static void strength_on_long_start(void) {
-    DBG_DEBUG("MODE Strength long_start");
+    DBG_DEBUG("MODE Strength: long_start");
     /* No special action for long press start in this mode */
 }
 

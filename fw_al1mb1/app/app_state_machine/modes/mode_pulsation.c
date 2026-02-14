@@ -78,7 +78,7 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 static void pulsation_enter(void) {
-    DBG_INFO("MODE Pulsation enter: speed=%s (%dms period)",
+    DBG_INFO("MODE Pulsation: enter speed=%s (%dms period)",
              speed_names[current_speed_index], pulse_periods[current_speed_index]);
     /* Start pulse animation */
     anim_thread_pulse(pulse_color_r, pulse_color_g, pulse_color_b,
@@ -96,7 +96,7 @@ static void pulsation_on_short_press(void) {
     /* Cycle to next pulse speed */
     current_speed_index = (current_speed_index + 1) % PULSE_SPEED_COUNT;
 
-    DBG_INFO("MODE Pulsation speed %s -> %s (%dms -> %dms)",
+    DBG_INFO("MODE Pulsation: speed from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              pulse_periods[old_idx], pulse_periods[current_speed_index]);
 
@@ -106,7 +106,7 @@ static void pulsation_on_short_press(void) {
 }
 
 static void pulsation_on_long_start(void) {
-    DBG_DEBUG("MODE Pulsation long_start");
+    DBG_DEBUG("MODE Pulsation: long_start");
     /* No special action for long press start in this mode */
 }
 

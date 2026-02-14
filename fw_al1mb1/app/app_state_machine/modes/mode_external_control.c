@@ -44,25 +44,25 @@ SOFTWARE.
 /*===========================================================================*/
 
 static void external_control_enter(void) {
-    DBG_INFO("MODE ExternalCtrl enter: waiting for external commands");
+    DBG_INFO("MODE ExternalCtrl: enter waiting for external commands");
     /* Show a distinctive color to indicate external control mode */
     /* Cyan pulsing indicates waiting for external commands */
     anim_thread_pulse(0, 255, 255, 128, 2000);
 }
 
 static void external_control_exit(void) {
-    DBG_INFO("MODE ExternalCtrl exit");
+    DBG_INFO("MODE ExternalCtrl: exit");
     /* Nothing to clean up */
 }
 
 static void external_control_on_short_press(void) {
-    DBG_DEBUG("MODE ExternalCtrl short_press: ignored (external control active)");
+    DBG_DEBUG("MODE ExternalCtrl: short_press ignored (external control active)");
     /* In external control mode, button presses are ignored */
     /* External commands take priority */
 }
 
 static void external_control_on_long_start(void) {
-    DBG_DEBUG("MODE ExternalCtrl long_start");
+    DBG_DEBUG("MODE ExternalCtrl: long_start");
     /* No special action for long press start in this mode */
 }
 
