@@ -39,20 +39,20 @@ SOFTWARE.
 #include "ws2812b_led_driver.h"
 
 /* Debug includes */
-#include "hal.h"
-#include "chprintf.h"
+//#include "hal.h"
+//#include "chprintf.h"
 
 /* Forward declaration - SDU1 is defined in usbcfg.c */
-extern SerialUSBDriver SDU1;
+//extern SerialUSBDriver SDU1;
 
 /* Debug macro - set to 1 to enable debug output */
-#define WS2812B_DEBUG  1
+//#define WS2812B_DEBUG  1
 
-#if WS2812B_DEBUG
-#define WS2812B_DBG(fmt, ...) chprintf((BaseSequentialStream*)&SDU1, "[WS2812B] " fmt "\r\n", ##__VA_ARGS__)
-#else
-#define WS2812B_DBG(fmt, ...)
-#endif
+//#if WS2812B_DEBUG
+//#define WS2812B_DBG(fmt, ...) chprintf((BaseSequentialStream*)&SDU1, "[WS2812B] " fmt "\r\n", ##__VA_ARGS__)
+//#else
+//#define WS2812B_DBG(fmt, ...)
+//#endif
 
 
 #define PWM_HI (14)
@@ -95,9 +95,9 @@ extern SerialUSBDriver SDU1;
 
 const uint8_t pwm_zero_buf = 0;
 uint8_t pwm_buf[PWM_BUFFER_SIZE] = {0}; // Ensure last value is untouched (always zero).
-static const stm32_dma_stream_t *dma_stream = NULL; // Global DMA stream pointer
+static const stm32_dma_stream_t *dma_stream; //= NULL; // Global DMA stream pointer
 static volatile bool dma_ready = true;
-static volatile bool driver_started = false; // Track if driver already started
+//static volatile bool driver_started = false; // Track if driver already started
 
 
 static const PWMConfig pwm_cfg = {
@@ -130,33 +130,33 @@ static void dma_callback(void *p, uint32_t flags) {
 }
 
 uint8_t ws2812b_led_driver_init(void){
-    WS2812B_DBG("init() called");
+    //WS2812B_DBG("init() called");
     ws2812b_led_driver_start();
     return 0;
 }
 
 uint8_t ws2812b_led_driver_start(void){
-    WS2812B_DBG("start() called, already_started=%d", driver_started);
+    //WS2812B_DBG("start() called, already_started=%d", driver_started);
 
     /* Prevent double initialization */
-    if (driver_started) {
-        WS2812B_DBG("start() skipped - already started");
-        return 0;
-    }
+    //if (driver_started) {
+    //    WS2812B_DBG("start() skipped - already started");
+    //    return 0;
+    //}
 
     // Start PWM
-    WS2812B_DBG("start() pwmStart...");
+    //WS2812B_DBG("start() pwmStart...");
     pwmStart(PWM_DRIVER, &pwm_cfg);
 
     // Setup DMA
-    WS2812B_DBG("start() dmaStreamAlloc...");
+    //WS2812B_DBG("start() dmaStreamAlloc...");
     dma_stream = dmaStreamAlloc(STM32_DMA_STREAM_ID(DMA_DRIVER, DMA_CHANNEL),
                                     DMA_PRIORITY, (stm32_dmaisr_t)dma_callback, NULL);
-    if (dma_stream == NULL) {
-        WS2812B_DBG("start() FAILED - dmaStreamAlloc returned NULL!");
-        return 1;
-    }
-    WS2812B_DBG("start() dma_stream=%p", dma_stream);
+    //if (dma_stream == NULL) {
+    //    WS2812B_DBG("start() FAILED - dmaStreamAlloc returned NULL!");
+    //    return 1;
+    //}
+    //WS2812B_DBG("start() dma_stream=%p", dma_stream);
 
     dmaSetRequestSource(dma_stream, DMA_REQUEST);
     dmaStreamSetPeripheral(dma_stream, DMA_PERIPHERAL);
@@ -165,26 +165,26 @@ uint8_t ws2812b_led_driver_start(void){
     // Start the PWM channel. PWMD for TIM16 (&PWMD16), Channel 1 (0), duty cycle 0 (off)
     //pwmEnableChannel(&PWMD16, 0, 0); // Not needed here?!
 
-    driver_started = true;
-    WS2812B_DBG("start() OK");
+    //driver_started = true;
+    //WS2812B_DBG("start() OK");
     return 0;
 }
 
 uint8_t ws2812b_led_driver_stop(void){
-    WS2812B_DBG("stop() called, driver_started=%d", driver_started);
+    //WS2812B_DBG("stop() called, driver_started=%d", driver_started);
 
-    if (!driver_started) {
-        WS2812B_DBG("stop() skipped - not started");
-        return 0;
-    }
+    //if (!driver_started) {
+    //    WS2812B_DBG("stop() skipped - not started");
+    //    return 0;
+    //}
 
     dmaStreamDisable(dma_stream);
     dmaStreamFree(dma_stream); // NB! Illegal operation if already freed/released
     dma_stream = NULL;
     pwmStop(PWM_DRIVER);
 
-    driver_started = false;
-    WS2812B_DBG("stop() OK");
+    //driver_started = false;
+    //WS2812B_DBG("stop() OK");
     return 0;
 }
 
