@@ -37,7 +37,7 @@ SOFTWARE.
  *          Button mapping:
  *          - Short press: Mode-specific action (next color, adjust setting)
  *          - Long press release: Go to next mode
- *          - Longest press release: Turn off (shutdown)
+ *          - Extended press release: Turn off (shutdown)
  */
 
 #ifndef APP_STATE_MACHINE_H
@@ -100,8 +100,8 @@ typedef enum {
     APP_SM_INPUT_BTN_SHORT,             /**< Short button press             */
     APP_SM_INPUT_BTN_LONG_START,        /**< Long press threshold reached   */
     APP_SM_INPUT_BTN_LONG_RELEASE,      /**< Released after long press      */
-    APP_SM_INPUT_BTN_LONGEST_START,     /**< Longest press threshold        */
-    APP_SM_INPUT_BTN_LONGEST_RELEASE,   /**< Released after longest press   */
+    APP_SM_INPUT_BTN_EXTENDED_START,    /**< Extended press threshold       */
+    APP_SM_INPUT_BTN_EXTENDED_RELEASE,  /**< Released after extended press  */
 
     /* External control inputs (for future use) */
     APP_SM_INPUT_EXT_CTRL_ENTER,        /**< Enter external control mode    */

@@ -133,8 +133,8 @@ static const char* input_names[] = {
     "BTN_SHORT",
     "BTN_LONG_START",
     "BTN_LONG_RELEASE",
-    "BTN_LONGEST_START",
-    "BTN_LONGEST_RELEASE",
+    "BTN_EXTENDED_START",
+    "BTN_EXTENDED_RELEASE",
     "EXT_CTRL_ENTER",
     "EXT_CTRL_EXIT",
     "EXT_COMMAND",
@@ -257,7 +257,7 @@ static void process_input_internal(app_sm_input_t input) {
             break;
 
         case APP_SM_SYS_ACTIVE:
-            if (input == APP_SM_INPUT_BTN_LONGEST_RELEASE) {
+            if (input == APP_SM_INPUT_BTN_EXTENDED_RELEASE) {
                 /* Initiate shutdown */
                 transition_to_state(APP_SM_SYS_SHUTDOWN);
             } else {

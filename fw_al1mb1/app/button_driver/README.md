@@ -1,13 +1,13 @@
 # Button Driver
 
-A button state detection driver based on ChibiOS/RT that detects short, long, and longest button presses using interrupt-based edge detection with a dedicated thread for timing and callback management.
+A button state detection driver based on ChibiOS/RT that detects short, long, and extended button presses using interrupt-based edge detection with a dedicated thread for timing and callback management.
 
 ## Features
 
 - **Interrupt-driven**: Uses PAL callbacks for efficient edge detection (no polling when idle)
 - **RTOS-friendly**: Dedicated low-priority thread handles timing logic
 - **Software debouncing**: Configurable debounce time (default 20ms)
-- **Three press types**: Short (<1s), Long (2-5s), Longest (>=5s)
+- **Three press types**: Short (<1s), Long (2-5s), Extended (>=5s)
 - **Dual callbacks**: Events fire at threshold crossings AND on release
 - **Thread-safe**: Callbacks invoked from thread context, safe to use RTOS functions
 - **Modular**: GPIO line and active state passed at runtime for easy reuse
@@ -20,8 +20,8 @@ A button state detection driver based on ChibiOS/RT that detects short, long, an
 | `BTN_EVT_SHORT_PRESS` | On release | < 1 second |
 | `BTN_EVT_LONG_PRESS_START` | At threshold | >= 2 seconds (while held) |
 | `BTN_EVT_LONG_PRESS_RELEASE` | On release | 2-5 seconds |
-| `BTN_EVT_LONGEST_PRESS_START` | At threshold | >= 5 seconds (while held) |
-| `BTN_EVT_LONGEST_PRESS_RELEASE` | On release | >= 5 seconds |
+| `BTN_EVT_EXTENDED_PRESS_START` | At threshold | >= 5 seconds (while held) |
+| `BTN_EVT_EXTENDED_PRESS_RELEASE` | On release | >= 5 seconds |
 
 **Note**: Releases between 1-2 seconds produce no event (considered "cancelled" press).
 
@@ -44,11 +44,11 @@ static void on_button_event(button_event_t event) {
     case BTN_EVT_LONG_PRESS_RELEASE:
         /* Handle long press release - e.g., stop brightness adjustment */
         break;
-    case BTN_EVT_LONGEST_PRESS_START:
-        /* Handle longest press - e.g., enter factory reset mode */
+    case BTN_EVT_EXTENDED_PRESS_START:
+        /* Handle extended press - e.g., enter factory reset mode */
         break;
-    case BTN_EVT_LONGEST_PRESS_RELEASE:
-        /* Handle longest press release - e.g., confirm factory reset */
+    case BTN_EVT_EXTENDED_PRESS_RELEASE:
+        /* Handle extended press release - e.g., confirm factory reset */
         break;
     default:
         break;
@@ -113,7 +113,7 @@ Configuration macros are defined in `button_driver_config.h`. Modify this file d
 | `BTN_DEBOUNCE_MS` | 20 | Debounce time (milliseconds) |
 | `BTN_SHORT_MAX_MS` | 1000 | Max duration for short press (ms) |
 | `BTN_LONG_MIN_MS` | 2000 | Min duration for long press (ms) |
-| `BTN_LONGEST_MIN_MS` | 5000 | Min duration for longest press (ms) |
+| `BTN_EXTENDED_MIN_MS` | 5000 | Min duration for extended press (ms) |
 | `BTN_POLL_INTERVAL_MS` | 50 | Polling interval while pressed (ms) |
 | `BTN_THREAD_WA_SIZE` | 256 | Thread stack size (bytes) |
 | `BTN_THREAD_PRIORITY` | LOWPRIO+1 | Thread priority |

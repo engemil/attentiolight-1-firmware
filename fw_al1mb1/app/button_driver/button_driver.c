@@ -43,7 +43,7 @@ typedef enum {
     BTN_SM_DEBOUNCING_PRESS,    /**< Waiting for press debounce             */
     BTN_SM_PRESSED,             /**< Button pressed, timing in progress     */
     BTN_SM_LONG_DETECTED,       /**< Long press threshold crossed           */
-    BTN_SM_LONGEST_DETECTED,    /**< Longest press threshold crossed        */
+    BTN_SM_EXTENDED_DETECTED,   /**< Extended press threshold crossed       */
     BTN_SM_DEBOUNCING_RELEASE   /**< Waiting for release debounce           */
 } btn_sm_state_t;
 
@@ -244,22 +244,22 @@ static THD_FUNCTION(button_thread, arg) {
             break;
 
         case BTN_SM_LONG_DETECTED:
-            /* Check for release or longest threshold */
+            /* Check for release or extended threshold */
             if (!read_button_raw()) {
                 /* Button released, start release debounce */
                 sm_state = BTN_SM_DEBOUNCING_RELEASE;
             } else {
-                /* Still pressed, check for longest threshold */
+                /* Still pressed, check for extended threshold */
                 uint32_t duration = get_press_duration_ms();
-                if (duration >= BTN_LONGEST_MIN_MS) {
-                    /* Longest press threshold reached */
-                    sm_state = BTN_SM_LONGEST_DETECTED;
-                    invoke_callback(BTN_EVT_LONGEST_PRESS_START);
+                if (duration >= BTN_EXTENDED_MIN_MS) {
+                    /* Extended press threshold reached */
+                    sm_state = BTN_SM_EXTENDED_DETECTED;
+                    invoke_callback(BTN_EVT_EXTENDED_PRESS_START);
                 }
             }
             break;
 
-        case BTN_SM_LONGEST_DETECTED:
+        case BTN_SM_EXTENDED_DETECTED:
             /* Just waiting for release now */
             if (!read_button_raw()) {
                 /* Button released, start release debounce */
@@ -278,9 +278,9 @@ static THD_FUNCTION(button_thread, arg) {
                     if (duration < BTN_SHORT_MAX_MS) {
                         /* Short press */
                         invoke_callback(BTN_EVT_SHORT_PRESS);
-                    } else if (duration >= BTN_LONGEST_MIN_MS) {
-                        /* Longest press release */
-                        invoke_callback(BTN_EVT_LONGEST_PRESS_RELEASE);
+                    } else if (duration >= BTN_EXTENDED_MIN_MS) {
+                        /* Extended press release */
+                        invoke_callback(BTN_EVT_EXTENDED_PRESS_RELEASE);
                     } else if (duration >= BTN_LONG_MIN_MS) {
                         /* Long press release */
                         invoke_callback(BTN_EVT_LONG_PRESS_RELEASE);
@@ -292,8 +292,8 @@ static THD_FUNCTION(button_thread, arg) {
                     /* False release, button still pressed */
                     /* Return to appropriate pressed state based on duration */
                     uint32_t duration = get_press_duration_ms();
-                    if (duration >= BTN_LONGEST_MIN_MS) {
-                        sm_state = BTN_SM_LONGEST_DETECTED;
+                    if (duration >= BTN_EXTENDED_MIN_MS) {
+                        sm_state = BTN_SM_EXTENDED_DETECTED;
                     } else if (duration >= BTN_LONG_MIN_MS) {
                         sm_state = BTN_SM_LONG_DETECTED;
                     } else {
@@ -418,10 +418,10 @@ const char* button_event_name(button_event_t event) {
         return "LONG_PRESS_START";
     case BTN_EVT_LONG_PRESS_RELEASE:
         return "LONG_PRESS_RELEASE";
-    case BTN_EVT_LONGEST_PRESS_START:
-        return "LONGEST_PRESS_START";
-    case BTN_EVT_LONGEST_PRESS_RELEASE:
-        return "LONGEST_PRESS_RELEASE";
+    case BTN_EVT_EXTENDED_PRESS_START:
+        return "EXTENDED_PRESS_START";
+    case BTN_EVT_EXTENDED_PRESS_RELEASE:
+        return "EXTENDED_PRESS_RELEASE";
     default:
         return "UNKNOWN";
     }

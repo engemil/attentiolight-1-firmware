@@ -65,11 +65,11 @@ SOFTWARE.
 #endif
 
 /**
- * @brief   Longest press minimum duration in milliseconds.
- * @details Press duration must reach this to be considered longest.
+ * @brief   Extended press minimum duration in milliseconds.
+ * @details Press duration must reach this to be considered extended.
  */
-#ifndef BTN_LONGEST_MIN_MS
-#define BTN_LONGEST_MIN_MS           5000
+#ifndef BTN_EXTENDED_MIN_MS
+#define BTN_EXTENDED_MIN_MS          5000
 #endif
 
 /**

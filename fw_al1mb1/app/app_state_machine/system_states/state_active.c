@@ -73,9 +73,9 @@ static void show_long_press_feedback(void) {
 }
 
 /**
- * @brief   Shows visual feedback for longest press (shutdown warning).
+ * @brief   Shows visual feedback for extended press (shutdown warning).
  */
-static void show_longest_press_feedback(void) {
+static void show_extended_press_feedback(void) {
 #if APP_SM_LONG_PRESS_FEEDBACK
     /* Red flash to indicate shutdown is coming */
     anim_thread_flash_feedback(255, 0, 0, APP_SM_MODE_FEEDBACK_MS);
@@ -116,12 +116,12 @@ void state_active_process(app_sm_input_t input) {
             }
             break;
 
-        case APP_SM_INPUT_BTN_LONGEST_START:
+        case APP_SM_INPUT_BTN_EXTENDED_START:
             /* Show shutdown warning feedback */
-            show_longest_press_feedback();
+            show_extended_press_feedback();
             break;
 
-        case APP_SM_INPUT_BTN_LONGEST_RELEASE:
+        case APP_SM_INPUT_BTN_EXTENDED_RELEASE:
             /* Initiate shutdown */
             /* This will be handled by the main state machine */
             break;

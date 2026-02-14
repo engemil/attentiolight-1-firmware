@@ -65,13 +65,13 @@ static void on_button_event(button_event_t event) {
         app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
         DBG_DEBUG("BTN LONG_RELEASE");
         break;
-    case BTN_EVT_LONGEST_PRESS_START:
-        app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_START);
-        DBG_DEBUG("BTN LONGEST_START");
+    case BTN_EVT_EXTENDED_PRESS_START:
+        app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_START);
+        DBG_DEBUG("BTN EXTENDED_START");
         break;
-    case BTN_EVT_LONGEST_PRESS_RELEASE:
-        app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_RELEASE);
-        DBG_DEBUG("BTN LONGEST_RELEASE");
+    case BTN_EVT_EXTENDED_PRESS_RELEASE:
+        app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_RELEASE);
+        DBG_DEBUG("BTN EXTENDED_RELEASE");
         break;
     default:
         break;

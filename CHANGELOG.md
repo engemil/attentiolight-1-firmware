@@ -31,6 +31,7 @@ Added
 - **LED Test Thread** for testing LED rendering in it's own thread.
 
 Changed
+- Renamed **Longest button press** to **extended button press**.
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.
 
 

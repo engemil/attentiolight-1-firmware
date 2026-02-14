@@ -25,14 +25,14 @@ SOFTWARE.
 /*
  * Button Driver for ChibiOS
  *
- * A button state detection driver that detects short, long, and longest
+ * A button state detection driver that detects short, long, and extended
  * button presses using interrupt-based edge detection with a dedicated
  * thread for timing and callback management.
  *
  * Features:
  * - Interrupt-driven edge detection (efficient for RTOS)
  * - Software debouncing
- * - Three press types: short (<1s), long (2-5s), longest (>=5s)
+ * - Three press types: short (<1s), long (2-5s), extended (>=5s)
  * - Callbacks at threshold crossings AND on release
  * - Thread-safe callback invocation (not from ISR context)
  */
@@ -57,8 +57,8 @@ typedef enum {
     BTN_EVT_SHORT_PRESS,             /**< Released after < 1s            */
     BTN_EVT_LONG_PRESS_START,        /**< Held for >= 2s (still held)    */
     BTN_EVT_LONG_PRESS_RELEASE,      /**< Released after 2-5s            */
-    BTN_EVT_LONGEST_PRESS_START,     /**< Held for >= 5s (still held)    */
-    BTN_EVT_LONGEST_PRESS_RELEASE    /**< Released after >= 5s           */
+    BTN_EVT_EXTENDED_PRESS_START,    /**< Held for >= 5s (still held)    */
+    BTN_EVT_EXTENDED_PRESS_RELEASE   /**< Released after >= 5s           */
 } button_event_t;
 
 /**

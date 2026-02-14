@@ -46,7 +46,7 @@ void state_off_process(app_sm_input_t input) {
     /* Any button press wakes up the system */
     if (input == APP_SM_INPUT_BTN_SHORT ||
         input == APP_SM_INPUT_BTN_LONG_RELEASE ||
-        input == APP_SM_INPUT_BTN_LONGEST_RELEASE) {
+        input == APP_SM_INPUT_BTN_EXTENDED_RELEASE) {
         /* Signal to transition to startup state */
         /* This is handled by the main state machine */
     }

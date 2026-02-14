@@ -31,7 +31,7 @@ The `app_state_machine` module implements the main state machine of the applicat
     │  (init)  │           │(fade-in) │           │ (normal) │    │
     └──────────┘           └──────────┘           └────┬─────┘    │
                                                        │          │
-                                LONGEST_PRESS ────────►│          │
+                               EXTENDED_PRESS ────────►│          │
                                                        ▼          │
                                                   ┌──────────┐    │
                                                   │ SHUTDOWN │────┘
@@ -73,7 +73,7 @@ Within the **ACTIVE** state, the following modes are available:
 |--------------|--------|
 | **Short Press** | Mode-specific action (see table above) |
 | **Long Press Release** | Go to next mode |
-| **Longest Press Release** | Turn off (enter shutdown state) |
+| **Extended Press Release** | Turn off (enter shutdown state) |
 
 
 ## API Usage
@@ -100,11 +100,11 @@ void on_button_event(button_event_t event) {
         case BTN_EVT_LONG_PRESS_RELEASE:
             app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
             break;
-        case BTN_EVT_LONGEST_PRESS_START:
-            app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_START);
+        case BTN_EVT_EXTENDED_PRESS_START:
+            app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_START);
             break;
-        case BTN_EVT_LONGEST_PRESS_RELEASE:
-            app_sm_process_input(APP_SM_INPUT_BTN_LONGEST_RELEASE);
+        case BTN_EVT_EXTENDED_PRESS_RELEASE:
+            app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_RELEASE);
             break;
     }
 }
