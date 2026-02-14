@@ -37,22 +37,10 @@ SOFTWARE.
  */
 
 #include "ws2812b_led_driver.h"
+#include "app_debug.h"
 
-/* Debug includes */
-//#include "hal.h"
-//#include "chprintf.h"
-
-/* Forward declaration - SDU1 is defined in usbcfg.c */
-//extern SerialUSBDriver SDU1;
-
-/* Debug macro - set to 1 to enable debug output */
-//#define WS2812B_DEBUG  1
-
-//#if WS2812B_DEBUG
-//#define WS2812B_DBG(fmt, ...) chprintf((BaseSequentialStream*)&SDU1, "[WS2812B] " fmt "\r\n", ##__VA_ARGS__)
-//#else
-//#define WS2812B_DBG(fmt, ...)
-//#endif
+/* Driver status tracking (non-blocking, safe to query anytime) */
+static ws2812b_status_t driver_status = {0};
 
 
 #define PWM_HI (14)
@@ -130,65 +118,63 @@ static void dma_callback(void *p, uint32_t flags) {
 }
 
 uint8_t ws2812b_led_driver_init(void){
-    //WS2812B_DBG("init() called");
+    DBG_INFO("WS2812B: init");
+    driver_status.initialized = true;
     ws2812b_led_driver_start();
     return 0;
 }
 
 uint8_t ws2812b_led_driver_start(void){
-    //WS2812B_DBG("start() called, already_started=%d", driver_started);
+    DBG_DEBUG("WS2812B: start");
 
     /* Prevent double initialization */
-    //if (driver_started) {
-    //    WS2812B_DBG("start() skipped - already started");
-    //    return 0;
-    //}
+    if (driver_status.started) {
+        DBG_DEBUG("WS2812B: start skipped - already started");
+        return 0;
+    }
 
     // Start PWM
-    //WS2812B_DBG("start() pwmStart...");
     pwmStart(PWM_DRIVER, &pwm_cfg);
 
     // Setup DMA
-    //WS2812B_DBG("start() dmaStreamAlloc...");
     dma_stream = dmaStreamAlloc(STM32_DMA_STREAM_ID(DMA_DRIVER, DMA_CHANNEL),
                                     DMA_PRIORITY, (stm32_dmaisr_t)dma_callback, NULL);
-    //if (dma_stream == NULL) {
-    //    WS2812B_DBG("start() FAILED - dmaStreamAlloc returned NULL!");
-    //    return 1;
-    //}
-    //WS2812B_DBG("start() dma_stream=%p", dma_stream);
+    if (dma_stream == NULL) {
+        DBG_ERROR("WS2812B: DMA alloc failed!");
+        return 1;
+    }
 
     dmaSetRequestSource(dma_stream, DMA_REQUEST);
     dmaStreamSetPeripheral(dma_stream, DMA_PERIPHERAL);
-    //dmaStreamSetMode(dma_stream, DMA_MODE_1); // Not needed here
 
-    // Start the PWM channel. PWMD for TIM16 (&PWMD16), Channel 1 (0), duty cycle 0 (off)
-    //pwmEnableChannel(&PWMD16, 0, 0); // Not needed here?!
-
-    //driver_started = true;
-    //WS2812B_DBG("start() OK");
+    driver_status.started = true;
+    DBG_DEBUG("WS2812B: started OK");
     return 0;
 }
 
 uint8_t ws2812b_led_driver_stop(void){
-    //WS2812B_DBG("stop() called, driver_started=%d", driver_started);
+    DBG_DEBUG("WS2812B: stop");
 
-    //if (!driver_started) {
-    //    WS2812B_DBG("stop() skipped - not started");
-    //    return 0;
-    //}
+    if (!driver_status.started) {
+        DBG_DEBUG("WS2812B: stop skipped - not started");
+        return 0;
+    }
 
     dmaStreamDisable(dma_stream);
-    dmaStreamFree(dma_stream); // NB! Illegal operation if already freed/released
+    dmaStreamFree(dma_stream);
     dma_stream = NULL;
     pwmStop(PWM_DRIVER);
 
-    //driver_started = false;
-    //WS2812B_DBG("stop() OK");
+    driver_status.started = false;
     return 0;
 }
 
 uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
+    /* Track last color (no debug print - timing critical) */
+    driver_status.last_r = r;
+    driver_status.last_g = g;
+    driver_status.last_b = b;
+
     // Send bits MSB-first (bit 7 first, bit 0 last) as required by WS2812B protocol
     for(int i = 0; i < 8; i++){
         pwm_buf[i] = (g & (1 << (7 - i))) ? PWM_HI : PWM_LO;
@@ -203,6 +189,7 @@ uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
 uint8_t ws2812b_led_driver_reset_render(void){
 
     while (!dma_ready) {
+        driver_status.dma_wait_count++;
         chThdSleepMilliseconds(1);  // Wait for previous DMA to complete
     }
     dma_ready = false;
@@ -212,10 +199,10 @@ uint8_t ws2812b_led_driver_reset_render(void){
     dmaStreamDisable(dma_stream);
     dmaStreamSetMode(dma_stream, DMA_MODE_2); // No MINC for repeated zero
     dmaStreamSetMemory0(dma_stream, &pwm_zero_buf);
-    //dmaStreamSetMemory0(dma_stream, (uint8_t*)PWM_ZERO);
     dmaStreamSetTransactionSize(dma_stream, PWM_RESET_BUFFER_SIZE);
     dmaStreamEnable(dma_stream);
 
+    driver_status.reset_render_count++;
     return 0;
 }
 
@@ -226,6 +213,7 @@ uint8_t ws2812b_led_driver_render(void) {
     status = ws2812b_led_driver_reset_render();
 
     while (!dma_ready) {
+        driver_status.dma_wait_count++;
         chThdSleepMilliseconds(1);  // Wait for previous DMA to complete
     }
     dma_ready = false;
@@ -239,6 +227,7 @@ uint8_t ws2812b_led_driver_render(void) {
     dmaStreamSetTransactionSize(dma_stream, PWM_BUFFER_SIZE);
     dmaStreamEnable(dma_stream);
 
+    driver_status.render_count++;
     return status;
 }
 
@@ -247,4 +236,8 @@ uint8_t ws2812b_led_driver_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_
     ws2812b_led_driver_render();
 
     return 0;
+}
+
+const ws2812b_status_t* ws2812b_led_driver_get_status(void) {
+    return &driver_status;
 }

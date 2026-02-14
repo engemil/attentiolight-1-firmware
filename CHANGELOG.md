@@ -19,7 +19,7 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Added
-
+- **Improved RGB LED rendering** by making it deterministic with a configurable rendering rate.
 - **Debug** prints to serial communication (over USB) with levels.
 - Script to check Memory Useage (in scripts folder).
 - New threads: **Animation Thread** and **State Machine Threads**.

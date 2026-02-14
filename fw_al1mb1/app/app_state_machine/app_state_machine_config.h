@@ -90,10 +90,11 @@ SOFTWARE.
 
 /**
  * @brief   Animation update interval in milliseconds.
- * @details 20ms = 50 FPS, good balance of smoothness and CPU usage.
+ * @details 33ms = ~30 FPS, good balance of smoothness and CPU usage.
+ *          Reduced from 20ms (50 FPS) to improve timing stability.
  */
 #ifndef APP_SM_ANIM_TICK_MS
-#define APP_SM_ANIM_TICK_MS             20
+#define APP_SM_ANIM_TICK_MS             33
 #endif
 
 /**

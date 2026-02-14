@@ -33,6 +33,7 @@ SOFTWARE.
 #define _WS2812B_LED_DRIVER_
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "ch.h"
@@ -116,6 +117,30 @@ uint8_t ws2812b_led_driver_render(void);
  * @return uint8_t status code, 0 success, nonzero on error
  */
 uint8_t ws2812b_led_driver_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_t b);
+
+/**
+ * @brief   Driver status for debugging (non-blocking query).
+ * @details This struct tracks driver state and statistics without
+ *          requiring blocking debug prints that would disrupt timing.
+ */
+typedef struct {
+    uint32_t render_count;          /**< Total render calls              */
+    uint32_t reset_render_count;    /**< Total reset render calls        */
+    uint32_t dma_wait_count;        /**< Times waited for DMA            */
+    uint8_t  last_r;                /**< Last red value set              */
+    uint8_t  last_g;                /**< Last green value set            */
+    uint8_t  last_b;                /**< Last blue value set             */
+    bool     initialized;           /**< Driver initialized              */
+    bool     started;               /**< Driver started                  */
+} ws2812b_status_t;
+
+/**
+ * @brief   Get driver status for debugging.
+ * @details Returns a pointer to the driver status struct. This is safe
+ *          to call at any time and does not affect LED timing.
+ * @return  Pointer to status struct (read-only).
+ */
+const ws2812b_status_t* ws2812b_led_driver_get_status(void);
 
 
 #ifdef __cplusplus

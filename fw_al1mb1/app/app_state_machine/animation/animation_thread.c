@@ -93,6 +93,25 @@ static anim_command_t cmd_storage[ANIM_CMD_MAILBOX_SIZE];
 static volatile uint8_t cmd_write_idx = 0;
 
 /**
+ * @brief   Virtual timer for deterministic tick timing.
+ */
+static virtual_timer_t anim_tick_vt;
+
+/**
+ * @brief   Event flags for thread synchronization.
+ */
+#define ANIM_EVT_TICK       ((eventmask_t)1)
+#define ANIM_EVT_CMD        ((eventmask_t)2)
+
+/**
+ * @brief   Last rendered color (for skip-if-unchanged optimization).
+ */
+static uint8_t last_rendered_r = 0;
+static uint8_t last_rendered_g = 0;
+static uint8_t last_rendered_b = 0;
+static bool force_render = true;  /* Force first render */
+
+/**
  * @brief   Color palette for color cycle animation.
  */
 static const uint8_t color_palette[APP_SM_COLOR_COUNT][3] = {
@@ -155,13 +174,50 @@ static void hsv_to_rgb(uint16_t h, uint8_t s, uint8_t v,
 }
 
 /**
- * @brief   Renders current color to LED.
+ * @brief   Virtual timer callback for animation tick.
+ * @details Called from ISR context to signal the animation thread.
  */
-static void render_color(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
+static void anim_tick_callback(virtual_timer_t *vtp, void *arg) {
+    (void)vtp;
+    (void)arg;
+    
+    chSysLockFromISR();
+    if (anim_thread_ref != NULL) {
+        chEvtSignalI(anim_thread_ref, ANIM_EVT_TICK);
+    }
+    chSysUnlockFromISR();
+}
+
+/**
+ * @brief   Force next render (for mode transitions).
+ */
+static void render_force_next(void) {
+    force_render = true;
+}
+
+/**
+ * @brief   Renders current color to LED (with skip-if-unchanged optimization).
+ * @return  true if actually rendered, false if skipped.
+ */
+static bool render_color(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
     uint8_t r_out = apply_brightness(r, brightness);
     uint8_t g_out = apply_brightness(g, brightness);
     uint8_t b_out = apply_brightness(b, brightness);
+    
+    /* Skip render if color unchanged (unless forced) */
+    if (!force_render &&
+        r_out == last_rendered_r &&
+        g_out == last_rendered_g &&
+        b_out == last_rendered_b) {
+        return false;
+    }
+    
     ws2812b_led_driver_set_color_rgb_and_render(r_out, g_out, b_out);
+    last_rendered_r = r_out;
+    last_rendered_g = g_out;
+    last_rendered_b = b_out;
+    force_render = false;
+    return true;
 }
 
 /**
@@ -385,8 +441,12 @@ static void process_command(const anim_command_t* cmd) {
     anim_state.phase = 0;
     anim_state.active = (cmd->type != ANIM_CMD_STOP);
 
+    /* Force render on mode change */
+    render_force_next();
+
     if (cmd->type == ANIM_CMD_STOP) {
         ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
+        last_rendered_r = last_rendered_g = last_rendered_b = 0;
     } else if (cmd->type == ANIM_CMD_SOLID) {
         process_solid();
     }
@@ -443,21 +503,31 @@ static THD_FUNCTION(anim_thread_func, arg) {
     (void)arg;
     chRegSetThreadName("animation_thread");
 
-    while (!chThdShouldTerminateX()) {
-        msg_t msg;
+    /* Start the virtual timer for first tick */
+    chVTSet(&anim_tick_vt, TIME_MS2I(APP_SM_ANIM_TICK_MS), anim_tick_callback, NULL);
 
-        /* Check for new command with timeout */
-        if (chMBFetchTimeout(&anim_mailbox, &msg, TIME_MS2I(APP_SM_ANIM_TICK_MS)) == MSG_OK) {
-            /* New command received */
+    while (!chThdShouldTerminateX()) {
+        /* Wait for events (tick or command notification) */
+        eventmask_t events = chEvtWaitAnyTimeout(ANIM_EVT_TICK | ANIM_EVT_CMD, 
+                                                  TIME_MS2I(APP_SM_ANIM_TICK_MS * 2));
+
+        /* Process any pending commands (non-blocking) */
+        msg_t msg;
+        while (chMBFetchTimeout(&anim_mailbox, &msg, TIME_IMMEDIATE) == MSG_OK) {
             anim_command_t* cmd = (anim_command_t*)msg;
             process_command(cmd);
         }
 
-        /* Process animation tick */
-        process_tick();
+        /* Process animation tick if timer fired */
+        if (events & ANIM_EVT_TICK) {
+            process_tick();
+            /* Restart timer for next tick */
+            chVTSet(&anim_tick_vt, TIME_MS2I(APP_SM_ANIM_TICK_MS), anim_tick_callback, NULL);
+        }
     }
 
-    /* Thread terminating, turn off LED */
+    /* Thread terminating, stop timer and turn off LED */
+    chVTReset(&anim_tick_vt);
     ws2812b_led_driver_set_color_rgb_and_render(0, 0, 0);
 }
 
@@ -494,8 +564,15 @@ uint8_t anim_thread_start(void) {
         return 2;
     }
 
+    /* Initialize virtual timer object */
+    chVTObjectInit(&anim_tick_vt);
+
     /* Start LED driver */
     ws2812b_led_driver_start();
+
+    /* Reset render tracking */
+    last_rendered_r = last_rendered_g = last_rendered_b = 0;
+    force_render = true;
 
     /* Create animation thread */
     anim_thread_ref = chThdCreateStatic(wa_anim_thread, sizeof(wa_anim_thread),
@@ -511,6 +588,9 @@ uint8_t anim_thread_stop(void) {
     if (anim_thread_state != ANIM_THREAD_RUNNING) {
         return 1;
     }
+
+    /* Stop the virtual timer first */
+    chVTReset(&anim_tick_vt);
 
     /* Request thread termination */
     chThdTerminate(anim_thread_ref);
