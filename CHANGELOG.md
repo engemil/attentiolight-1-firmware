@@ -32,6 +32,7 @@ Added
 - **LED Test Thread** for testing LED rendering in it's own thread.
 
 Changed
+- Changed **Button Driver** start and stop calls, to avoid affecting the the start-up/power-up and shutdown/power-down animation.
 - Renamed **Longest button press** to **extended button press**.
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.
 

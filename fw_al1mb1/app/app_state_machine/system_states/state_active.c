@@ -34,6 +34,7 @@ SOFTWARE.
 #include "../modes/modes.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "button_driver.h"
 
 /*===========================================================================*/
 /* External References                                                       */
@@ -87,6 +88,9 @@ static void show_extended_press_feedback(void) {
 /*===========================================================================*/
 
 void state_active_enter(void) {
+    /* Activate button driver */
+    button_start();
+
     /* Enter the current mode (or default mode) */
     modes_enter_current();
 }

@@ -33,6 +33,7 @@ SOFTWARE.
 #include "system_states.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "button_driver.h"
 
 /*===========================================================================*/
 /* Local Variables                                                           */
@@ -61,6 +62,9 @@ static void shutdown_timer_cb(virtual_timer_t *vtp, void *arg) {
 /*===========================================================================*/
 
 void state_shutdown_enter(void) {
+    /* Deactivate button driver */
+    button_stop();
+
     /* Start fade-out animation */
     anim_thread_fade_out(APP_SM_SHUTDOWN_FADE_MS);
 

@@ -32,12 +32,16 @@ SOFTWARE.
 
 #include "system_states.h"
 #include "../animation/animation_thread.h"
+#include "button_driver.h"
 
 /*===========================================================================*/
 /* Off State Implementation                                                  */
 /*===========================================================================*/
 
 void state_off_enter(void) {
+    /* Activate button driver to allow wake-up */
+    button_start();
+
     /* Ensure LEDs are off */
     anim_thread_off();
 }

@@ -126,6 +126,18 @@ int main(void) {
      */
     /* led_test_init(); */
     /* led_test_start(); */
+    
+    /*
+     * Initializes Button Driver.
+     * Uses interrupt-driven detection with a dedicated thread.
+     * NOTE: button_start() is NOT called here - the state machine will
+     * activate the button when entering the ACTIVE state.
+     */
+    button_init(LINE_USER_BUTTON, PAL_LOW);
+    button_register_callback(on_button_event);
+    // Add a delay to allow system to start up properly before starting the state machine
+    chThdSleepMilliseconds(500);
+
 
     /*
      * Initializes and starts Application State Machine.
@@ -135,14 +147,6 @@ int main(void) {
     DBG_DEBUG("MAIN app_sm_start()...");
     app_sm_start();
     DBG_INFO("MAIN state machine started");
-
-    /*
-     * Initializes Button Driver.
-     * Uses interrupt-driven detection with a dedicated thread.
-     */
-    button_init(LINE_USER_BUTTON, PAL_LOW);
-    button_register_callback(on_button_event);
-    button_start();
     
     uint32_t test_serial_usb = 0;
     uint32_t test_serial_vcp = 0;
