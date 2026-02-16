@@ -97,16 +97,6 @@ static mailbox_t input_mailbox;
  */
 static msg_t input_mailbox_buffer[APP_SM_INPUT_QUEUE_SIZE];
 
-/**
- * @brief   Powerup complete timer.
- */
-static virtual_timer_t powerup_complete_timer;
-
-/**
- * @brief   Powerdown complete timer.
- */
-static virtual_timer_t powerdown_complete_timer;
-
 /*===========================================================================*/
 /* Name Lookup Tables                                                        */
 /*===========================================================================*/
@@ -190,28 +180,6 @@ void app_sm_init_button(void) {
 }
 
 /**
- * @brief   Timer callback for powerup complete.
- */
-static void powerup_complete_cb(virtual_timer_t *vtp, void *arg) {
-    (void)vtp;
-    (void)arg;
-    chSysLockFromISR();
-    chMBPostI(&input_mailbox, (msg_t)APP_SM_INPUT_POWERUP_COMPLETE);
-    chSysUnlockFromISR();
-}
-
-/**
- * @brief   Timer callback for powerdown complete.
- */
-static void powerdown_complete_cb(virtual_timer_t *vtp, void *arg) {
-    (void)vtp;
-    (void)arg;
-    chSysLockFromISR();
-    chMBPostI(&input_mailbox, (msg_t)APP_SM_INPUT_POWERDOWN_COMPLETE);
-    chSysUnlockFromISR();
-}
-
-/**
  * @brief   Transitions to a new system state.
  */
 static void transition_to_state(app_sm_system_state_t new_state) {
@@ -253,22 +221,12 @@ static void transition_to_state(app_sm_system_state_t new_state) {
             break;
         case APP_SM_SYS_POWERUP:
             state_powerup_enter();
-            /* Set timer for powerup complete */
-            chVTObjectInit(&powerup_complete_timer);
-            chVTSet(&powerup_complete_timer,
-                    TIME_MS2I(APP_SM_POWERUP_FADE_MS + 100),
-                    powerup_complete_cb, NULL);
             break;
         case APP_SM_SYS_ACTIVE:
             state_active_enter();
             break;
         case APP_SM_SYS_POWERDOWN:
             state_powerdown_enter();
-            /* Set timer for powerdown complete */
-            chVTObjectInit(&powerdown_complete_timer);
-            chVTSet(&powerdown_complete_timer,
-                    TIME_MS2I(APP_SM_POWERDOWN_FADE_MS + 100),
-                    powerdown_complete_cb, NULL);
             break;
         case APP_SM_SYS_OFF:
             state_off_enter();
@@ -412,6 +370,12 @@ void app_sm_process_input(app_sm_input_t input) {
 
     /* Post input to mailbox (non-blocking) */
     chMBPostTimeout(&input_mailbox, (msg_t)input, TIME_IMMEDIATE);
+}
+
+void app_sm_process_input_isr(app_sm_input_t input) {
+    chSysLockFromISR();
+    chMBPostI(&input_mailbox, (msg_t)input);
+    chSysUnlockFromISR();
 }
 
 app_sm_system_state_t app_sm_get_system_state(void) {

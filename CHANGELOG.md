@@ -33,6 +33,7 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Moved powerup and powerdown state's timers from the state machine file and into their state file. 
 - Renamed **Strength** mode to **Brightness** mode.
 - Restructured the use of **button driver**, moved code away from main.c and to app_state_machine.c, and initializing button driver from state_boot.c/state_boot_enter-function.
 - Renamed **startup** state to **powerup**, and **shutdown** state to **powerdown**.

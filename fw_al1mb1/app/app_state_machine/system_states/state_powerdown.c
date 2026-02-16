@@ -53,8 +53,7 @@ static void powerdown_timer_cb(virtual_timer_t *vtp, void *arg) {
     (void)arg;
 
     /* Signal powerdown complete */
-    chSysLockFromISR();
-    chSysUnlockFromISR();
+    app_sm_process_input_isr(APP_SM_INPUT_POWERDOWN_COMPLETE);
 }
 
 /*===========================================================================*/

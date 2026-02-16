@@ -121,6 +121,14 @@ void state_off_exit(void);
  */
 void app_sm_init_button(void);
 
+/**
+ * @brief   Posts an input event to the state machine from ISR context.
+ * @details This is ISR-safe and can be called from timer callbacks.
+ *
+ * @param[in] input     The input event to post.
+ */
+void app_sm_process_input_isr(app_sm_input_t input);
+
 #ifdef __cplusplus
 }
 #endif
