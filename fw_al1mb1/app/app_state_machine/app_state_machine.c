@@ -34,6 +34,7 @@ SOFTWARE.
 #include "system_states/system_states.h"
 #include "modes/modes.h"
 #include "animation/animation_thread.h"
+#include "button_driver.h"
 
 /* Debug support */
 #include "app_debug.h"
@@ -146,6 +147,47 @@ static const char* input_names[] = {
 /*===========================================================================*/
 /* Local Functions                                                           */
 /*===========================================================================*/
+
+/**
+ * @brief   Button event callback for state machine.
+ * @details Routes button events to the state machine input queue.
+ *          Called from button thread context (safe for RTOS functions).
+ */
+static void on_button_event(button_event_t event) {
+    switch (event) {
+    case BTN_EVT_SHORT_PRESS:
+        app_sm_process_input(APP_SM_INPUT_BTN_SHORT);
+        DBG_DEBUG("BTN SHORT_PRESS");
+        break;
+    case BTN_EVT_LONG_PRESS_START:
+        app_sm_process_input(APP_SM_INPUT_BTN_LONG_START);
+        DBG_DEBUG("BTN LONG_START");
+        break;
+    case BTN_EVT_LONG_PRESS_RELEASE:
+        app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
+        DBG_DEBUG("BTN LONG_RELEASE");
+        break;
+    case BTN_EVT_EXTENDED_PRESS_START:
+        app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_START);
+        DBG_DEBUG("BTN EXTENDED_START");
+        break;
+    case BTN_EVT_EXTENDED_PRESS_RELEASE:
+        app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_RELEASE);
+        DBG_DEBUG("BTN EXTENDED_RELEASE");
+        break;
+    default:
+        break;
+    }
+}
+
+/**
+ * @brief   Initializes the button driver and registers the callback.
+ * @details Called from state_boot_enter() to set up button handling.
+ */
+void app_sm_init_button(void) {
+    button_init(LINE_USER_BUTTON, PAL_LOW);
+    button_register_callback(on_button_event);
+}
 
 /**
  * @brief   Timer callback for powerup complete.

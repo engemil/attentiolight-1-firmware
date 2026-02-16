@@ -652,8 +652,8 @@ uint8_t anim_thread_start(void) {
     /* Initialize virtual timer object */
     chVTObjectInit(&anim_tick_vt);
 
-    /* Start LED driver */
-    ws2812b_led_driver_start();
+    /* Initialize (and Start) LED driver */
+    ws2812b_led_driver_init();
 
     /* Reset render tracking */
     last_rendered_r = last_rendered_g = last_rendered_b = 0;

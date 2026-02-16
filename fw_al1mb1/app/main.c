@@ -31,7 +31,6 @@ SOFTWARE.
 #include "usbcfg.h"
 #include "ws2812b_led_driver.h"
 #include "ee_esp32_wifi_ble_if_driver.h"
-#include "button_driver.h"
 /* #include "led_test.h" */  /* Replaced by app_state_machine */
 #include "app_state_machine.h"
 #include "app_debug.h"
@@ -44,39 +43,6 @@ static SerialConfig serial_cfg = {
     .cr2    = 0,                // No specific control settings
     .cr3    = 0                 // No hardware flow control
 };
-
-/*
- * Button event callback function.
- * Called from button thread context (safe to use RTOS functions).
- * Routes button events to the application state machine.
- */
-static void on_button_event(button_event_t event) {
-    /* Route button events to state machine */
-    switch (event) {
-    case BTN_EVT_SHORT_PRESS:
-        app_sm_process_input(APP_SM_INPUT_BTN_SHORT);
-        DBG_DEBUG("BTN SHORT_PRESS");
-        break;
-    case BTN_EVT_LONG_PRESS_START:
-        app_sm_process_input(APP_SM_INPUT_BTN_LONG_START);
-        DBG_DEBUG("BTN LONG_START");
-        break;
-    case BTN_EVT_LONG_PRESS_RELEASE:
-        app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
-        DBG_DEBUG("BTN LONG_RELEASE");
-        break;
-    case BTN_EVT_EXTENDED_PRESS_START:
-        app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_START);
-        DBG_DEBUG("BTN EXTENDED_START");
-        break;
-    case BTN_EVT_EXTENDED_PRESS_RELEASE:
-        app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_RELEASE);
-        DBG_DEBUG("BTN EXTENDED_RELEASE");
-        break;
-    default:
-        break;
-    }
-}
 
 int main(void) {
     halInit();
@@ -121,23 +87,13 @@ int main(void) {
     //ws2812b_led_driver_init();
     
     /*
-     * Initializes and starts LED Test thread.
-     * REPLACED BY APP STATE MACHINE - kept for reference.
+     * NOTE: Button Driver is now initialized by the app_state_machine
+     * in state_boot_enter() via app_sm_init_button().
+     * button_start() is called later in state_active_enter().
      */
-    /* led_test_init(); */
-    /* led_test_start(); */
-    
-    /*
-     * Initializes Button Driver.
-     * Uses interrupt-driven detection with a dedicated thread.
-     * NOTE: button_start() is NOT called here - the state machine will
-     * activate the button when entering the ACTIVE state.
-     */
-    button_init(LINE_USER_BUTTON, PAL_LOW);
-    button_register_callback(on_button_event);
-    // Add a delay to allow system to start up properly before starting the state machine
-    chThdSleepMilliseconds(500);
 
+    // Add a delay to ensure ChibiOS and USB (Serial) is fully initialized before starting the (main) application part.
+    chThdSleepMilliseconds(200);
 
     /*
      * Initializes and starts Application State Machine.

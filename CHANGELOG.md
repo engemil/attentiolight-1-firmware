@@ -11,13 +11,9 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-14)
+## [Development] (2026-02-16)
 
 NB! Notes added here during development to keep track of changes.
-
-Fixed
-- Corrected bad state call flow, transition from **boot** state to **powerup** state.
-- **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Added
 - New **Render modes**; static, transitions, and continuous, to handle different types of modes and animations.
@@ -32,7 +28,12 @@ Added
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
 - **LED Test Thread** for testing LED rendering in it's own thread.
 
+Fixed
+- Corrected bad state call flow, transition from **boot** state to **powerup** state.
+- **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
+
 Changed
+- Restructured the use of **button driver**, moved code away from main.c and to app_state_machine.c, and initializing button driver from state_boot.c/state_boot_enter-function.
 - Renamed **startup** state to **powerup**, and **shutdown** state to **powerdown**.
 - Renamed **Animation mode** to **Effects mode**.
 - Changed **Button Driver** start and stop calls, to avoid affecting the the start-up/power-up and shutdown/power-down animation.

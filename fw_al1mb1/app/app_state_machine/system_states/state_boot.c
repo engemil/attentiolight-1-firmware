@@ -42,6 +42,11 @@ SOFTWARE.
 void state_boot_enter(void) {
     DBG_DEBUG("state_boot_enter()");
 
+    /* Initialize button driver and register callback */
+    DBG_DEBUG("calling app_sm_init_button()...");
+    app_sm_init_button();
+    DBG_DEBUG("app_sm_init_button() returned");
+
     /* Initialize animation thread */
     DBG_DEBUG("calling anim_thread_init()...");
     anim_thread_init();
