@@ -52,8 +52,8 @@ void state_boot_enter(void) {
     DBG_DEBUG("anim_thread_start() returned");
 
     /* Boot is instant - signal transition to powerup */
-    DBG_DEBUG("posting POWERUP_COMPLETE input...");
-    app_sm_process_input(APP_SM_INPUT_POWERUP_COMPLETE);
+    DBG_DEBUG("posting BOOT_COMPLETE input...");
+    app_sm_process_input(APP_SM_INPUT_BOOT_COMPLETE);
     DBG_DEBUG("state_boot_enter() done");
 }
 

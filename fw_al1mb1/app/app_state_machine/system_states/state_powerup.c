@@ -35,31 +35,6 @@ SOFTWARE.
 #include "../app_state_machine_config.h"
 
 /*===========================================================================*/
-/* Local Variables                                                           */
-/*===========================================================================*/
-
-static virtual_timer_t powerup_timer;
-
-/*===========================================================================*/
-/* Local Functions                                                           */
-/*===========================================================================*/
-
-/**
- * @brief   Timer callback when powerup animation completes.
- */
-static void powerup_timer_cb(virtual_timer_t *vtp, void *arg) {
-    (void)vtp;
-    (void)arg;
-
-    /* Signal powerup complete - this will be processed by SM thread */
-    chSysLockFromISR();
-    /* We need to signal the SM thread - use a simple approach */
-    chSysUnlockFromISR();
-
-    /* The state machine will check for completion via animation state */
-}
-
-/*===========================================================================*/
 /* Powerup State Implementation                                              */
 /*===========================================================================*/
 
@@ -67,23 +42,13 @@ void state_powerup_enter(void) {
     /* Start fade-in animation to a white color */
     anim_thread_fade_in(255, 255, 255, APP_SM_DEFAULT_BRIGHTNESS,
                         APP_SM_POWERUP_FADE_MS);
-
-    /* Set a timer to transition to active state */
-    chVTObjectInit(&powerup_timer);
-    chVTSet(&powerup_timer, TIME_MS2I(APP_SM_POWERUP_FADE_MS + 100),
-            powerup_timer_cb, NULL);
 }
 
 void state_powerup_process(app_sm_input_t input) {
-    /* During powerup, we ignore most inputs but allow skip */
-    if (input == APP_SM_INPUT_BTN_SHORT) {
-        /* Skip powerup animation - go directly to active */
-        chVTReset(&powerup_timer);
-        app_sm_process_input(APP_SM_INPUT_POWERUP_COMPLETE);
-    }
+    (void)input;
+    /* Powerup ignores all inputs - animation runs to completion */
 }
 
 void state_powerup_exit(void) {
-    /* Cancel timer if still running */
-    chVTReset(&powerup_timer);
+    /* Nothing to clean up */
 }

@@ -16,6 +16,7 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 NB! Notes added here during development to keep track of changes.
 
 Fixed
+- Corrected bad state call flow, transition from **boot** state to **powerup** state.
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Added
@@ -37,6 +38,10 @@ Changed
 - Changed **Button Driver** start and stop calls, to avoid affecting the the start-up/power-up and shutdown/power-down animation.
 - Renamed **Longest button press** to **extended button press**.
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.
+
+Removed
+- Redundant **powerup timer**.
+- Unecessary skip powerup button press.
 
 
 ---

@@ -138,6 +138,7 @@ static const char* input_names[] = {
     "EXT_CTRL_ENTER",
     "EXT_CTRL_EXIT",
     "EXT_COMMAND",
+    "BOOT_COMPLETE",
     "POWERUP_COMPLETE",
     "POWERDOWN_COMPLETE"
 };
@@ -241,17 +242,13 @@ static void process_input_internal(app_sm_input_t input) {
     switch (system_state) {
         case APP_SM_SYS_BOOT:
             /* Boot immediately transitions to powerup */
-            if (input == APP_SM_INPUT_POWERUP_COMPLETE) {
+            if (input == APP_SM_INPUT_BOOT_COMPLETE) {
                 transition_to_state(APP_SM_SYS_POWERUP);
             }
             break;
 
         case APP_SM_SYS_POWERUP:
             if (input == APP_SM_INPUT_POWERUP_COMPLETE) {
-                transition_to_state(APP_SM_SYS_ACTIVE);
-            } else if (input == APP_SM_INPUT_BTN_SHORT) {
-                /* Skip powerup animation */
-                chVTReset(&powerup_complete_timer);
                 transition_to_state(APP_SM_SYS_ACTIVE);
             }
             break;
@@ -294,9 +291,6 @@ static THD_FUNCTION(sm_thread_func, arg) {
 
     /* Enter boot state */
     transition_to_state(APP_SM_SYS_BOOT);
-
-    /* Boot immediately triggers powerup */
-    transition_to_state(APP_SM_SYS_POWERUP);
 
     while (!chThdShouldTerminateX()) {
         msg_t msg;
@@ -417,6 +411,7 @@ const char* app_sm_mode_name(app_sm_mode_t mode) {
 }
 
 const char* app_sm_input_name(app_sm_input_t input) {
+    /* Note that APP_SM_INPUT_POWERDOWN_COMPLETE is the last element in app_sm_input_t */
     if (input <= APP_SM_INPUT_POWERDOWN_COMPLETE) {
         return input_names[input];
     }

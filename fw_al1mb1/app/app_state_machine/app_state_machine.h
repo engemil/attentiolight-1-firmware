@@ -109,6 +109,7 @@ typedef enum {
     APP_SM_INPUT_EXT_COMMAND,           /**< External command received      */
 
     /* System inputs */
+    APP_SM_INPUT_BOOT_COMPLETE,         /**< Boot sequence finished         */
     APP_SM_INPUT_POWERUP_COMPLETE,      /**< Powerup animation finished     */
     APP_SM_INPUT_POWERDOWN_COMPLETE     /**< Powerdown animation finished   */
 } app_sm_input_t;
