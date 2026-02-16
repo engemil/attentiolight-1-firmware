@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 /**
- * @file    mode_animation.c
- * @brief   Animation mode implementation.
+ * @file    mode_effects.c
+ * @brief   Effects mode implementation.
  *
- * @details Contains multiple animation sub-modes:
+ * @details Contains multiple effects sub-modes:
  *          - Rainbow: Smooth HSV color cycling
  *          - Strobe: Fast flash effect
  *          - Color Cycle: Step through colors
@@ -47,12 +47,12 @@ SOFTWARE.
 /**
  * @brief   Submode names for debug output.
  */
-static const char* const submode_names[APP_SM_ANIM_COUNT] = {
+static const char* const submode_names[APP_SM_EFFECTS_COUNT] = {
     "RAINBOW", "STROBE", "COLOR_CYCLE"
 };
 #endif
 
-static app_sm_animation_submode_t current_submode = APP_SM_ANIM_RAINBOW;
+static app_sm_effects_submode_t current_submode = APP_SM_EFFECTS_RAINBOW;
 
 /* External reference to global brightness */
 extern uint8_t global_brightness;
@@ -62,20 +62,20 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 /**
- * @brief   Starts the current animation submode.
+ * @brief   Starts the current effects submode.
  */
 static void start_current_submode(void) {
     switch (current_submode) {
-        case APP_SM_ANIM_RAINBOW:
+        case APP_SM_EFFECTS_RAINBOW:
             anim_thread_rainbow(global_brightness, APP_SM_RAINBOW_PERIOD_MS);
             break;
 
-        case APP_SM_ANIM_STROBE:
+        case APP_SM_EFFECTS_STROBE:
             anim_thread_strobe(255, 255, 255, global_brightness,
                                APP_SM_STROBE_INTERVAL_MS);
             break;
 
-        case APP_SM_ANIM_COLOR_CYCLE:
+        case APP_SM_EFFECTS_COLOR_CYCLE:
             anim_thread_color_cycle(global_brightness,
                                     APP_SM_COLOR_CYCLE_INTERVAL_MS);
             break;
@@ -90,33 +90,33 @@ static void start_current_submode(void) {
 /* Mode Functions                                                            */
 /*===========================================================================*/
 
-static void animation_enter(void) {
-    DBG_INFO("MODE Animation: enter submode=%s", submode_names[current_submode]);
-    /* Start current animation submode */
+static void effects_enter(void) {
+    DBG_INFO("MODE Effects: enter submode=%s", submode_names[current_submode]);
+    /* Start current effects submode */
     start_current_submode();
 }
 
-static void animation_exit(void) {
-    DBG_INFO("MODE Animation: exit");
+static void effects_exit(void) {
+    DBG_INFO("MODE Effects: exit");
     /* Nothing to clean up - animation will be replaced */
 }
 
-static void animation_on_short_press(void) {
-    app_sm_animation_submode_t old_submode = current_submode;
+static void effects_on_short_press(void) {
+    app_sm_effects_submode_t old_submode = current_submode;
     DBG_UNUSED(old_submode);
-    /* Cycle to next animation submode */
-    current_submode = (app_sm_animation_submode_t)
-                      ((current_submode + 1) % APP_SM_ANIM_COUNT);
+    /* Cycle to next effects submode */
+    current_submode = (app_sm_effects_submode_t)
+                      ((current_submode + 1) % APP_SM_EFFECTS_COUNT);
 
-    DBG_INFO("MODE Animation: submode %s -> %s",
+    DBG_INFO("MODE Effects: submode %s -> %s",
              submode_names[old_submode], submode_names[current_submode]);
 
-    /* Start new animation */
+    /* Start new effect */
     start_current_submode();
 }
 
-static void animation_on_long_start(void) {
-    DBG_DEBUG("MODE Animation: long_start");
+static void effects_on_long_start(void) {
+    DBG_DEBUG("MODE Effects: long_start");
     /* No special action for long press start in this mode */
 }
 
@@ -124,10 +124,10 @@ static void animation_on_long_start(void) {
 /* Mode Operations Structure                                                 */
 /*===========================================================================*/
 
-const app_sm_mode_ops_t mode_animation_ops = {
-    .name = "Animation",
-    .enter = animation_enter,
-    .exit = animation_exit,
-    .on_short_press = animation_on_short_press,
-    .on_long_start = animation_on_long_start
+const app_sm_mode_ops_t mode_effects_ops = {
+    .name = "Effects",
+    .enter = effects_enter,
+    .exit = effects_exit,
+    .on_short_press = effects_on_short_press,
+    .on_long_start = effects_on_long_start
 };

@@ -63,7 +63,7 @@ Within the **ACTIVE** state, the following modes are available:
 | **Strength** | Brightness control | Cycle through 8 brightness levels |
 | **Blinking** | Blink on/off | Cycle through 5 blink speeds |
 | **Pulsation** | Breathing effect | Cycle through 5 pulse speeds |
-| **Animation** | Dynamic animations | Cycle through sub-modes (Rainbow, Strobe, Color Cycle) |
+| **Effects** | Dynamic effects | Cycle through sub-modes (Rainbow, Strobe, Color Cycle) |
 | **Traffic Light** | Red-Yellow-Green sequence | Toggle auto/manual mode |
 | **Night Light** | Dim warm light | Cycle through 4 dim levels |
 

@@ -86,8 +86,8 @@ extern const app_sm_mode_ops_t mode_blinking_ops;
 /* Pulsation Mode */
 extern const app_sm_mode_ops_t mode_pulsation_ops;
 
-/* Animation Mode */
-extern const app_sm_mode_ops_t mode_animation_ops;
+/* Effects Mode */
+extern const app_sm_mode_ops_t mode_effects_ops;
 
 /* Traffic Light Mode */
 extern const app_sm_mode_ops_t mode_traffic_light_ops;

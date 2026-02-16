@@ -48,7 +48,7 @@ static const app_sm_mode_ops_t* mode_registry[APP_SM_MODE_COUNT] = {
     &mode_strength_ops,
     &mode_blinking_ops,
     &mode_pulsation_ops,
-    &mode_animation_ops,
+    &mode_effects_ops,
     &mode_traffic_light_ops,
     &mode_night_light_ops
 };

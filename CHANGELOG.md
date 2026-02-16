@@ -24,7 +24,7 @@ Added
 - **Debug** prints to serial communication (over USB) with levels.
 - Script to check Memory Useage (in scripts folder).
 - New threads: **Animation Thread** and **State Machine Threads**.
-- **Modes** (available in the **Active** state): solid, strength, blink, pulse, traffic light, night light, animations, and external control.
+- **Modes** (available in the **Active** state): solid, strength, blink, pulse, traffic light, night light, effects, and external control.
 - **Operational Modes**, aka. different ways the RGB LED light is used.
 - **Application State Machine** with boot, startup, active, shutdown, and off states.
 - **License note** added/adjusted on most source files.
@@ -32,6 +32,7 @@ Added
 - **LED Test Thread** for testing LED rendering in it's own thread.
 
 Changed
+- Renamed **Animation mode** to **Effects mode**.
 - Changed **Button Driver** start and stop calls, to avoid affecting the the start-up/power-up and shutdown/power-down animation.
 - Renamed **Longest button press** to **extended button press**.
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.

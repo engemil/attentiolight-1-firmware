@@ -73,21 +73,21 @@ typedef enum {
     APP_SM_MODE_STRENGTH,           /**< Brightness/intensity control       */
     APP_SM_MODE_BLINKING,           /**< Blink effect                       */
     APP_SM_MODE_PULSATION,          /**< Breathing/pulse effect             */
-    APP_SM_MODE_ANIMATION,          /**< Dynamic animations (submodes)      */
+    APP_SM_MODE_EFFECTS,            /**< Dynamic effects (submodes)         */
     APP_SM_MODE_TRAFFIC_LIGHT,      /**< Traffic light sequence             */
     APP_SM_MODE_NIGHT_LIGHT,        /**< Dim warm night light               */
     APP_SM_MODE_COUNT               /**< Number of user-cyclable modes (7)  */
 } app_sm_mode_t;
 
 /**
- * @brief   Animation sub-modes (within ANIMATION mode).
+ * @brief   Effects sub-modes (within EFFECTS mode).
  */
 typedef enum {
-    APP_SM_ANIM_RAINBOW = 0,        /**< Rainbow color cycle                */
-    APP_SM_ANIM_STROBE,             /**< Strobe/flash effect                */
-    APP_SM_ANIM_COLOR_CYCLE,        /**< Smooth color transitions           */
-    APP_SM_ANIM_COUNT               /**< Number of animation sub-modes      */
-} app_sm_animation_submode_t;
+    APP_SM_EFFECTS_RAINBOW = 0,     /**< Rainbow color cycle                */
+    APP_SM_EFFECTS_STROBE,          /**< Strobe/flash effect                */
+    APP_SM_EFFECTS_COLOR_CYCLE,     /**< Smooth color transitions           */
+    APP_SM_EFFECTS_COUNT            /**< Number of effects sub-modes        */
+} app_sm_effects_submode_t;
 
 /**
  * @brief   Input events for the state machine.

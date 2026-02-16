@@ -157,7 +157,7 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/modes/mode_strength.c \
        app/app_state_machine/modes/mode_blinking.c \
        app/app_state_machine/modes/mode_pulsation.c \
-       app/app_state_machine/modes/mode_animation.c \
+       app/app_state_machine/modes/mode_effects.c \
        app/app_state_machine/modes/mode_traffic_light.c \
        app/app_state_machine/modes/mode_night_light.c \
        app/app_state_machine/modes/mode_external_control.c \
