@@ -26,12 +26,13 @@ Added
 - New threads: **Animation Thread** and **State Machine Threads**.
 - **Modes** (available in the **Active** state): solid, strength, blink, pulse, traffic light, night light, effects, and external control.
 - **Operational Modes**, aka. different ways the RGB LED light is used.
-- **Application State Machine** with boot, startup, active, shutdown, and off states.
+- **Application State Machine** with boot, startup (powerup), active, shutdown (powerdown), and off states.
 - **License note** added/adjusted on most source files.
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
 - **LED Test Thread** for testing LED rendering in it's own thread.
 
 Changed
+- Renamed **startup** state to **powerup**, and **shutdown** state to **powerdown**.
 - Renamed **Animation mode** to **Effects mode**.
 - Changed **Button Driver** start and stop calls, to avoid affecting the the start-up/power-up and shutdown/power-down animation.
 - Renamed **Longest button press** to **extended button press**.

@@ -51,7 +51,7 @@ void state_off_process(app_sm_input_t input) {
     if (input == APP_SM_INPUT_BTN_SHORT ||
         input == APP_SM_INPUT_BTN_LONG_RELEASE ||
         input == APP_SM_INPUT_BTN_EXTENDED_RELEASE) {
-        /* Signal to transition to startup state */
+        /* Signal to transition to powerup state */
         /* This is handled by the main state machine */
     }
 }

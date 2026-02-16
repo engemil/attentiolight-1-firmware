@@ -27,7 +27,7 @@ SOFTWARE.
  * @brief   Application State Machine for AttentioLight1.
  *
  * @details This module implements the main application state machine that
- *          manages system states (boot, startup, active, shutdown, off) and
+ *          manages system states (boot, powerup, active, powerdown, off) and
  *          operational modes (solid color, brightness, blinking, etc.).
  *
  *          Architecture:
@@ -37,7 +37,7 @@ SOFTWARE.
  *          Button mapping:
  *          - Short press: Mode-specific action (next color, adjust setting)
  *          - Long press release: Go to next mode
- *          - Extended press release: Turn off (shutdown)
+ *          - Extended press release: Turn off (powerdown)
  */
 
 #ifndef APP_STATE_MACHINE_H
@@ -58,9 +58,9 @@ SOFTWARE.
  */
 typedef enum {
     APP_SM_SYS_BOOT = 0,        /**< Initialization phase                   */
-    APP_SM_SYS_STARTUP,         /**< Startup animation (fade-in)            */
+    APP_SM_SYS_POWERUP,         /**< Powerup animation (fade-in)            */
     APP_SM_SYS_ACTIVE,          /**< Normal operation (modes available)     */
-    APP_SM_SYS_SHUTDOWN,        /**< Shutdown animation (fade-out)          */
+    APP_SM_SYS_POWERDOWN,       /**< Powerdown animation (fade-out)         */
     APP_SM_SYS_OFF              /**< Off / low power mode                   */
 } app_sm_system_state_t;
 
@@ -109,8 +109,8 @@ typedef enum {
     APP_SM_INPUT_EXT_COMMAND,           /**< External command received      */
 
     /* System inputs */
-    APP_SM_INPUT_STARTUP_COMPLETE,      /**< Startup animation finished     */
-    APP_SM_INPUT_SHUTDOWN_COMPLETE      /**< Shutdown animation finished    */
+    APP_SM_INPUT_POWERUP_COMPLETE,      /**< Powerup animation finished     */
+    APP_SM_INPUT_POWERDOWN_COMPLETE     /**< Powerdown animation finished   */
 } app_sm_input_t;
 
 /**
@@ -163,7 +163,7 @@ uint8_t app_sm_init(void);
 
 /**
  * @brief   Starts the application state machine.
- * @details Begins processing events and transitions to STARTUP state.
+ * @details Begins processing events and transitions to POWERUP state.
  *
  * @return  0 on success, 1 if not initialized, 2 if already running.
  *

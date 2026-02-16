@@ -148,9 +148,9 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/app_state_machine.c \
        app/app_state_machine/animation/animation_thread.c \
        app/app_state_machine/system_states/state_boot.c \
-       app/app_state_machine/system_states/state_startup.c \
+       app/app_state_machine/system_states/state_powerup.c \
        app/app_state_machine/system_states/state_active.c \
-       app/app_state_machine/system_states/state_shutdown.c \
+       app/app_state_machine/system_states/state_powerdown.c \
        app/app_state_machine/system_states/state_off.c \
        app/app_state_machine/modes/modes.c \
        app/app_state_machine/modes/mode_solid_color.c \

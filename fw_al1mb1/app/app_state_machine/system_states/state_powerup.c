@@ -23,63 +23,67 @@ SOFTWARE.
 */
 
 /**
- * @file    state_shutdown.c
- * @brief   Shutdown state implementation.
+ * @file    state_powerup.c
+ * @brief   Powerup state implementation.
  *
- * @details The shutdown state shows a fade-out animation, then transitions
- *          to the off state.
+ * @details The powerup state shows a fade-in animation, then transitions
+ *          to the active state.
  */
 
 #include "system_states.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
-#include "button_driver.h"
 
 /*===========================================================================*/
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-static virtual_timer_t shutdown_timer;
+static virtual_timer_t powerup_timer;
 
 /*===========================================================================*/
 /* Local Functions                                                           */
 /*===========================================================================*/
 
 /**
- * @brief   Timer callback when shutdown animation completes.
+ * @brief   Timer callback when powerup animation completes.
  */
-static void shutdown_timer_cb(virtual_timer_t *vtp, void *arg) {
+static void powerup_timer_cb(virtual_timer_t *vtp, void *arg) {
     (void)vtp;
     (void)arg;
 
-    /* Signal shutdown complete */
+    /* Signal powerup complete - this will be processed by SM thread */
     chSysLockFromISR();
+    /* We need to signal the SM thread - use a simple approach */
     chSysUnlockFromISR();
+
+    /* The state machine will check for completion via animation state */
 }
 
 /*===========================================================================*/
-/* Shutdown State Implementation                                             */
+/* Powerup State Implementation                                              */
 /*===========================================================================*/
 
-void state_shutdown_enter(void) {
-    /* Deactivate button driver */
-    button_stop();
+void state_powerup_enter(void) {
+    /* Start fade-in animation to a white color */
+    anim_thread_fade_in(255, 255, 255, APP_SM_DEFAULT_BRIGHTNESS,
+                        APP_SM_POWERUP_FADE_MS);
 
-    /* Start fade-out animation */
-    anim_thread_fade_out(APP_SM_SHUTDOWN_FADE_MS);
-
-    /* Set a timer to transition to off state */
-    chVTObjectInit(&shutdown_timer);
-    chVTSet(&shutdown_timer, TIME_MS2I(APP_SM_SHUTDOWN_FADE_MS + 100),
-            shutdown_timer_cb, NULL);
+    /* Set a timer to transition to active state */
+    chVTObjectInit(&powerup_timer);
+    chVTSet(&powerup_timer, TIME_MS2I(APP_SM_POWERUP_FADE_MS + 100),
+            powerup_timer_cb, NULL);
 }
 
-void state_shutdown_process(app_sm_input_t input) {
-    (void)input;
-    /* During shutdown, we ignore all inputs */
+void state_powerup_process(app_sm_input_t input) {
+    /* During powerup, we ignore most inputs but allow skip */
+    if (input == APP_SM_INPUT_BTN_SHORT) {
+        /* Skip powerup animation - go directly to active */
+        chVTReset(&powerup_timer);
+        app_sm_process_input(APP_SM_INPUT_POWERUP_COMPLETE);
+    }
 }
 
-void state_shutdown_exit(void) {
+void state_powerup_exit(void) {
     /* Cancel timer if still running */
-    chVTReset(&shutdown_timer);
+    chVTReset(&powerup_timer);
 }

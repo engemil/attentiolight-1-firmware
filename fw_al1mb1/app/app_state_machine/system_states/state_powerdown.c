@@ -23,67 +23,63 @@ SOFTWARE.
 */
 
 /**
- * @file    state_startup.c
- * @brief   Startup state implementation.
+ * @file    state_powerdown.c
+ * @brief   Powerdown state implementation.
  *
- * @details The startup state shows a fade-in animation, then transitions
- *          to the active state.
+ * @details The powerdown state shows a fade-out animation, then transitions
+ *          to the off state.
  */
 
 #include "system_states.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
+#include "button_driver.h"
 
 /*===========================================================================*/
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-static virtual_timer_t startup_timer;
+static virtual_timer_t powerdown_timer;
 
 /*===========================================================================*/
 /* Local Functions                                                           */
 /*===========================================================================*/
 
 /**
- * @brief   Timer callback when startup animation completes.
+ * @brief   Timer callback when powerdown animation completes.
  */
-static void startup_timer_cb(virtual_timer_t *vtp, void *arg) {
+static void powerdown_timer_cb(virtual_timer_t *vtp, void *arg) {
     (void)vtp;
     (void)arg;
 
-    /* Signal startup complete - this will be processed by SM thread */
+    /* Signal powerdown complete */
     chSysLockFromISR();
-    /* We need to signal the SM thread - use a simple approach */
     chSysUnlockFromISR();
-
-    /* The state machine will check for completion via animation state */
 }
 
 /*===========================================================================*/
-/* Startup State Implementation                                              */
+/* Powerdown State Implementation                                            */
 /*===========================================================================*/
 
-void state_startup_enter(void) {
-    /* Start fade-in animation to a white color */
-    anim_thread_fade_in(255, 255, 255, APP_SM_DEFAULT_BRIGHTNESS,
-                        APP_SM_STARTUP_FADE_MS);
+void state_powerdown_enter(void) {
+    /* Deactivate button driver */
+    button_stop();
 
-    /* Set a timer to transition to active state */
-    chVTObjectInit(&startup_timer);
-    chVTSet(&startup_timer, TIME_MS2I(APP_SM_STARTUP_FADE_MS + 100),
-            startup_timer_cb, NULL);
+    /* Start fade-out animation */
+    anim_thread_fade_out(APP_SM_POWERDOWN_FADE_MS);
+
+    /* Set a timer to transition to off state */
+    chVTObjectInit(&powerdown_timer);
+    chVTSet(&powerdown_timer, TIME_MS2I(APP_SM_POWERDOWN_FADE_MS + 100),
+            powerdown_timer_cb, NULL);
 }
 
-void state_startup_process(app_sm_input_t input) {
-    /* During startup, we ignore most inputs but allow skip */
-    if (input == APP_SM_INPUT_BTN_SHORT) {
-        /* Skip startup animation - go directly to active */
-        chVTReset(&startup_timer);
-        app_sm_process_input(APP_SM_INPUT_STARTUP_COMPLETE);
-    }
+void state_powerdown_process(app_sm_input_t input) {
+    (void)input;
+    /* During powerdown, we ignore all inputs */
 }
 
-void state_startup_exit(void) {
+void state_powerdown_exit(void) {
     /* Cancel timer if still running */
-    chVTReset(&startup_timer);
+    chVTReset(&powerdown_timer);
 }

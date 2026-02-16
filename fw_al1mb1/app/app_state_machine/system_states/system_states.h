@@ -56,19 +56,19 @@ void state_boot_process(app_sm_input_t input);
 void state_boot_exit(void);
 
 /**
- * @brief   Startup state - enter handler.
+ * @brief   Powerup state - enter handler.
  */
-void state_startup_enter(void);
+void state_powerup_enter(void);
 
 /**
- * @brief   Startup state - process input.
+ * @brief   Powerup state - process input.
  */
-void state_startup_process(app_sm_input_t input);
+void state_powerup_process(app_sm_input_t input);
 
 /**
- * @brief   Startup state - exit handler.
+ * @brief   Powerup state - exit handler.
  */
-void state_startup_exit(void);
+void state_powerup_exit(void);
 
 /**
  * @brief   Active state - enter handler.
@@ -86,19 +86,19 @@ void state_active_process(app_sm_input_t input);
 void state_active_exit(void);
 
 /**
- * @brief   Shutdown state - enter handler.
+ * @brief   Powerdown state - enter handler.
  */
-void state_shutdown_enter(void);
+void state_powerdown_enter(void);
 
 /**
- * @brief   Shutdown state - process input.
+ * @brief   Powerdown state - process input.
  */
-void state_shutdown_process(app_sm_input_t input);
+void state_powerdown_process(app_sm_input_t input);
 
 /**
- * @brief   Shutdown state - exit handler.
+ * @brief   Powerdown state - exit handler.
  */
-void state_shutdown_exit(void);
+void state_powerdown_exit(void);
 
 /**
  * @brief   Off state - enter handler.

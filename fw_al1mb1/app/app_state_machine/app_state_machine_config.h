@@ -75,17 +75,17 @@ SOFTWARE.
 /*===========================================================================*/
 
 /**
- * @brief   Startup animation duration in milliseconds.
+ * @brief   Powerup animation duration in milliseconds.
  */
-#ifndef APP_SM_STARTUP_FADE_MS
-#define APP_SM_STARTUP_FADE_MS          1000
+#ifndef APP_SM_POWERUP_FADE_MS
+#define APP_SM_POWERUP_FADE_MS          1000
 #endif
 
 /**
- * @brief   Shutdown animation duration in milliseconds.
+ * @brief   Powerdown animation duration in milliseconds.
  */
-#ifndef APP_SM_SHUTDOWN_FADE_MS
-#define APP_SM_SHUTDOWN_FADE_MS         500
+#ifndef APP_SM_POWERDOWN_FADE_MS
+#define APP_SM_POWERDOWN_FADE_MS        500
 #endif
 
 /**
@@ -119,7 +119,7 @@ SOFTWARE.
 
 /**
  * @brief   Enable mode persistence to flash.
- * @details Set to 1 to save current mode to flash on shutdown.
+ * @details Set to 1 to save current mode to flash on powerdown.
  *          Requires flash driver implementation.
  */
 #ifndef APP_SM_PERSIST_MODE
@@ -138,7 +138,7 @@ SOFTWARE.
 /*===========================================================================*/
 
 /**
- * @brief   Default operational mode on startup.
+ * @brief   Default operational mode.
  */
 #ifndef APP_SM_DEFAULT_MODE
 #define APP_SM_DEFAULT_MODE             APP_SM_MODE_SOLID_COLOR

@@ -27,7 +27,7 @@ SOFTWARE.
  * @brief   Boot state implementation.
  *
  * @details The boot state handles system initialization. It immediately
- *          transitions to the startup state once initialization is complete.
+ *          transitions to the powerup state once initialization is complete.
  */
 
 #include "system_states.h"
@@ -51,9 +51,9 @@ void state_boot_enter(void) {
     anim_thread_start();
     DBG_DEBUG("anim_thread_start() returned");
 
-    /* Boot is instant - signal transition to startup */
-    DBG_DEBUG("posting STARTUP_COMPLETE input...");
-    app_sm_process_input(APP_SM_INPUT_STARTUP_COMPLETE);
+    /* Boot is instant - signal transition to powerup */
+    DBG_DEBUG("posting POWERUP_COMPLETE input...");
+    app_sm_process_input(APP_SM_INPUT_POWERUP_COMPLETE);
     DBG_DEBUG("state_boot_enter() done");
 }
 

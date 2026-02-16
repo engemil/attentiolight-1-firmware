@@ -27,14 +27,14 @@ The `app_state_machine` module implements the main state machine of the applicat
 
 ```
     ┌──────────┐   auto    ┌──────────┐   auto    ┌──────────┐
-    │   BOOT   │ ───────►  │ STARTUP  │ ───────►  │  ACTIVE  │◄───┐
+    │   BOOT   │ ───────►  │ POWERUP  │ ───────►  │  ACTIVE  │◄───┐
     │  (init)  │           │(fade-in) │           │ (normal) │    │
     └──────────┘           └──────────┘           └────┬─────┘    │
                                                        │          │
                                EXTENDED_PRESS ────────►│          │
                                                        ▼          │
                                                   ┌──────────┐    │
-                                                  │ SHUTDOWN │────┘
+                                                  │POWERDOWN │────┘
                                                   │(fade-out)│  (btn)
                                                   └────┬─────┘
                                                        │ auto
@@ -48,9 +48,9 @@ The `app_state_machine` module implements the main state machine of the applicat
 | State | Description |
 |-------|-------------|
 | **BOOT** | System initialization, transient state |
-| **STARTUP** | Fade-in animation |
+| **POWERUP** | Fade-in animation |
 | **ACTIVE** | Normal operation, user can interact with modes |
-| **SHUTDOWN** | Fade-out animation |
+| **POWERDOWN** | Fade-out animation |
 | **OFF** | LEDs off, waiting for button press to wake |
 
 ## Operational Modes
@@ -73,7 +73,7 @@ Within the **ACTIVE** state, the following modes are available:
 |--------------|--------|
 | **Short Press** | Mode-specific action (see table above) |
 | **Long Press Release** | Go to next mode |
-| **Extended Press Release** | Turn off (enter shutdown state) |
+| **Extended Press Release** | Turn off (enter powerdown state) |
 
 
 ## API Usage

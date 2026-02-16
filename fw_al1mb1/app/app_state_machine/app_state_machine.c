@@ -97,14 +97,14 @@ static mailbox_t input_mailbox;
 static msg_t input_mailbox_buffer[APP_SM_INPUT_QUEUE_SIZE];
 
 /**
- * @brief   Startup complete timer.
+ * @brief   Powerup complete timer.
  */
-static virtual_timer_t startup_complete_timer;
+static virtual_timer_t powerup_complete_timer;
 
 /**
- * @brief   Shutdown complete timer.
+ * @brief   Powerdown complete timer.
  */
-static virtual_timer_t shutdown_complete_timer;
+static virtual_timer_t powerdown_complete_timer;
 
 /*===========================================================================*/
 /* Name Lookup Tables                                                        */
@@ -112,9 +112,9 @@ static virtual_timer_t shutdown_complete_timer;
 
 static const char* system_state_names[] = {
     "BOOT",
-    "STARTUP",
+    "POWERUP",
     "ACTIVE",
-    "SHUTDOWN",
+    "POWERDOWN",
     "OFF"
 };
 
@@ -138,8 +138,8 @@ static const char* input_names[] = {
     "EXT_CTRL_ENTER",
     "EXT_CTRL_EXIT",
     "EXT_COMMAND",
-    "STARTUP_COMPLETE",
-    "SHUTDOWN_COMPLETE"
+    "POWERUP_COMPLETE",
+    "POWERDOWN_COMPLETE"
 };
 
 /*===========================================================================*/
@@ -147,24 +147,24 @@ static const char* input_names[] = {
 /*===========================================================================*/
 
 /**
- * @brief   Timer callback for startup complete.
+ * @brief   Timer callback for powerup complete.
  */
-static void startup_complete_cb(virtual_timer_t *vtp, void *arg) {
+static void powerup_complete_cb(virtual_timer_t *vtp, void *arg) {
     (void)vtp;
     (void)arg;
     chSysLockFromISR();
-    chMBPostI(&input_mailbox, (msg_t)APP_SM_INPUT_STARTUP_COMPLETE);
+    chMBPostI(&input_mailbox, (msg_t)APP_SM_INPUT_POWERUP_COMPLETE);
     chSysUnlockFromISR();
 }
 
 /**
- * @brief   Timer callback for shutdown complete.
+ * @brief   Timer callback for powerdown complete.
  */
-static void shutdown_complete_cb(virtual_timer_t *vtp, void *arg) {
+static void powerdown_complete_cb(virtual_timer_t *vtp, void *arg) {
     (void)vtp;
     (void)arg;
     chSysLockFromISR();
-    chMBPostI(&input_mailbox, (msg_t)APP_SM_INPUT_SHUTDOWN_COMPLETE);
+    chMBPostI(&input_mailbox, (msg_t)APP_SM_INPUT_POWERDOWN_COMPLETE);
     chSysUnlockFromISR();
 }
 
@@ -182,14 +182,14 @@ static void transition_to_state(app_sm_system_state_t new_state) {
         case APP_SM_SYS_BOOT:
             state_boot_exit();
             break;
-        case APP_SM_SYS_STARTUP:
-            state_startup_exit();
+        case APP_SM_SYS_POWERUP:
+            state_powerup_exit();
             break;
         case APP_SM_SYS_ACTIVE:
             state_active_exit();
             break;
-        case APP_SM_SYS_SHUTDOWN:
-            state_shutdown_exit();
+        case APP_SM_SYS_POWERDOWN:
+            state_powerdown_exit();
             break;
         case APP_SM_SYS_OFF:
             state_off_exit();
@@ -208,24 +208,24 @@ static void transition_to_state(app_sm_system_state_t new_state) {
         case APP_SM_SYS_BOOT:
             state_boot_enter();
             break;
-        case APP_SM_SYS_STARTUP:
-            state_startup_enter();
-            /* Set timer for startup complete */
-            chVTObjectInit(&startup_complete_timer);
-            chVTSet(&startup_complete_timer,
-                    TIME_MS2I(APP_SM_STARTUP_FADE_MS + 100),
-                    startup_complete_cb, NULL);
+        case APP_SM_SYS_POWERUP:
+            state_powerup_enter();
+            /* Set timer for powerup complete */
+            chVTObjectInit(&powerup_complete_timer);
+            chVTSet(&powerup_complete_timer,
+                    TIME_MS2I(APP_SM_POWERUP_FADE_MS + 100),
+                    powerup_complete_cb, NULL);
             break;
         case APP_SM_SYS_ACTIVE:
             state_active_enter();
             break;
-        case APP_SM_SYS_SHUTDOWN:
-            state_shutdown_enter();
-            /* Set timer for shutdown complete */
-            chVTObjectInit(&shutdown_complete_timer);
-            chVTSet(&shutdown_complete_timer,
-                    TIME_MS2I(APP_SM_SHUTDOWN_FADE_MS + 100),
-                    shutdown_complete_cb, NULL);
+        case APP_SM_SYS_POWERDOWN:
+            state_powerdown_enter();
+            /* Set timer for powerdown complete */
+            chVTObjectInit(&powerdown_complete_timer);
+            chVTSet(&powerdown_complete_timer,
+                    TIME_MS2I(APP_SM_POWERDOWN_FADE_MS + 100),
+                    powerdown_complete_cb, NULL);
             break;
         case APP_SM_SYS_OFF:
             state_off_enter();
@@ -240,44 +240,44 @@ static void process_input_internal(app_sm_input_t input) {
     /* Handle state transitions based on input */
     switch (system_state) {
         case APP_SM_SYS_BOOT:
-            /* Boot immediately transitions to startup */
-            if (input == APP_SM_INPUT_STARTUP_COMPLETE) {
-                transition_to_state(APP_SM_SYS_STARTUP);
+            /* Boot immediately transitions to powerup */
+            if (input == APP_SM_INPUT_POWERUP_COMPLETE) {
+                transition_to_state(APP_SM_SYS_POWERUP);
             }
             break;
 
-        case APP_SM_SYS_STARTUP:
-            if (input == APP_SM_INPUT_STARTUP_COMPLETE) {
+        case APP_SM_SYS_POWERUP:
+            if (input == APP_SM_INPUT_POWERUP_COMPLETE) {
                 transition_to_state(APP_SM_SYS_ACTIVE);
             } else if (input == APP_SM_INPUT_BTN_SHORT) {
-                /* Skip startup animation */
-                chVTReset(&startup_complete_timer);
+                /* Skip powerup animation */
+                chVTReset(&powerup_complete_timer);
                 transition_to_state(APP_SM_SYS_ACTIVE);
             }
             break;
 
         case APP_SM_SYS_ACTIVE:
             if (input == APP_SM_INPUT_BTN_EXTENDED_RELEASE) {
-                /* Initiate shutdown */
-                transition_to_state(APP_SM_SYS_SHUTDOWN);
+                /* Initiate powerdown */
+                transition_to_state(APP_SM_SYS_POWERDOWN);
             } else {
                 /* Delegate to active state handler */
                 state_active_process(input);
             }
             break;
 
-        case APP_SM_SYS_SHUTDOWN:
-            if (input == APP_SM_INPUT_SHUTDOWN_COMPLETE) {
+        case APP_SM_SYS_POWERDOWN:
+            if (input == APP_SM_INPUT_POWERDOWN_COMPLETE) {
                 transition_to_state(APP_SM_SYS_OFF);
             }
-            /* Ignore other inputs during shutdown */
+            /* Ignore other inputs during powerdown */
             break;
 
         case APP_SM_SYS_OFF:
             /* Any button press wakes up */
             if (input == APP_SM_INPUT_BTN_SHORT ||
                 input == APP_SM_INPUT_BTN_LONG_RELEASE) {
-                transition_to_state(APP_SM_SYS_STARTUP);
+                transition_to_state(APP_SM_SYS_POWERUP);
             }
             break;
     }
@@ -295,8 +295,8 @@ static THD_FUNCTION(sm_thread_func, arg) {
     /* Enter boot state */
     transition_to_state(APP_SM_SYS_BOOT);
 
-    /* Boot immediately triggers startup */
-    transition_to_state(APP_SM_SYS_STARTUP);
+    /* Boot immediately triggers powerup */
+    transition_to_state(APP_SM_SYS_POWERUP);
 
     while (!chThdShouldTerminateX()) {
         msg_t msg;
@@ -417,7 +417,7 @@ const char* app_sm_mode_name(app_sm_mode_t mode) {
 }
 
 const char* app_sm_input_name(app_sm_input_t input) {
-    if (input <= APP_SM_INPUT_SHUTDOWN_COMPLETE) {
+    if (input <= APP_SM_INPUT_POWERDOWN_COMPLETE) {
         return input_names[input];
     }
     return "UNKNOWN";
