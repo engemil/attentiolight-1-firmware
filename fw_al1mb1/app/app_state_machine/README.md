@@ -60,7 +60,7 @@ Within the **ACTIVE** state, the following modes are available:
 | Mode | Description | Short Press Action |
 |------|-------------|-------------------|
 | **Solid Color** | Static color display | Cycle through 12 colors |
-| **Strength** | Brightness control | Cycle through 8 brightness levels |
+| **Brightness** | Brightness control | Cycle through 8 brightness levels |
 | **Blinking** | Blink on/off | Cycle through 5 blink speeds |
 | **Pulsation** | Breathing effect | Cycle through 5 pulse speeds |
 | **Effects** | Dynamic effects | Cycle through sub-modes (Rainbow, Strobe, Color Cycle) |

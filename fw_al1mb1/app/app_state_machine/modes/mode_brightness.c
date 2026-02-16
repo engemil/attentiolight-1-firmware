@@ -23,8 +23,8 @@ SOFTWARE.
 */
 
 /**
- * @file    mode_strength.c
- * @brief   Strength/brightness mode implementation.
+ * @file    mode_brightness.c
+ * @brief   Brightness mode implementation.
  *
  * @details Adjusts LED brightness. Short press cycles through 8 brightness
  *          levels. Shows white color to demonstrate brightness.
@@ -75,28 +75,28 @@ extern uint8_t global_brightness;
 /* Mode Functions                                                            */
 /*===========================================================================*/
 
-static void strength_enter(void) {
-    DBG_INFO("MODE Strength: enter level=%s (%d)",
+static void brightness_enter(void) {
+    DBG_INFO("MODE Brightness: enter level=%s (%d)",
              brightness_names[current_level_index],
              brightness_levels[current_level_index]);
     /* Display white at current brightness level */
     anim_thread_set_solid(255, 255, 255, brightness_levels[current_level_index]);
 }
 
-static void strength_exit(void) {
-    DBG_INFO("MODE Strength: exit global_brightness=%d",
+static void brightness_exit(void) {
+    DBG_INFO("MODE Brightness: exit global_brightness=%d",
              brightness_levels[current_level_index]);
     /* Update global brightness for other modes to use */
     global_brightness = brightness_levels[current_level_index];
 }
 
-static void strength_on_short_press(void) {
+static void brightness_on_short_press(void) {
     uint8_t old_idx = current_level_index;
     DBG_UNUSED(old_idx);
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % APP_SM_BRIGHTNESS_LEVELS;
 
-    DBG_INFO("MODE Strength: level set from %s to %s (%d to %d)",
+    DBG_INFO("MODE Brightness: level set from %s to %s (%d to %d)",
              brightness_names[old_idx], brightness_names[current_level_index],
              brightness_levels[old_idx], brightness_levels[current_level_index]);
 
@@ -107,8 +107,8 @@ static void strength_on_short_press(void) {
     global_brightness = brightness_levels[current_level_index];
 }
 
-static void strength_on_long_start(void) {
-    DBG_DEBUG("MODE Strength: long_start");
+static void brightness_on_long_start(void) {
+    DBG_DEBUG("MODE Brightness: long_start");
     /* No special action for long press start in this mode */
 }
 
@@ -116,10 +116,10 @@ static void strength_on_long_start(void) {
 /* Mode Operations Structure                                                 */
 /*===========================================================================*/
 
-const app_sm_mode_ops_t mode_strength_ops = {
-    .name = "Strength",
-    .enter = strength_enter,
-    .exit = strength_exit,
-    .on_short_press = strength_on_short_press,
-    .on_long_start = strength_on_long_start
+const app_sm_mode_ops_t mode_brightness_ops = {
+    .name = "Brightness",
+    .enter = brightness_enter,
+    .exit = brightness_exit,
+    .on_short_press = brightness_on_short_press,
+    .on_long_start = brightness_on_long_start
 };

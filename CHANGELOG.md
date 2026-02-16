@@ -21,7 +21,7 @@ Added
 - **Debug** prints to serial communication (over USB) with levels.
 - Script to check Memory Useage (in scripts folder).
 - New threads: **Animation Thread** and **State Machine Threads**.
-- **Modes** (available in the **Active** state): solid, strength, blink, pulse, traffic light, night light, effects, and external control.
+- **Modes** (available in the **Active** state): solid, brightness, blink, pulse, traffic light, night light, effects, and external control.
 - **Operational Modes**, aka. different ways the RGB LED light is used.
 - **Application State Machine** with boot, startup (powerup), active, shutdown (powerdown), and off states.
 - **License note** added/adjusted on most source files.
@@ -33,6 +33,7 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Renamed **Strength** mode to **Brightness** mode.
 - Restructured the use of **button driver**, moved code away from main.c and to app_state_machine.c, and initializing button driver from state_boot.c/state_boot_enter-function.
 - Renamed **startup** state to **powerup**, and **shutdown** state to **powerdown**.
 - Renamed **Animation mode** to **Effects mode**.

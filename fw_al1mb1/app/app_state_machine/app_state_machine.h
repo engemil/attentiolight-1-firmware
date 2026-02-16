@@ -70,7 +70,7 @@ typedef enum {
  */
 typedef enum {
     APP_SM_MODE_SOLID_COLOR = 0,    /**< Static color display               */
-    APP_SM_MODE_STRENGTH,           /**< Brightness/intensity control       */
+    APP_SM_MODE_BRIGHTNESS,         /**< Brightness/intensity control       */
     APP_SM_MODE_BLINKING,           /**< Blink effect                       */
     APP_SM_MODE_PULSATION,          /**< Breathing/pulse effect             */
     APP_SM_MODE_EFFECTS,            /**< Dynamic effects (submodes)         */

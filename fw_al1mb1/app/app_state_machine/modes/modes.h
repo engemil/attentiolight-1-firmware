@@ -77,8 +77,8 @@ const app_sm_mode_ops_t* modes_get_ops(app_sm_mode_t mode);
 /* Solid Color Mode */
 extern const app_sm_mode_ops_t mode_solid_color_ops;
 
-/* Strength Mode */
-extern const app_sm_mode_ops_t mode_strength_ops;
+/* Brightness Mode */
+extern const app_sm_mode_ops_t mode_brightness_ops;
 
 /* Blinking Mode */
 extern const app_sm_mode_ops_t mode_blinking_ops;

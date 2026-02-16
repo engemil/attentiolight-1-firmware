@@ -45,7 +45,7 @@ extern app_sm_mode_t current_mode;
  */
 static const app_sm_mode_ops_t* mode_registry[APP_SM_MODE_COUNT] = {
     &mode_solid_color_ops,
-    &mode_strength_ops,
+    &mode_brightness_ops,
     &mode_blinking_ops,
     &mode_pulsation_ops,
     &mode_effects_ops,

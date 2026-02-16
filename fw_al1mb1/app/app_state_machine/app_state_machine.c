@@ -121,7 +121,7 @@ static const char* system_state_names[] = {
 
 static const char* mode_names[] = {
     "Solid Color",
-    "Strength",
+    "Brightness",
     "Blinking",
     "Pulsation",
     "Animation",

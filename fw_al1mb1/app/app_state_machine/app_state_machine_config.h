@@ -168,7 +168,7 @@ SOFTWARE.
 #define APP_SM_COLOR_COUNT              12
 
 /**
- * @brief   Number of brightness levels in strength mode.
+ * @brief   Number of brightness levels in brightness mode.
  */
 #define APP_SM_BRIGHTNESS_LEVELS        8
 
