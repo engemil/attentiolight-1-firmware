@@ -252,4 +252,90 @@ SOFTWARE.
 #define APP_SM_NIGHT_LIGHT_BRIGHTNESS   32
 #endif
 
+/*===========================================================================*/
+/* Startup Animation Configuration                                           */
+/*===========================================================================*/
+
+/**
+ * @brief   Startup animation: rainbow fade-in duration in milliseconds.
+ * @details Phase 1 - LED fades in while cycling through colors.
+ */
+#ifndef APP_SM_STARTUP_RAINBOW_FADE_MS
+#define APP_SM_STARTUP_RAINBOW_FADE_MS      4000
+#endif
+
+/**
+ * @brief   Startup animation: rainbow cycle period at START in milliseconds.
+ * @details Initial (slow) color cycle speed when fade begins.
+ *          Higher values = slower color changes at the start.
+ */
+#ifndef APP_SM_STARTUP_RAINBOW_CYCLE_START_MS
+#define APP_SM_STARTUP_RAINBOW_CYCLE_START_MS   4000
+#endif
+
+/**
+ * @brief   Startup animation: rainbow cycle period at END in milliseconds.
+ * @details Final (fast) color cycle speed when fade completes.
+ *          Lower values = faster color changes at the end.
+ *          Set equal to START_MS to disable acceleration.
+ */
+#ifndef APP_SM_STARTUP_RAINBOW_CYCLE_END_MS
+#define APP_SM_STARTUP_RAINBOW_CYCLE_END_MS     250
+#endif
+
+/**
+ * @brief   Startup animation: transition to blue duration in milliseconds.
+ * @details Phase 2 - Fades from current rainbow color to solid blue.
+ */
+#ifndef APP_SM_STARTUP_BLUE_FADE_MS
+#define APP_SM_STARTUP_BLUE_FADE_MS         500
+#endif
+
+/**
+ * @brief   Startup animation: pulse period in milliseconds.
+ * @details Phase 3 - Duration of one complete pulse cycle (up and down).
+ */
+#ifndef APP_SM_STARTUP_PULSE_PERIOD_MS
+#define APP_SM_STARTUP_PULSE_PERIOD_MS      1500
+#endif
+
+/**
+ * @brief   Startup animation: number of blue pulses.
+ * @details Phase 3 - How many times to pulse before going blank.
+ */
+#ifndef APP_SM_STARTUP_PULSE_COUNT
+#define APP_SM_STARTUP_PULSE_COUNT          2
+#endif
+
+/**
+ * @brief   Startup animation: blank duration in milliseconds.
+ * @details Phase 4 - LED stays off before transitioning to active state.
+ */
+#ifndef APP_SM_STARTUP_BLANK_MS
+#define APP_SM_STARTUP_BLANK_MS             800
+#endif
+
+/**
+ * @brief   Startup animation: final color (blue).
+ * @details RGB values for the final blue color in the startup sequence.
+ */
+#ifndef APP_SM_STARTUP_BLUE_R
+#define APP_SM_STARTUP_BLUE_R               0
+#endif
+#ifndef APP_SM_STARTUP_BLUE_G
+#define APP_SM_STARTUP_BLUE_G               0
+#endif
+#ifndef APP_SM_STARTUP_BLUE_B
+#define APP_SM_STARTUP_BLUE_B               255
+#endif
+
+/**
+ * @brief   Total startup animation duration in milliseconds.
+ * @details Calculated from all phases. Used for powerup timer.
+ */
+#define APP_SM_STARTUP_TOTAL_MS             (APP_SM_STARTUP_RAINBOW_FADE_MS + \
+                                             APP_SM_STARTUP_BLUE_FADE_MS + \
+                                             (APP_SM_STARTUP_PULSE_PERIOD_MS * APP_SM_STARTUP_PULSE_COUNT) + \
+                                             APP_SM_STARTUP_BLANK_MS)
+
 #endif /* APP_STATE_MACHINE_CONFIG_H */

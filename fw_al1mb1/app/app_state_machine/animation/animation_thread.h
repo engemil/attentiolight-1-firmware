@@ -239,6 +239,23 @@ uint8_t anim_thread_flash_feedback(uint8_t r, uint8_t g, uint8_t b,
 uint8_t anim_thread_off(void);
 
 /**
+ * @brief   Starts the startup sequence animation.
+ * @details Multi-phase animation for device power-up:
+ *          1. Rainbow fade-in (brightness ramps while cycling colors)
+ *          2. Transition to solid blue
+ *          3. Blue pulse/breathing (2 times)
+ *          4. Blank (LED off)
+ *          5. Animation completes
+ *
+ * @param[in] brightness Target brightness level (0-255).
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_startup_sequence(uint8_t brightness);
+
+/**
  * @brief   Checks if animation thread is running.
  *
  * @return  true if running, false otherwise.

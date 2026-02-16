@@ -60,13 +60,12 @@ static void powerup_timer_cb(virtual_timer_t *vtp, void *arg) {
 /*===========================================================================*/
 
 void state_powerup_enter(void) {
-    /* Start fade-in animation to a white color */
-    anim_thread_fade_in(255, 255, 255, APP_SM_DEFAULT_BRIGHTNESS,
-                        APP_SM_POWERUP_FADE_MS);
+    /* Start the multi-phase startup sequence animation */
+    anim_thread_startup_sequence(APP_SM_DEFAULT_BRIGHTNESS);
 
-    /* Set a timer to transition to active state */
+    /* Set a timer to transition to active state after animation completes */
     chVTObjectInit(&powerup_timer);
-    chVTSet(&powerup_timer, TIME_MS2I(APP_SM_POWERUP_FADE_MS + 100),
+    chVTSet(&powerup_timer, TIME_MS2I(APP_SM_STARTUP_TOTAL_MS + 100),
             powerup_timer_cb, NULL);
 }
 

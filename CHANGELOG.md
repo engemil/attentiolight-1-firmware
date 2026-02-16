@@ -16,6 +16,7 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 NB! Notes added here during development to keep track of changes.
 
 Added
+- New **startup animation sequence**.
 - New **Render modes**; static, transitions, and continuous, to handle different types of modes and animations.
 - **Improved RGB LED rendering** by making it deterministic with a configurable rendering rate.
 - **Debug** prints to serial communication (over USB) with levels.
