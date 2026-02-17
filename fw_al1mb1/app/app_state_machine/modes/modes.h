@@ -40,6 +40,32 @@ SOFTWARE.
 extern "C" {
 #endif
 
+/*===========================================================================*/
+/* Shared Global Settings                                                    */
+/*===========================================================================*/
+
+/**
+ * @brief   Global brightness level (0-255).
+ * @details Set by brightness mode, used by solid, blink, and pulse modes.
+ */
+extern uint8_t global_brightness;
+
+/**
+ * @brief   Global color index (0-11, indexes into shared_color_palette).
+ * @details Set by solid color mode, used by brightness, blink, and pulse modes.
+ */
+extern uint8_t global_color_index;
+
+/**
+ * @brief   Shared 12-color palette.
+ * @details Used by all modes that need color selection.
+ */
+extern const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3];
+
+/*===========================================================================*/
+/* Mode Functions                                                            */
+/*===========================================================================*/
+
 /**
  * @brief   Initializes all modes.
  */

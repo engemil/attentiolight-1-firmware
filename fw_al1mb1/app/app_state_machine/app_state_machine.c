@@ -63,6 +63,11 @@ app_sm_mode_t saved_mode_before_external = APP_SM_DEFAULT_MODE;
  */
 uint8_t global_brightness = APP_SM_DEFAULT_BRIGHTNESS;
 
+/**
+ * @brief   Global color index (0-11, indexes into color palette).
+ */
+uint8_t global_color_index = APP_SM_DEFAULT_COLOR_INDEX;
+
 /*===========================================================================*/
 /* Local Variables                                                           */
 /*===========================================================================*/

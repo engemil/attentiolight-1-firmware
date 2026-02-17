@@ -66,12 +66,6 @@ static const uint16_t pulse_periods[PULSE_SPEED_COUNT] = {
 /*===========================================================================*/
 
 static uint8_t current_speed_index = 1;  /* Default to slow */
-static uint8_t pulse_color_r = 255;
-static uint8_t pulse_color_g = 255;
-static uint8_t pulse_color_b = 255;
-
-/* External reference to global brightness */
-extern uint8_t global_brightness;
 
 /*===========================================================================*/
 /* Mode Functions                                                            */
@@ -80,9 +74,12 @@ extern uint8_t global_brightness;
 static void pulsation_enter(void) {
     DBG_INFO("MODE Pulsation: enter speed=%s (%dms period)",
              speed_names[current_speed_index], pulse_periods[current_speed_index]);
-    /* Start pulse animation */
-    anim_thread_pulse(pulse_color_r, pulse_color_g, pulse_color_b,
-                      global_brightness, pulse_periods[current_speed_index]);
+    /* Start pulse animation with shared color */
+    anim_thread_pulse(
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        global_brightness, pulse_periods[current_speed_index]);
 }
 
 static void pulsation_exit(void) {
@@ -100,9 +97,12 @@ static void pulsation_on_short_press(void) {
              speed_names[old_idx], speed_names[current_speed_index],
              pulse_periods[old_idx], pulse_periods[current_speed_index]);
 
-    /* Update pulse animation */
-    anim_thread_pulse(pulse_color_r, pulse_color_g, pulse_color_b,
-                      global_brightness, pulse_periods[current_speed_index]);
+    /* Update pulse animation with shared color */
+    anim_thread_pulse(
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        global_brightness, pulse_periods[current_speed_index]);
 }
 
 static void pulsation_on_long_start(void) {

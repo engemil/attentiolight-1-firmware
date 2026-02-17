@@ -50,8 +50,9 @@ static const char* const color_names[APP_SM_COLOR_COUNT] = {
 
 /**
  * @brief   12-color extended palette.
+ * @note    Shared globally - other modes reference this via extern in modes.h
  */
-static const uint8_t solid_color_palette[APP_SM_COLOR_COUNT][3] = {
+const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
     {255,   0,   0},    /* Red          */
     {255, 128,   0},    /* Orange       */
     {255, 255,   0},    /* Yellow       */
@@ -70,8 +71,7 @@ static const uint8_t solid_color_palette[APP_SM_COLOR_COUNT][3] = {
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-static uint8_t current_color_index = 0;
-static uint8_t current_brightness = APP_SM_DEFAULT_BRIGHTNESS;
+/* None - uses global_color_index and global_brightness from modes.h */
 
 /*===========================================================================*/
 /* Mode Functions                                                            */
@@ -79,13 +79,13 @@ static uint8_t current_brightness = APP_SM_DEFAULT_BRIGHTNESS;
 
 static void solid_color_enter(void) {
     DBG_INFO("MODE SolidColor: enter: color=%s brightness=%d",
-             color_names[current_color_index], current_brightness);
+             color_names[global_color_index], global_brightness);
     /* Display current color */
     anim_thread_set_solid(
-        solid_color_palette[current_color_index][0],
-        solid_color_palette[current_color_index][1],
-        solid_color_palette[current_color_index][2],
-        current_brightness
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        global_brightness
     );
 }
 
@@ -95,20 +95,20 @@ static void solid_color_exit(void) {
 }
 
 static void solid_color_on_short_press(void) {
-    uint8_t old_idx = current_color_index;
+    uint8_t old_idx = global_color_index;
     DBG_UNUSED(old_idx);
     /* Cycle to next color */
-    current_color_index = (current_color_index + 1) % APP_SM_COLOR_COUNT;
+    global_color_index = (global_color_index + 1) % APP_SM_COLOR_COUNT;
 
     DBG_INFO("MODE SolidColor: color set from %s to %s",
-             color_names[old_idx], color_names[current_color_index]);
+             color_names[old_idx], color_names[global_color_index]);
 
     /* Display new color */
     anim_thread_set_solid(
-        solid_color_palette[current_color_index][0],
-        solid_color_palette[current_color_index][1],
-        solid_color_palette[current_color_index][2],
-        current_brightness
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        global_brightness
     );
 }
 

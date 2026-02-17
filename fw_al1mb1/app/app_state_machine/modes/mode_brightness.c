@@ -79,8 +79,12 @@ static void brightness_enter(void) {
     DBG_INFO("MODE Brightness: enter level=%s (%d)",
              brightness_names[current_level_index],
              brightness_levels[current_level_index]);
-    /* Display white at current brightness level */
-    anim_thread_set_solid(255, 255, 255, brightness_levels[current_level_index]);
+    /* Display current color at current brightness level */
+    anim_thread_set_solid(
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        brightness_levels[current_level_index]);
 }
 
 static void brightness_exit(void) {
@@ -100,8 +104,12 @@ static void brightness_on_short_press(void) {
              brightness_names[old_idx], brightness_names[current_level_index],
              brightness_levels[old_idx], brightness_levels[current_level_index]);
 
-    /* Update display */
-    anim_thread_set_solid(255, 255, 255, brightness_levels[current_level_index]);
+    /* Update display with current color */
+    anim_thread_set_solid(
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        brightness_levels[current_level_index]);
 
     /* Update global brightness */
     global_brightness = brightness_levels[current_level_index];

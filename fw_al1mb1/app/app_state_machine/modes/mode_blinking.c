@@ -65,12 +65,9 @@ static const uint16_t blink_speeds[BLINK_SPEED_COUNT] = {
 /*===========================================================================*/
 
 static uint8_t current_speed_index = 1;  /* Default to slow */
-static uint8_t blink_color_r = 255;
-static uint8_t blink_color_g = 255;
-static uint8_t blink_color_b = 255;
 
-/* External reference to global brightness */
-extern uint8_t global_brightness;
+/* Color and brightness are shared via global_color_index, global_brightness,
+ * and shared_color_palette (declared in modes.h) */
 
 /*===========================================================================*/
 /* Mode Functions                                                            */
@@ -79,9 +76,12 @@ extern uint8_t global_brightness;
 static void blinking_enter(void) {
     DBG_INFO("MODE Blinking: enter speed=%s (%dms)",
              speed_names[current_speed_index], blink_speeds[current_speed_index]);
-    /* Start blinking animation */
-    anim_thread_blink(blink_color_r, blink_color_g, blink_color_b,
-                      global_brightness, blink_speeds[current_speed_index]);
+    /* Start blinking animation with shared color */
+    anim_thread_blink(
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        global_brightness, blink_speeds[current_speed_index]);
 }
 
 static void blinking_exit(void) {
@@ -99,9 +99,12 @@ static void blinking_on_short_press(void) {
              speed_names[old_idx], speed_names[current_speed_index],
              blink_speeds[old_idx], blink_speeds[current_speed_index]);
 
-    /* Update blink animation */
-    anim_thread_blink(blink_color_r, blink_color_g, blink_color_b,
-                      global_brightness, blink_speeds[current_speed_index]);
+    /* Update blink animation with shared color */
+    anim_thread_blink(
+        shared_color_palette[global_color_index][0],
+        shared_color_palette[global_color_index][1],
+        shared_color_palette[global_color_index][2],
+        global_brightness, blink_speeds[current_speed_index]);
 }
 
 static void blinking_on_long_start(void) {
