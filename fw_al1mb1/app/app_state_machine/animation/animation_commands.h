@@ -51,7 +51,8 @@ typedef enum {
     ANIM_CMD_COLOR_CYCLE,       /**< Cycle through color palette            */
     ANIM_CMD_TRAFFIC_LIGHT,     /**< Traffic light R-Y-G sequence           */
     ANIM_CMD_FLASH_FEEDBACK,    /**< Quick flash for button feedback        */
-    ANIM_CMD_STARTUP_SEQUENCE,  /**< Multi-phase startup animation          */
+    ANIM_CMD_POWERUP_SEQUENCE,  /**< powerup animation                      */
+    ANIM_CMD_POWERDOWN_SEQUENCE, /**< Powerdown animation                   */
     ANIM_CMD_CUSTOM             /**< Custom animation (future use)          */
 } anim_cmd_type_t;
 

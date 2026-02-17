@@ -70,6 +70,12 @@ cd fw_al1mb1 && make clean && make
 # Upload test firmware (NB! This may take 5 min or more.)
 sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/fw_al1mb1_signed.bin
 ```
+<!-- Not working?! 
+```
+# Alternatively with the ST-LINK connected
+st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
+```
+-->
 
 
 ## Debug Builds

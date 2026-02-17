@@ -243,7 +243,8 @@ static render_mode_t get_render_mode(anim_cmd_type_t type) {
         case ANIM_CMD_RAINBOW:
         case ANIM_CMD_FADE_IN:
         case ANIM_CMD_FADE_OUT:
-        case ANIM_CMD_STARTUP_SEQUENCE:
+        case ANIM_CMD_POWERUP_SEQUENCE:
+        case ANIM_CMD_POWERDOWN_SEQUENCE:
         default:
             return RENDER_CONTINUOUS;
     }
@@ -508,18 +509,28 @@ static void process_flash_feedback(void) {
 }
 
 /**
- * @brief   Startup sequence phase definitions.
+ * @brief   Powerup sequence phase definitions.
  */
 typedef enum {
-    STARTUP_PHASE_RAINBOW_FADE = 0,     /**< Rainbow with brightness ramp     */
-    STARTUP_PHASE_BLUE_FADE,            /**< Fade to solid blue               */
-    STARTUP_PHASE_PULSE,                /**< Blue pulse/breathing             */
-    STARTUP_PHASE_BLANK,                /**< LED off                          */
-    STARTUP_PHASE_COMPLETE              /**< Animation finished               */
-} startup_phase_t;
+    POWERUP_PHASE_RAINBOW_FADE = 0,     /**< Rainbow with brightness ramp     */
+    POWERUP_PHASE_BLUE_FADE,            /**< Fade to solid blue               */
+    POWERUP_PHASE_PULSE,                /**< Blue pulse/breathing             */
+    POWERUP_PHASE_BLANK,                /**< LED off                          */
+    POWERUP_PHASE_COMPLETE              /**< Animation finished               */
+} powerup_phase_t;
 
 /**
- * @brief   Processes startup sequence animation.
+ * @brief   Powerdown sequence phase definitions.
+ */
+typedef enum {
+    POWERDOWN_PHASE_COLOR_FADE = 0,      /**< Fade to amber                    */
+    POWERDOWN_PHASE_PULSE,               /**< Pulse with decreasing intensity  */
+    POWERDOWN_PHASE_FINAL_FADE,          /**< Final fade to off                */
+    POWERDOWN_PHASE_COMPLETE             /**< Animation finished               */
+} powerdown_phase_t;
+
+/**
+ * @brief   Processes powerup sequence animation.
  * @details Multi-phase animation:
  *          Phase 0: Rainbow fade-in (brightness ramps 0->255 while cycling colors)
  *          Phase 1: Fade to solid blue
@@ -527,16 +538,16 @@ typedef enum {
  *          Phase 3: Blank (LED off)
  *          Phase 4: Complete (stop animation)
  */
-static void process_startup_sequence(void) {
+static void process_powerup_sequence(void) {
     uint32_t now = chVTGetSystemTime();
     uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
 
     /* Calculate phase boundaries */
-    uint32_t phase1_start = APP_SM_STARTUP_RAINBOW_FADE_MS;
-    uint32_t phase2_start = phase1_start + APP_SM_STARTUP_BLUE_FADE_MS;
+    uint32_t phase1_start = APP_SM_POWERUP_RAINBOW_FADE_MS;
+    uint32_t phase2_start = phase1_start + APP_SM_POWERUP_BLUE_FADE_MS;
     uint32_t phase3_start = phase2_start + 
-                            (APP_SM_STARTUP_PULSE_PERIOD_MS * APP_SM_STARTUP_PULSE_COUNT);
-    uint32_t phase4_start = phase3_start + APP_SM_STARTUP_BLANK_MS;
+                            (APP_SM_POWERUP_PULSE_PERIOD_MS * APP_SM_POWERUP_PULSE_COUNT);
+    uint32_t phase4_start = phase3_start + APP_SM_POWERUP_BLANK_MS;
 
     if (elapsed < phase1_start) {
         /*==================================================================*/
@@ -545,7 +556,7 @@ static void process_startup_sequence(void) {
         uint32_t phase_elapsed = elapsed;
         
         /* Calculate brightness ramp (0 -> 255) */
-        uint8_t brightness = (uint8_t)((phase_elapsed * 255) / APP_SM_STARTUP_RAINBOW_FADE_MS);
+        uint8_t brightness = (uint8_t)((phase_elapsed * 255) / APP_SM_POWERUP_RAINBOW_FADE_MS);
         
         /*
          * Accelerating rainbow: cycle period decreases from START to END.
@@ -562,11 +573,11 @@ static void process_startup_sequence(void) {
          */
         
         /* Normalized progress (0-255 for integer math) */
-        uint32_t progress_256 = (phase_elapsed * 256) / APP_SM_STARTUP_RAINBOW_FADE_MS;
+        uint32_t progress_256 = (phase_elapsed * 256) / APP_SM_POWERUP_RAINBOW_FADE_MS;
         
         /* Interpolate current period: START -> END as progress goes 0 -> 256 */
-        uint32_t period_start = APP_SM_STARTUP_RAINBOW_CYCLE_START_MS;
-        uint32_t period_end = APP_SM_STARTUP_RAINBOW_CYCLE_END_MS;
+        uint32_t period_start = APP_SM_POWERUP_RAINBOW_CYCLE_START_MS;
+        uint32_t period_end = APP_SM_POWERUP_RAINBOW_CYCLE_END_MS;
         uint32_t current_period = period_start - 
             ((period_start - period_end) * progress_256) / 256;
         
@@ -596,7 +607,7 @@ static void process_startup_sequence(void) {
         anim_state.current_b = b;
         
         render_color(r, g, b, brightness);
-        anim_state.phase = STARTUP_PHASE_RAINBOW_FADE;
+        anim_state.phase = POWERUP_PHASE_RAINBOW_FADE;
 
     } else if (elapsed < phase2_start) {
         /*==================================================================*/
@@ -605,24 +616,24 @@ static void process_startup_sequence(void) {
         uint32_t phase_elapsed = elapsed - phase1_start;
         
         /* Interpolate from current color to blue */
-        uint8_t progress = (uint8_t)((phase_elapsed * 255) / APP_SM_STARTUP_BLUE_FADE_MS);
+        uint8_t progress = (uint8_t)((phase_elapsed * 255) / APP_SM_POWERUP_BLUE_FADE_MS);
         uint8_t inv_progress = 255 - progress;
         
         /* Linear interpolation: current_color -> blue */
         uint8_t r = (anim_state.current_r * inv_progress) / 255;
         uint8_t g = (anim_state.current_g * inv_progress) / 255;
         uint8_t b = ((anim_state.current_b * inv_progress) + 
-                     (APP_SM_STARTUP_BLUE_B * progress)) / 255;
+                     (APP_SM_POWERUP_BLUE_B * progress)) / 255;
         
         render_color(r, g, b, anim_state.brightness);
-        anim_state.phase = STARTUP_PHASE_BLUE_FADE;
+        anim_state.phase = POWERUP_PHASE_BLUE_FADE;
 
     } else if (elapsed < phase3_start) {
         /*==================================================================*/
         /* Phase 2: Blue pulse (breathing effect)                           */
         /*==================================================================*/
         uint32_t phase_elapsed = elapsed - phase2_start;
-        uint32_t pulse_period = APP_SM_STARTUP_PULSE_PERIOD_MS;
+        uint32_t pulse_period = APP_SM_POWERUP_PULSE_PERIOD_MS;
         uint32_t cycle_pos = phase_elapsed % pulse_period;
         
         /* Triangular wave for breathing: 0 -> max -> 0 */
@@ -638,17 +649,17 @@ static void process_startup_sequence(void) {
         }
         
         uint8_t effective_brightness = (uint8_t)(((uint16_t)anim_state.brightness * brightness_factor) / 255);
-        render_color(APP_SM_STARTUP_BLUE_R, APP_SM_STARTUP_BLUE_G, 
-                     APP_SM_STARTUP_BLUE_B, effective_brightness);
-        anim_state.phase = STARTUP_PHASE_PULSE;
+        render_color(APP_SM_POWERUP_BLUE_R, APP_SM_POWERUP_BLUE_G, 
+                     APP_SM_POWERUP_BLUE_B, effective_brightness);
+        anim_state.phase = POWERUP_PHASE_PULSE;
 
     } else if (elapsed < phase4_start) {
         /*==================================================================*/
         /* Phase 3: Blank (LED off)                                         */
         /*==================================================================*/
-        if (anim_state.phase != STARTUP_PHASE_BLANK) {
+        if (anim_state.phase != POWERUP_PHASE_BLANK) {
             render_off();
-            anim_state.phase = STARTUP_PHASE_BLANK;
+            anim_state.phase = POWERUP_PHASE_BLANK;
         }
 
     } else {
@@ -657,7 +668,120 @@ static void process_startup_sequence(void) {
         /*==================================================================*/
         anim_state.current_type = ANIM_CMD_STOP;
         anim_state.active = false;
-        anim_state.phase = STARTUP_PHASE_COMPLETE;
+        anim_state.phase = POWERUP_PHASE_COMPLETE;
+        render_off();
+    }
+}
+
+/**
+ * @brief   Processes powerdown sequence animation.
+ * @details Multi-phase animation:
+ *          Phase 0: Fade to amber color
+ *          Phase 1: Slow pulse with decreasing intensity
+ *          Phase 2: Final fade to off
+ *          Phase 3: Complete (stop animation)
+ */
+static void process_powerdown_sequence(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+
+    /* Calculate phase boundaries */
+    uint32_t phase1_start = APP_SM_POWERDOWN_COLOR_FADE_MS;
+    uint32_t phase2_start = phase1_start + 
+                            (APP_SM_POWERDOWN_PULSE_PERIOD_MS * APP_SM_POWERDOWN_PULSE_COUNT);
+    uint32_t phase3_start = phase2_start + APP_SM_POWERDOWN_FINAL_FADE_MS;
+
+    if (elapsed < phase1_start) {
+        /*==================================================================*/
+        /* Phase 0: Fade to amber color                                     */
+        /*==================================================================*/
+        uint32_t phase_elapsed = elapsed;
+        
+        /* Interpolate from current color to amber */
+        uint8_t progress = (uint8_t)((phase_elapsed * 255) / APP_SM_POWERDOWN_COLOR_FADE_MS);
+        uint8_t inv_progress = 255 - progress;
+        
+        /* Linear interpolation: current_color -> amber */
+        uint8_t r = ((anim_state.current_r * inv_progress) + 
+                     (APP_SM_POWERDOWN_AMBER_R * progress)) / 255;
+        uint8_t g = ((anim_state.current_g * inv_progress) + 
+                     (APP_SM_POWERDOWN_AMBER_G * progress)) / 255;
+        uint8_t b = ((anim_state.current_b * inv_progress) + 
+                     (APP_SM_POWERDOWN_AMBER_B * progress)) / 255;
+        
+        render_color(r, g, b, anim_state.brightness);
+        anim_state.phase = POWERDOWN_PHASE_COLOR_FADE;
+
+    } else if (elapsed < phase2_start) {
+        /*==================================================================*/
+        /* Phase 1: Slow pulse with decreasing intensity                    */
+        /*==================================================================*/
+        uint32_t phase_elapsed = elapsed - phase1_start;
+        uint32_t pulse_period = APP_SM_POWERDOWN_PULSE_PERIOD_MS;
+        
+        /* Determine which pulse we're in (0-indexed) */
+        uint32_t pulse_index = phase_elapsed / pulse_period;
+        uint32_t cycle_pos = phase_elapsed % pulse_period;
+        
+        /* Calculate the maximum brightness for this pulse cycle.
+         * Each pulse is dimmer than the last.
+         * Pulse 0: 100% -> 70%, Pulse 1: 70% -> 40%, etc.
+         */
+        uint8_t max_brightness_pct = 100 - (pulse_index * 30);
+        if (max_brightness_pct < 30) {
+            max_brightness_pct = 30;  /* Floor at 30% */
+        }
+        uint8_t max_brightness = (anim_state.brightness * max_brightness_pct) / 100;
+        
+        /* Triangular wave for breathing: max -> 0 -> next_max
+         * We go down first then up to connect smoothly to next pulse
+         */
+        uint16_t half_period = pulse_period / 2;
+        uint8_t brightness_factor;
+        
+        if (cycle_pos < half_period) {
+            /* Falling: max -> 0 */
+            brightness_factor = (uint8_t)(((half_period - cycle_pos) * 255) / half_period);
+        } else {
+            /* Rising: 0 -> next_max (which is dimmer) */
+            uint8_t next_max_pct = 100 - ((pulse_index + 1) * 30);
+            if (next_max_pct < 30) {
+                next_max_pct = 30;
+            }
+            /* Scale the rise to reach next pulse's max brightness */
+            uint8_t rise_target = (next_max_pct * 255) / max_brightness_pct;
+            brightness_factor = (uint8_t)(((cycle_pos - half_period) * rise_target) / half_period);
+        }
+        
+        uint8_t effective_brightness = (uint8_t)(((uint16_t)max_brightness * brightness_factor) / 255);
+        render_color(APP_SM_POWERDOWN_AMBER_R, APP_SM_POWERDOWN_AMBER_G, 
+                     APP_SM_POWERDOWN_AMBER_B, effective_brightness);
+        anim_state.phase = POWERDOWN_PHASE_PULSE;
+
+    } else if (elapsed < phase3_start) {
+        /*==================================================================*/
+        /* Phase 2: Final fade to off                                       */
+        /*==================================================================*/
+        uint32_t phase_elapsed = elapsed - phase2_start;
+        
+        /* Start from the final pulse brightness (about 40% of original) */
+        uint8_t start_brightness = (anim_state.brightness * 40) / 100;
+        
+        /* Fade to 0 */
+        uint8_t progress = (uint8_t)((phase_elapsed * 255) / APP_SM_POWERDOWN_FINAL_FADE_MS);
+        uint8_t effective_brightness = (start_brightness * (255 - progress)) / 255;
+        
+        render_color(APP_SM_POWERDOWN_AMBER_R, APP_SM_POWERDOWN_AMBER_G,
+                     APP_SM_POWERDOWN_AMBER_B, effective_brightness);
+        anim_state.phase = POWERDOWN_PHASE_FINAL_FADE;
+
+    } else {
+        /*==================================================================*/
+        /* Phase 3: Complete                                                */
+        /*==================================================================*/
+        anim_state.current_type = ANIM_CMD_STOP;
+        anim_state.active = false;
+        anim_state.phase = POWERDOWN_PHASE_COMPLETE;
         render_off();
     }
 }
@@ -732,8 +856,11 @@ static void process_tick(void) {
         case ANIM_CMD_FLASH_FEEDBACK:
             process_flash_feedback();
             break;
-        case ANIM_CMD_STARTUP_SEQUENCE:
-            process_startup_sequence();
+        case ANIM_CMD_POWERUP_SEQUENCE:
+            process_powerup_sequence();
+            break;
+        case ANIM_CMD_POWERDOWN_SEQUENCE:
+            process_powerdown_sequence();
             break;
         default:
             break;
@@ -998,12 +1125,25 @@ uint8_t anim_thread_flash_feedback(uint8_t r, uint8_t g, uint8_t b,
     return anim_thread_send_command(&cmd);
 }
 
-uint8_t anim_thread_startup_sequence(uint8_t brightness) {
+uint8_t anim_thread_powerup_sequence(uint8_t brightness) {
     anim_command_t cmd = {
-        .type = ANIM_CMD_STARTUP_SEQUENCE,
-        .r = APP_SM_STARTUP_BLUE_R,
-        .g = APP_SM_STARTUP_BLUE_G,
-        .b = APP_SM_STARTUP_BLUE_B,
+        .type = ANIM_CMD_POWERUP_SEQUENCE,
+        .r = APP_SM_POWERUP_BLUE_R,
+        .g = APP_SM_POWERUP_BLUE_G,
+        .b = APP_SM_POWERUP_BLUE_B,
+        .brightness = brightness,
+        .period_ms = 0,  /* Not used - timing is internal */
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_powerdown_sequence(uint8_t brightness) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_POWERDOWN_SEQUENCE,
+        .r = APP_SM_POWERDOWN_AMBER_R,
+        .g = APP_SM_POWERDOWN_AMBER_G,
+        .b = APP_SM_POWERDOWN_AMBER_B,
         .brightness = brightness,
         .period_ms = 0,  /* Not used - timing is internal */
         .param = 0

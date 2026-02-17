@@ -254,7 +254,7 @@ static void process_input_internal(app_sm_input_t input) {
             break;
 
         case APP_SM_SYS_ACTIVE:
-            if (input == APP_SM_INPUT_BTN_EXTENDED_RELEASE) {
+            if (input == APP_SM_INPUT_BTN_EXTENDED_START) {
                 /* Initiate powerdown */
                 transition_to_state(APP_SM_SYS_POWERDOWN);
             } else {
@@ -272,8 +272,8 @@ static void process_input_internal(app_sm_input_t input) {
 
         case APP_SM_SYS_OFF:
             /* Any button press wakes up */
-            if (input == APP_SM_INPUT_BTN_SHORT ||
-                input == APP_SM_INPUT_BTN_LONG_RELEASE) {
+            /* TO DO: See if continuing holding the button will trigger in new transitioned state? */
+            if (input == APP_SM_INPUT_BTN_LONG_START) {
                 transition_to_state(APP_SM_SYS_POWERUP);
             }
             break;

@@ -11,12 +11,13 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-16)
+## [Development] (2026-02-17)
 
 NB! Notes added here during development to keep track of changes.
 
 Added
-- New **startup animation sequence**.
+- New **powerdown animation sequence**.
+- New **powerup animation sequence**.
 - New **Render modes**; static, transitions, and continuous, to handle different types of modes and animations.
 - **Improved RGB LED rendering** by making it deterministic with a configurable rendering rate.
 - **Debug** prints to serial communication (over USB) with levels.
@@ -24,7 +25,7 @@ Added
 - New threads: **Animation Thread** and **State Machine Threads**.
 - **Modes** (available in the **Active** state): solid, brightness, blink, pulse, traffic light, night light, effects, and external control.
 - **Operational Modes**, aka. different ways the RGB LED light is used.
-- **Application State Machine** with boot, startup (powerup), active, shutdown (powerdown), and off states.
+- **Application State Machine** with boot, powerup, active, shutdown (powerdown), and off states.
 - **License note** added/adjusted on most source files.
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
 - **LED Test Thread** for testing LED rendering in it's own thread.
@@ -34,6 +35,7 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Changed going from off state to startup state, requires only reach the long button press to start (hold in until classified as long press).
 - Moved powerup and powerdown state's timers from the state machine file and into their state file. 
 - Renamed **Strength** mode to **Brightness** mode.
 - Restructured the use of **button driver**, moved code away from main.c and to app_state_machine.c, and initializing button driver from state_boot.c/state_boot_enter-function.

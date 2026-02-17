@@ -26,8 +26,8 @@ SOFTWARE.
  * @file    state_powerdown.c
  * @brief   Powerdown state implementation.
  *
- * @details The powerdown state shows a fade-out animation, then transitions
- *          to the off state.
+ * @details The powerdown state shows a powerdown sequence animation,
+ *          then transitions to the off state.
  */
 
 #include "system_states.h"
@@ -64,12 +64,12 @@ void state_powerdown_enter(void) {
     /* Deactivate button driver */
     button_stop();
 
-    /* Start fade-out animation */
-    anim_thread_fade_out(APP_SM_POWERDOWN_FADE_MS);
+    /* Start powerdown sequence animation (amber pulse fade) */
+    anim_thread_powerdown_sequence(APP_SM_DEFAULT_BRIGHTNESS);
 
-    /* Set a timer to transition to off state */
+    /* Set a timer to transition to off state after animation completes */
     chVTObjectInit(&powerdown_timer);
-    chVTSet(&powerdown_timer, TIME_MS2I(APP_SM_POWERDOWN_FADE_MS + 100),
+    chVTSet(&powerdown_timer, TIME_MS2I(APP_SM_POWERDOWN_TOTAL_MS + 100),
             powerdown_timer_cb, NULL);
 }
 

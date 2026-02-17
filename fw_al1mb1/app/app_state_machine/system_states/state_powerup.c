@@ -60,12 +60,12 @@ static void powerup_timer_cb(virtual_timer_t *vtp, void *arg) {
 /*===========================================================================*/
 
 void state_powerup_enter(void) {
-    /* Start the multi-phase startup sequence animation */
-    anim_thread_startup_sequence(APP_SM_DEFAULT_BRIGHTNESS);
+    /* Start the multi-phase powerup sequence animation */
+    anim_thread_powerup_sequence(APP_SM_DEFAULT_BRIGHTNESS);
 
     /* Set a timer to transition to active state after animation completes */
     chVTObjectInit(&powerup_timer);
-    chVTSet(&powerup_timer, TIME_MS2I(APP_SM_STARTUP_TOTAL_MS + 100),
+    chVTSet(&powerup_timer, TIME_MS2I(APP_SM_POWERUP_TOTAL_MS + 100),
             powerup_timer_cb, NULL);
 }
 
