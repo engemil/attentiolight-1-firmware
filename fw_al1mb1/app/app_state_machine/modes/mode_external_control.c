@@ -29,10 +29,13 @@ SOFTWARE.
  * @details Placeholder mode for external control (WiFi, BLE, etc.).
  *          This mode can be entered from any other mode and will be
  *          controlled by external commands.
- *
- * @note    This is a stub implementation. Full implementation will be
- *          added when external interfaces are integrated.
  */
+
+/* TO DO: Integrate ESP32 WiFi/BLE communication for external control. */
+/* TO DO: Implement command protocol for receiving color/animation commands. */
+/* TO DO: Add bi-directional communication for status reporting. */
+/* TO DO: Register this mode in modes.c when external interfaces are ready. */
+
 
 #include "modes.h"
 #include "../animation/animation_thread.h"
@@ -45,6 +48,8 @@ SOFTWARE.
 
 static void external_control_enter(void) {
     DBG_INFO("MODE ExternalCtrl: enter waiting for external commands");
+    /* TO DO: Initialize ESP32 WiFi/BLE communication here */
+    /* TO DO: Register command handlers for external color/animation control */
     /* Show a distinctive color to indicate external control mode */
     /* Cyan pulsing indicates waiting for external commands */
     anim_thread_pulse(0, 255, 255, 128, 2000);
@@ -52,7 +57,7 @@ static void external_control_enter(void) {
 
 static void external_control_exit(void) {
     DBG_INFO("MODE ExternalCtrl: exit");
-    
+    /* TO DO: Cleanup ESP32 communication and unregister command handlers */
 }
 
 static void external_control_on_short_press(void) {

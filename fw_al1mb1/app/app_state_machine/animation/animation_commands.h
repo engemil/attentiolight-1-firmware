@@ -36,6 +36,8 @@ SOFTWARE.
 /* Animation Command Types                                                   */
 /*===========================================================================*/
 
+
+/* TO DO: Add ANIM_CMD_CUSTOM for user-defined animations via external control. */ 
 /**
  * @brief   Animation command types.
  */
@@ -50,7 +52,7 @@ typedef enum {
     ANIM_CMD_TRAFFIC_LIGHT,     /**< Traffic light R-Y-G sequence           */
     ANIM_CMD_FLASH_FEEDBACK,    /**< Quick flash for button feedback        */
     ANIM_CMD_POWERUP_SEQUENCE,  /**< powerup animation                      */
-    ANIM_CMD_POWERDOWN_SEQUENCE /**< Powerdown animation                   */
+    ANIM_CMD_POWERDOWN_SEQUENCE /**< Powerdown animation                    */
 } anim_cmd_type_t;
 
 /**

@@ -40,6 +40,7 @@ extern app_sm_mode_t current_mode;
 /* Mode Registry                                                             */
 /*===========================================================================*/
 
+/* TO DO: Add &mode_external_control_ops when ESP32 WiFi/BLE integration is complete. */
 /**
  * @brief   Array of mode operations, indexed by app_sm_mode_t.
  */

@@ -103,7 +103,7 @@ typedef enum {
     APP_SM_INPUT_BTN_EXTENDED_START,    /**< Extended press threshold       */
     APP_SM_INPUT_BTN_EXTENDED_RELEASE,  /**< Released after extended press  */
 
-    /* External control inputs (for future use) */
+    /* External control inputs */
     APP_SM_INPUT_EXT_CTRL_ENTER,        /**< Enter external control mode    */
     APP_SM_INPUT_EXT_CTRL_EXIT,         /**< Exit external control mode     */
     APP_SM_INPUT_EXT_COMMAND,           /**< External command received      */

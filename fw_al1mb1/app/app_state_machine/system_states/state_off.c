@@ -27,8 +27,12 @@ SOFTWARE.
  * @brief   Off state implementation.
  *
  * @details The off state keeps LEDs off and waits for user input to wake up.
- *          In the future, this could implement low-power mode.
+ *
  */
+
+/* TO DO: Implement low-power mode (STM32 Stop/Standby mode) to reduce power
+ *        consumption while in off state. Configure wake-up via button EXTI
+*/
 
 #include "system_states.h"
 #include "../animation/animation_thread.h"

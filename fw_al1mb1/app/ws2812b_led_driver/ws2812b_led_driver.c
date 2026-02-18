@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// TO DO: Add checks for already initialized
-// TO DO: Add error handling
-// TO DO: Add parameter for pin selection, timer selection, etc.
-// TO DO: Add function to set PWM driver depending on timer selection
-// TO DO: Add a check if it's already freed/released before calling dmaStreamFree()
-// TO DO: Add functionality to control the power to the LED (on/off) (e.g., via a GPIO pin)
+/* TO DO: Add checks for already initialized */
+/* TO DO: Add error handling */
+/* TO DO: Add parameter for pin selection, timer selection, etc. */
+/* TO DO: Add function to set PWM driver depending on timer selection */
+/* TO DO: Add a check if it's already freed/released before calling dmaStreamFree() */
+/* TO DO: Add functionality to control the power to the LED (on/off) (e.g., via a GPIO pin) */
 
 /**
  * @file ws2812b_led_driver.c

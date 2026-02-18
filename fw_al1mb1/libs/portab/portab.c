@@ -56,7 +56,7 @@
 /*===========================================================================*/
 
 void portab_setup(void) {
-
+    /* TO DO: Add board-specific portability setup if needed */
 }
 
 /** @} */

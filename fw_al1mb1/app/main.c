@@ -74,6 +74,8 @@ int main(void) {
     /*
      * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
      */
+    /* TO DO: Enable ESP32 driver and integrate with external control mode. */
+    /* TO DO: Implement UART communication protocol with ESP32-C3. */
     //init_ee_esp32_wifi_ble_if_driver();
     //disable_ee_esp32_wifi_ble_if_driver();
     //set_program_mode_ee_esp32_wifi_ble_if_driver();
