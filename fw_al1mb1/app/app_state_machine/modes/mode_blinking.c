@@ -42,8 +42,8 @@ SOFTWARE.
 /**
  * @brief   Blink speed names for debug output.
  */
-static const char* const speed_names[5] = {
-    "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
+static const char* const speed_names[6] = {
+    "ULTRA_SLOW", "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
 };
 #endif
 
@@ -53,18 +53,19 @@ static const char* const speed_names[5] = {
 #define BLINK_SPEED_COUNT   5
 
 static const uint16_t blink_speeds[BLINK_SPEED_COUNT] = {
-    1000,   /* Very slow - 1Hz */
-    500,    /* Slow - 2Hz */
-    250,    /* Medium - 4Hz */
-    125,    /* Fast - 8Hz */
-    62      /* Very fast - ~16Hz */
+    4000,   /* Ultra Slow - 0.25Hz */
+    2000,   /* Very Slow - 0.5Hz */
+    1000,   /* Slow - 1Hz */
+    500,    /* Medium - 2Hz */
+    250,    /* Fast - 4Hz */
+    125     /* Very Fast - 8Hz */
 };
 
 /*===========================================================================*/
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-static uint8_t current_speed_index = 1;  /* Default to slow */
+static uint8_t current_speed_index = 2;  /* Default to Slow */
 
 /* Color and brightness are shared via global_color_index, global_brightness,
  * and shared_color_palette (declared in modes.h) */

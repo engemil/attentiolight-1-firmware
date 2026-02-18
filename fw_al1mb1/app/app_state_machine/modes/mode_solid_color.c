@@ -43,8 +43,8 @@ SOFTWARE.
  * @brief   Color names for debug output.
  */
 static const char* const color_names[APP_SM_COLOR_COUNT] = {
-    "RED", "ORANGE", "YELLOW", "LIME", "GREEN", "SPRING",
-    "CYAN", "AZURE", "BLUE", "PURPLE", "MAGENTA", "PINK"
+    "AZURE", "BLUE", "PURPLE", "MAGENTA", "PINK", "RED", 
+    "ORANGE", "YELLOW", "LIME", "GREEN", "SPRING", "CYAN" 
 };
 #endif
 
@@ -53,18 +53,18 @@ static const char* const color_names[APP_SM_COLOR_COUNT] = {
  * @note    Shared globally - other modes reference this via extern in modes.h
  */
 const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
+    {  0, 128, 255},    /* Azure        */
+    {  0,   0, 255},    /* Blue         */
+    {128,   0, 255},    /* Purple       */
+    {255,   0, 255},    /* Magenta      */
+    {255,   0, 128},    /* Pink         */
     {255,   0,   0},    /* Red          */
     {255, 128,   0},    /* Orange       */
     {255, 255,   0},    /* Yellow       */
     {128, 255,   0},    /* Lime         */
     {  0, 255,   0},    /* Green        */
     {  0, 255, 128},    /* Spring       */
-    {  0, 255, 255},    /* Cyan         */
-    {  0, 128, 255},    /* Azure        */
-    {  0,   0, 255},    /* Blue         */
-    {128,   0, 255},    /* Purple       */
-    {255,   0, 255},    /* Magenta      */
-    {255,   0, 128}     /* Pink         */
+    {  0, 255, 255}     /* Cyan         */
 };
 
 /*===========================================================================*/

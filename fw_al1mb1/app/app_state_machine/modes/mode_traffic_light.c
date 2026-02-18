@@ -26,8 +26,8 @@ SOFTWARE.
  * @file    mode_traffic_light.c
  * @brief   Traffic light mode implementation.
  *
- * @details Cycles through Red -> Yellow -> Green sequence like a traffic
- *          light. Short press toggles between automatic and manual advance.
+ * @details Cycles through Green -> Yellow -> Red sequence like a traffic
+ *          light. Short press advances to the next color. Starts on Green.
  */
 
 #include "modes.h"
@@ -58,8 +58,7 @@ typedef enum {
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-static bool auto_mode = true;  /* true = automatic cycling, false = manual */
-static traffic_state_t manual_state = TRAFFIC_RED;
+static traffic_state_t current_state = TRAFFIC_GREEN;
 
 /* External reference to global brightness */
 extern uint8_t global_brightness;
@@ -90,14 +89,8 @@ static void set_traffic_color(traffic_state_t state) {
 /*===========================================================================*/
 
 static void traffic_light_enter(void) {
-    DBG_DEBUG("MODE TrafficLight: enter mode=%s", auto_mode ? "AUTO" : "MANUAL");
-    if (auto_mode) {
-        /* Start automatic traffic light animation */
-        anim_thread_traffic_light(global_brightness);
-    } else {
-        /* Show current manual state */
-        set_traffic_color(manual_state);
-    }
+    DBG_DEBUG("MODE TrafficLight: enter state=%s", traffic_state_names[current_state]);
+    set_traffic_color(current_state);
 }
 
 static void traffic_light_exit(void) {
@@ -106,30 +99,25 @@ static void traffic_light_exit(void) {
 }
 
 static void traffic_light_on_short_press(void) {
-    if (auto_mode) {
-        /* Switch to manual mode */
-        auto_mode = false;
-        manual_state = TRAFFIC_RED;
-        DBG_DEBUG("MODE TrafficLight: Set from AUTO to MANUAL (state=%s)",
-                 traffic_state_names[manual_state]);
-        set_traffic_color(manual_state);
-    } else {
-        /* Advance to next color in manual mode */
-        traffic_state_t old_state = manual_state;
-        DBG_UNUSED(old_state);
-        manual_state = (traffic_state_t)((manual_state + 1) % 3);
-        if (manual_state == TRAFFIC_RED) {
-            /* Completed one cycle, switch back to auto */
-            auto_mode = true;
-            DBG_DEBUG("MODE TrafficLight: Set from MANUAL %s to AUTO",
-                     traffic_state_names[old_state]);
-            anim_thread_traffic_light(global_brightness);
-        } else {
-            DBG_DEBUG("MODE TrafficLight: Set state from %s to %s",
-                     traffic_state_names[old_state], traffic_state_names[manual_state]);
-            set_traffic_color(manual_state);
-        }
+    /* Cycle through colors: GREEN -> YELLOW -> RED -> GREEN */
+    traffic_state_t old_state = current_state;
+    DBG_UNUSED(old_state);
+    
+    switch (current_state) {
+        case TRAFFIC_GREEN:
+            current_state = TRAFFIC_YELLOW;
+            break;
+        case TRAFFIC_YELLOW:
+            current_state = TRAFFIC_RED;
+            break;
+        case TRAFFIC_RED:
+            current_state = TRAFFIC_GREEN;
+            break;
     }
+    
+    DBG_DEBUG("MODE TrafficLight: Set state from %s to %s",
+             traffic_state_names[old_state], traffic_state_names[current_state]);
+    set_traffic_color(current_state);
 }
 
 static void traffic_light_on_long_start(void) {

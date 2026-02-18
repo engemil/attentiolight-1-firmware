@@ -44,7 +44,7 @@ SOFTWARE.
  * @brief   Pulse speed names for debug output.
  */
 static const char* const speed_names[5] = {
-    "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
+    "ULTRA_SLOW", "VERY_SLOW", "SLOW", "MEDIUM", "FAST"
 };
 #endif
 
@@ -54,18 +54,18 @@ static const char* const speed_names[5] = {
 #define PULSE_SPEED_COUNT   5
 
 static const uint16_t pulse_periods[PULSE_SPEED_COUNT] = {
+    8000,   /* Ultra slow - 8s cycle */
     4000,   /* Very slow - 4s cycle */
     2000,   /* Slow - 2s cycle */
     1000,   /* Medium - 1s cycle */
-    500,    /* Fast - 0.5s cycle */
-    250     /* Very fast - 0.25s cycle */
+    500    /* Fast - 0.5s cycle */
 };
 
 /*===========================================================================*/
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-static uint8_t current_speed_index = 1;  /* Default to slow */
+static uint8_t current_speed_index = 2;  /* Default to Slow */
 
 /*===========================================================================*/
 /* Mode Functions                                                            */

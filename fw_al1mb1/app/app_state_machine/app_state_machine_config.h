@@ -162,6 +162,9 @@ SOFTWARE.
 
 /**
  * @brief   Default color index for solid color mode.
+ * 
+ * @details Index into shared_color_palette (see mode_solid_color.c).
+ *          Set to 0 for first color, or any
  */
 #ifndef APP_SM_DEFAULT_COLOR_INDEX
 #define APP_SM_DEFAULT_COLOR_INDEX      0
