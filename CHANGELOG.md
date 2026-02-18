@@ -11,11 +11,12 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-17)
+## [Development] (2026-02-18)
 
 NB! Notes added here during development to keep track of changes.
 
 Added
+- Brightness config setting for **change mode feedback**.
 - **global/shared color** and brightness between solid, brightness, blinking and pulsation states.
 - New **powerdown animation sequence**.
 - New **powerup animation sequence**.

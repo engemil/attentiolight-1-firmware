@@ -111,7 +111,8 @@ typedef enum {
     /* System inputs */
     APP_SM_INPUT_BOOT_COMPLETE,         /**< Boot sequence finished         */
     APP_SM_INPUT_POWERUP_COMPLETE,      /**< Powerup animation finished     */
-    APP_SM_INPUT_POWERDOWN_COMPLETE     /**< Powerdown animation finished   */
+    APP_SM_INPUT_POWERDOWN_COMPLETE,    /**< Powerdown animation finished   */
+    APP_SM_INPUT_MODE_TRANSITION_COMPLETE /**< Mode transition delay done   */
 } app_sm_input_t;
 
 /**

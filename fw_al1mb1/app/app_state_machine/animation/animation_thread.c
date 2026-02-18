@@ -498,7 +498,7 @@ static void process_flash_feedback(void) {
         last_transition_state = current_state;
         if (current_state) {
             render_color(anim_state.target_r, anim_state.target_g,
-                         anim_state.target_b, 255);
+                         anim_state.target_b, anim_state.brightness);
         } else {
             /* Return to previous state - just go to stop for now */
             anim_state.current_type = ANIM_CMD_STOP;
@@ -1118,7 +1118,7 @@ uint8_t anim_thread_flash_feedback(uint8_t r, uint8_t g, uint8_t b,
         .r = r,
         .g = g,
         .b = b,
-        .brightness = 255,
+        .brightness = APP_SM_CHANGE_MODE_FEEDBACK_BRIGHTNESS,
         .period_ms = duration_ms,
         .param = 0
     };

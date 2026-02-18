@@ -104,6 +104,15 @@ SOFTWARE.
 #define APP_SM_MODE_FEEDBACK_MS         100
 #endif
 
+/**
+ * @brief   Brightness/intensity of the mode change feedback flash.
+ * @details Value from 0 (off) to 255 (maximum brightness).
+ */
+#ifndef APP_SM_CHANGE_MODE_FEEDBACK_BRIGHTNESS
+#define APP_SM_CHANGE_MODE_FEEDBACK_BRIGHTNESS  128
+#endif
+
+
 /*===========================================================================*/
 /* Feature Toggles                                                           */
 /*===========================================================================*/
