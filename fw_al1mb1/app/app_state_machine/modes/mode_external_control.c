@@ -52,7 +52,7 @@ static void external_control_enter(void) {
 
 static void external_control_exit(void) {
     DBG_INFO("MODE ExternalCtrl: exit");
-    /* Nothing to clean up */
+    
 }
 
 static void external_control_on_short_press(void) {

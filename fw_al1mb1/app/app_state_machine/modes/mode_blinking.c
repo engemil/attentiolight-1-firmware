@@ -86,7 +86,7 @@ static void blinking_enter(void) {
 
 static void blinking_exit(void) {
     DBG_INFO("MODE Blinking: exit");
-    /* Nothing to clean up - animation will be replaced */
+    
 }
 
 static void blinking_on_short_press(void) {

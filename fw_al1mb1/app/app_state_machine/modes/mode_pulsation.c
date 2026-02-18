@@ -84,7 +84,7 @@ static void pulsation_enter(void) {
 
 static void pulsation_exit(void) {
     DBG_INFO("MODE Pulsation exit");
-    /* Nothing to clean up - animation will be replaced */
+    
 }
 
 static void pulsation_on_short_press(void) {

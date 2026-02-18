@@ -47,15 +47,10 @@ void state_off_enter(void) {
 }
 
 void state_off_process(app_sm_input_t input) {
-    /* Any button press wakes up the system */
-    if (input == APP_SM_INPUT_BTN_SHORT ||
-        input == APP_SM_INPUT_BTN_LONG_RELEASE ||
-        input == APP_SM_INPUT_BTN_EXTENDED_RELEASE) {
-        /* Signal to transition to powerup state */
-        /* This is handled by the main state machine */
-    }
+    (void)input;
+    /* Nothing, ignore all inputs */
 }
 
 void state_off_exit(void) {
-    /* Nothing to clean up */
+
 }

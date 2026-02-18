@@ -71,7 +71,7 @@ void state_powerup_enter(void) {
 
 void state_powerup_process(app_sm_input_t input) {
     (void)input;
-    /* Powerup ignores all inputs - animation runs to completion */
+    /* Nothing, ignore all inputs */
 }
 
 void state_powerup_exit(void) {

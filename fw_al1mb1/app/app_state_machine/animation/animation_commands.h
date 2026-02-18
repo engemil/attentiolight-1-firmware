@@ -42,8 +42,6 @@ SOFTWARE.
 typedef enum {
     ANIM_CMD_STOP = 0,          /**< Stop animation, turn LEDs off          */
     ANIM_CMD_SOLID,             /**< Set solid color (no animation)         */
-    ANIM_CMD_FADE_IN,           /**< Fade in to target color                */
-    ANIM_CMD_FADE_OUT,          /**< Fade out to black                      */
     ANIM_CMD_BLINK,             /**< Blink on/off pattern                   */
     ANIM_CMD_PULSE,             /**< Breathing/pulse effect                 */
     ANIM_CMD_RAINBOW,           /**< Rainbow color cycle                    */
@@ -52,8 +50,7 @@ typedef enum {
     ANIM_CMD_TRAFFIC_LIGHT,     /**< Traffic light R-Y-G sequence           */
     ANIM_CMD_FLASH_FEEDBACK,    /**< Quick flash for button feedback        */
     ANIM_CMD_POWERUP_SEQUENCE,  /**< powerup animation                      */
-    ANIM_CMD_POWERDOWN_SEQUENCE, /**< Powerdown animation                   */
-    ANIM_CMD_CUSTOM             /**< Custom animation (future use)          */
+    ANIM_CMD_POWERDOWN_SEQUENCE /**< Powerdown animation                   */
 } anim_cmd_type_t;
 
 /**

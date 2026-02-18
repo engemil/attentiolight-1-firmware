@@ -85,7 +85,7 @@ static void night_light_enter(void) {
 
 static void night_light_exit(void) {
     DBG_INFO("MODE NightLight: exit");
-    /* Nothing to clean up */
+    
 }
 
 static void night_light_on_short_press(void) {

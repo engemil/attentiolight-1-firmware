@@ -50,7 +50,8 @@ static const app_sm_mode_ops_t* mode_registry[APP_SM_MODE_COUNT] = {
     &mode_pulsation_ops,
     &mode_effects_ops,
     &mode_traffic_light_ops,
-    &mode_night_light_ops
+    &mode_night_light_ops//,
+    //&mode_external_control_ops
 };
 
 /*===========================================================================*/

@@ -98,7 +98,7 @@ static void effects_enter(void) {
 
 static void effects_exit(void) {
     DBG_INFO("MODE Effects: exit");
-    /* Nothing to clean up - animation will be replaced */
+    
 }
 
 static void effects_on_short_press(void) {

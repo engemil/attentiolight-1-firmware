@@ -102,7 +102,7 @@ static void traffic_light_enter(void) {
 
 static void traffic_light_exit(void) {
     DBG_INFO("MODE TrafficLight: exit");
-    /* Nothing to clean up */
+    
 }
 
 static void traffic_light_on_short_press(void) {

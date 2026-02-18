@@ -144,7 +144,6 @@ CSRC = $(ALLCSRC) \
        app/main.c \
        app/button_driver/button_driver.c \
        app/ws2812b_led_driver/ws2812b_led_driver.c \
-       app/led_test/led_test.c \
        app/app_state_machine/app_state_machine.c \
        app/app_state_machine/animation/animation_thread.c \
        app/app_state_machine/system_states/state_boot.c \
@@ -201,7 +200,6 @@ UINCDIR = ./app_header \
           ./app \
           ./app/button_driver \
           ./app/ws2812b_led_driver \
-          ./app/led_test \
           ./app/app_state_machine \
           ./app/app_state_machine/animation \
           ./app/app_state_machine/system_states \

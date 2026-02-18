@@ -75,7 +75,7 @@ void state_powerdown_enter(void) {
 
 void state_powerdown_process(app_sm_input_t input) {
     (void)input;
-    /* During powerdown, we ignore all inputs */
+    /* Nothing, ignore all inputs */
 }
 
 void state_powerdown_exit(void) {

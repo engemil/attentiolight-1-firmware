@@ -64,9 +64,9 @@ void state_boot_enter(void) {
 
 void state_boot_process(app_sm_input_t input) {
     (void)input;
-    /* Boot state processes no inputs - it's a transient state */
+    /* Nothing, ignore all inputs */
 }
 
 void state_boot_exit(void) {
-    /* Nothing to clean up */
+
 }

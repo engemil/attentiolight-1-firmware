@@ -126,7 +126,7 @@ static const char* mode_names[] = {
 
 static const char* input_names[] = {
     "NONE",
-    "BTN_SHORT",
+    "BTN_SHORT_PRESS",
     "BTN_LONG_START",
     "BTN_LONG_RELEASE",
     "BTN_EXTENDED_START",
@@ -149,30 +149,29 @@ static const char* input_names[] = {
  *          Called from button thread context (safe for RTOS functions).
  */
 static void on_button_event(button_event_t event) {
+    
+    DBG_DEBUG("BTN EVENT: %s", button_event_name(event));
+
     switch (event) {
     case BTN_EVT_SHORT_PRESS:
         app_sm_process_input(APP_SM_INPUT_BTN_SHORT);
-        DBG_DEBUG("BTN SHORT_PRESS");
         break;
     case BTN_EVT_LONG_PRESS_START:
         app_sm_process_input(APP_SM_INPUT_BTN_LONG_START);
-        DBG_DEBUG("BTN LONG_START");
         break;
     case BTN_EVT_LONG_PRESS_RELEASE:
         app_sm_process_input(APP_SM_INPUT_BTN_LONG_RELEASE);
-        DBG_DEBUG("BTN LONG_RELEASE");
         break;
     case BTN_EVT_EXTENDED_PRESS_START:
         app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_START);
-        DBG_DEBUG("BTN EXTENDED_START");
         break;
     case BTN_EVT_EXTENDED_PRESS_RELEASE:
         app_sm_process_input(APP_SM_INPUT_BTN_EXTENDED_RELEASE);
-        DBG_DEBUG("BTN EXTENDED_RELEASE");
         break;
     default:
         break;
     }
+    
 }
 
 /**
@@ -277,7 +276,6 @@ static void process_input_internal(app_sm_input_t input) {
 
         case APP_SM_SYS_OFF:
             /* Any button press wakes up */
-            /* TO DO: See if continuing holding the button will trigger in new transitioned state? */
             if (input == APP_SM_INPUT_BTN_LONG_START) {
                 transition_to_state(APP_SM_SYS_POWERUP);
             }

@@ -105,10 +105,6 @@ static const PWMConfig pwm_cfg = {
     .dier       = STM32_TIM_DIER_CC3DE  // Enable DMA on CC3 event (TIMx_CH3 / PWM Channel 3)
 };
 
-
-uint8_t led_reset(void);
-
-
 static void dma_callback(void *p, uint32_t flags) {
     (void)p;
     if (flags & STM32_DMA_ISR_TCIF) {

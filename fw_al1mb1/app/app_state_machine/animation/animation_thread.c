@@ -241,8 +241,6 @@ static render_mode_t get_render_mode(anim_cmd_type_t type) {
             return RENDER_TRANSITIONS;
         case ANIM_CMD_PULSE:
         case ANIM_CMD_RAINBOW:
-        case ANIM_CMD_FADE_IN:
-        case ANIM_CMD_FADE_OUT:
         case ANIM_CMD_POWERUP_SEQUENCE:
         case ANIM_CMD_POWERDOWN_SEQUENCE:
         default:
@@ -284,62 +282,6 @@ static void process_solid(void) {
     anim_state.current_r = anim_state.target_r;
     anim_state.current_g = anim_state.target_g;
     anim_state.current_b = anim_state.target_b;
-}
-
-/**
- * @brief   Processes fade-in animation tick.
- */
-static void process_fade_in(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
-
-    if (elapsed >= anim_state.period_ms) {
-        /* Fade complete */
-        anim_state.current_r = anim_state.target_r;
-        anim_state.current_g = anim_state.target_g;
-        anim_state.current_b = anim_state.target_b;
-        anim_state.current_type = ANIM_CMD_SOLID;
-        render_color(anim_state.current_r, anim_state.current_g,
-                     anim_state.current_b, anim_state.brightness);
-    } else {
-        /* Interpolate */
-        uint8_t progress = (uint8_t)((elapsed * 255) / anim_state.period_ms);
-        uint8_t r = (anim_state.target_r * progress) / 255;
-        uint8_t g = (anim_state.target_g * progress) / 255;
-        uint8_t b = (anim_state.target_b * progress) / 255;
-        anim_state.current_r = r;
-        anim_state.current_g = g;
-        anim_state.current_b = b;
-        render_color(r, g, b, anim_state.brightness);
-    }
-}
-
-/**
- * @brief   Processes fade-out animation tick.
- */
-static void process_fade_out(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
-
-    if (elapsed >= anim_state.period_ms) {
-        /* Fade complete */
-        anim_state.current_r = 0;
-        anim_state.current_g = 0;
-        anim_state.current_b = 0;
-        anim_state.current_type = ANIM_CMD_STOP;
-        anim_state.active = false;
-        render_off();
-    } else {
-        /* Interpolate */
-        uint8_t progress = (uint8_t)(255 - ((elapsed * 255) / anim_state.period_ms));
-        uint8_t r = (anim_state.target_r * progress) / 255;
-        uint8_t g = (anim_state.target_g * progress) / 255;
-        uint8_t b = (anim_state.target_b * progress) / 255;
-        anim_state.current_r = r;
-        anim_state.current_g = g;
-        anim_state.current_b = b;
-        render_color(r, g, b, anim_state.brightness);
-    }
 }
 
 /**
@@ -829,12 +771,6 @@ static void process_tick(void) {
         case ANIM_CMD_SOLID:
             /* Static, no update needed */
             break;
-        case ANIM_CMD_FADE_IN:
-            process_fade_in();
-            break;
-        case ANIM_CMD_FADE_OUT:
-            process_fade_out();
-            break;
         case ANIM_CMD_BLINK:
             process_blink();
             break;
@@ -998,33 +934,6 @@ uint8_t anim_thread_set_solid(uint8_t r, uint8_t g, uint8_t b, uint8_t brightnes
         .b = b,
         .brightness = brightness,
         .period_ms = 0,
-        .param = 0
-    };
-    return anim_thread_send_command(&cmd);
-}
-
-uint8_t anim_thread_fade_in(uint8_t r, uint8_t g, uint8_t b,
-                            uint8_t brightness, uint16_t duration_ms) {
-    anim_command_t cmd = {
-        .type = ANIM_CMD_FADE_IN,
-        .r = r,
-        .g = g,
-        .b = b,
-        .brightness = brightness,
-        .period_ms = duration_ms,
-        .param = 0
-    };
-    return anim_thread_send_command(&cmd);
-}
-
-uint8_t anim_thread_fade_out(uint16_t duration_ms) {
-    anim_command_t cmd = {
-        .type = ANIM_CMD_FADE_OUT,
-        .r = anim_state.current_r,
-        .g = anim_state.current_g,
-        .b = anim_state.current_b,
-        .brightness = anim_state.brightness,
-        .period_ms = duration_ms,
         .param = 0
     };
     return anim_thread_send_command(&cmd);

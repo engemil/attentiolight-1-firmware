@@ -91,7 +91,7 @@ static void solid_color_enter(void) {
 
 static void solid_color_exit(void) {
     DBG_INFO("MODE SolidColor: exit");
-    /* Nothing to clean up */
+    
 }
 
 static void solid_color_on_short_press(void) {

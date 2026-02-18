@@ -104,33 +104,6 @@ uint8_t anim_thread_send_command(const anim_command_t* cmd);
 uint8_t anim_thread_set_solid(uint8_t r, uint8_t g, uint8_t b, uint8_t brightness);
 
 /**
- * @brief   Starts a fade-in animation.
- *
- * @param[in] r         Target red component.
- * @param[in] g         Target green component.
- * @param[in] b         Target blue component.
- * @param[in] brightness Target brightness.
- * @param[in] duration_ms Fade duration in milliseconds.
- *
- * @return  0 on success.
- *
- * @api
- */
-uint8_t anim_thread_fade_in(uint8_t r, uint8_t g, uint8_t b,
-                            uint8_t brightness, uint16_t duration_ms);
-
-/**
- * @brief   Starts a fade-out animation.
- *
- * @param[in] duration_ms Fade duration in milliseconds.
- *
- * @return  0 on success.
- *
- * @api
- */
-uint8_t anim_thread_fade_out(uint16_t duration_ms);
-
-/**
  * @brief   Starts a blink animation.
  *
  * @param[in] r         Color red component.

@@ -30,8 +30,7 @@ SOFTWARE.
 #include "portab.h"
 #include "usbcfg.h"
 #include "ws2812b_led_driver.h"
-#include "ee_esp32_wifi_ble_if_driver.h"
-/* #include "led_test.h" */  /* Replaced by app_state_machine */
+//#include "ee_esp32_wifi_ble_if_driver.h"
 #include "app_state_machine.h"
 #include "app_debug.h"
 
@@ -45,6 +44,9 @@ static SerialConfig serial_cfg = {
 };
 
 int main(void) {
+    /*
+     * ChibiOS HAL and RTOS initialization.
+     */
     halInit();
     chSysInit();
 
@@ -78,19 +80,6 @@ int main(void) {
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);
-
-    /*
-     * NOTE: WS2812B LED Driver is now initialized by the app_state_machine
-     * via anim_thread_start() -> ws2812b_led_driver_start().
-     * The driver has protection against double-initialization.
-     */
-    //ws2812b_led_driver_init();
-    
-    /*
-     * NOTE: Button Driver is now initialized by the app_state_machine
-     * in state_boot_enter() via app_sm_init_button().
-     * button_start() is called later in state_active_enter().
-     */
 
     // Add a delay to ensure ChibiOS and USB (Serial) is fully initialized before starting the (main) application part.
     chThdSleepMilliseconds(200);
