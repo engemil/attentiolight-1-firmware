@@ -40,6 +40,17 @@ SOFTWARE.
 #include "app_debug.h"
 
 /*===========================================================================*/
+/* App State Machine Macros                                                  */
+/*===========================================================================*/
+
+/**
+ * @brief   String macros for App State Machine.
+ * @details Used for consistent naming across button_driver and app_state_machine.
+ */
+#define APP_SM_UNKNOWN              "UNKNOWN"
+
+
+/*===========================================================================*/
 /* Global Variables (exported to other modules)                              */
 /*===========================================================================*/
 
@@ -126,11 +137,11 @@ static const char* mode_names[] = {
 
 static const char* input_names[] = {
     "NONE",
-    "BTN_SHORT_PRESS",
-    "BTN_LONG_START",
-    "BTN_LONG_RELEASE",
-    "BTN_EXTENDED_START",
-    "BTN_EXTENDED_RELEASE",
+    BTN_EVT_NAME_SHORT_PRESS,
+    BTN_EVT_NAME_LONG_PRESS_START,
+    BTN_EVT_NAME_LONG_PRESS_RELEASE,
+    BTN_EVT_NAME_EXTENDED_PRESS_START,
+    BTN_EVT_NAME_EXTENDED_PRESS_RELEASE,
     "EXT_CTRL_ENTER",
     "EXT_CTRL_EXIT",
     "EXT_COMMAND",
@@ -409,14 +420,14 @@ const char* app_sm_system_state_name(app_sm_system_state_t state) {
     if (state <= APP_SM_SYS_OFF) {
         return system_state_names[state];
     }
-    return "UNKNOWN";
+    return APP_SM_UNKNOWN;
 }
 
 const char* app_sm_mode_name(app_sm_mode_t mode) {
     if (mode < APP_SM_MODE_COUNT) {
         return mode_names[mode];
     }
-    return "UNKNOWN";
+    return APP_SM_UNKNOWN;
 }
 
 const char* app_sm_input_name(app_sm_input_t input) {
@@ -424,5 +435,5 @@ const char* app_sm_input_name(app_sm_input_t input) {
     if (input <= APP_SM_INPUT_POWERDOWN_COMPLETE) {
         return input_names[input];
     }
-    return "UNKNOWN";
+    return APP_SM_UNKNOWN;
 }

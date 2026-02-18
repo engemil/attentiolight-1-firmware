@@ -45,6 +45,22 @@ SOFTWARE.
 #include "button_driver_config.h"
 
 /*===========================================================================*/
+/* Button Event Name Macros                                                  */
+/*===========================================================================*/
+
+/**
+ * @brief   String macros for button event names.
+ * @details Used for consistent naming across button_driver and app_state_machine.
+ */
+#define BTN_EVT_NAME_NONE                   "BTN_NONE"
+#define BTN_EVT_NAME_SHORT_PRESS            "BTN_SHORT_PRESS"
+#define BTN_EVT_NAME_LONG_PRESS_START       "BTN_LONG_PRESS_START"
+#define BTN_EVT_NAME_LONG_PRESS_RELEASE     "BTN_LONG_PRESS_RELEASE"
+#define BTN_EVT_NAME_EXTENDED_PRESS_START   "BTN_EXTENDED_PRESS_START"
+#define BTN_EVT_NAME_EXTENDED_PRESS_RELEASE "BTN_EXTENDED_PRESS_RELEASE"
+#define BNT_EVT_UNKNOWN_EVENT               "BTN_UNKNOWN"
+
+/*===========================================================================*/
 /* Driver Data Types                                                         */
 /*===========================================================================*/
 

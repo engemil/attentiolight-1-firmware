@@ -411,18 +411,18 @@ button_driver_state_t button_get_state(void) {
 const char* button_event_name(button_event_t event) {
     switch (event) {
     case BTN_EVT_NONE:
-        return "NONE";
+        return BTN_EVT_NAME_NONE;
     case BTN_EVT_SHORT_PRESS:
-        return "SHORT_PRESS";
+        return BTN_EVT_NAME_SHORT_PRESS;
     case BTN_EVT_LONG_PRESS_START:
-        return "LONG_PRESS_START";
+        return BTN_EVT_NAME_LONG_PRESS_START;
     case BTN_EVT_LONG_PRESS_RELEASE:
-        return "LONG_PRESS_RELEASE";
+        return BTN_EVT_NAME_LONG_PRESS_RELEASE;
     case BTN_EVT_EXTENDED_PRESS_START:
-        return "EXTENDED_PRESS_START";
+        return BTN_EVT_NAME_EXTENDED_PRESS_START;
     case BTN_EVT_EXTENDED_PRESS_RELEASE:
-        return "EXTENDED_PRESS_RELEASE";
+        return BTN_EVT_NAME_EXTENDED_PRESS_RELEASE;
     default:
-        return "UNKNOWN";
+        return BNT_EVT_UNKNOWN_EVENT;
     }
 }
