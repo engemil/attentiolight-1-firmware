@@ -11,7 +11,7 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-18)
+## [Development] (2026-02-19)
 
 NB! Notes added here during development to keep track of changes.
 
@@ -33,10 +33,13 @@ Added
 - **LED Test Thread** for testing LED rendering in it's own thread.
 
 Fixed
+- Fixed problem with early initialization debug prints to show up on serial com (USB).
 - Corrected bad state call flow, transition from **boot** state to **powerup** state.
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Moved thread and application sub-/system initialization to main.c. Simpler overview of real-time related initializations.
+- Tweaked levels of a handful of debug prints.
 - Changed going from off state to startup state, requires only reach the long button press to start (hold in until classified as long press).
 - Moved powerup and powerdown state's timers from the state machine file and into their state file. 
 - Renamed **Strength** mode to **Brightness** mode.
@@ -57,8 +60,6 @@ Removed
 ## [1.0.0] - (2026-02-11)
 
 Changed
-- Moved thread and application sub-/system initialization to main.c. Simpler overview of real-time related initializations.
-- Tweaked levels of a handful of debug prints.
 - Updated **.devcontainer files** with better container structure.
 - Removed **ChibiOS** command from .vscode files. 
 
