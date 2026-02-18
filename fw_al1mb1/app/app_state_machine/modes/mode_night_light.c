@@ -39,7 +39,7 @@ SOFTWARE.
 /* Night Light Brightness Levels                                             */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
  * @brief   Night light level names for debug output.
  */
@@ -71,7 +71,7 @@ static uint8_t current_level_index = 2;  /* Default to dim */
 /*===========================================================================*/
 
 static void night_light_enter(void) {
-    DBG_INFO("MODE NightLight: enter level=%s (%d)",
+    DBG_DEBUG("MODE NightLight: enter level=%s (%d)",
              level_names[current_level_index],
              night_brightness_levels[current_level_index]);
     /* Display warm color at current night light brightness */
@@ -84,7 +84,7 @@ static void night_light_enter(void) {
 }
 
 static void night_light_exit(void) {
-    DBG_INFO("MODE NightLight: exit");
+    DBG_DEBUG("MODE NightLight: exit");
     
 }
 
@@ -94,7 +94,7 @@ static void night_light_on_short_press(void) {
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % NIGHT_LIGHT_LEVELS;
 
-    DBG_INFO("MODE NightLight: level set from %s to %s (%d to %d)",
+    DBG_DEBUG("MODE NightLight: level set from %s to %s (%d to %d)",
              level_names[old_idx], level_names[current_level_index],
              night_brightness_levels[old_idx],
              night_brightness_levels[current_level_index]);

@@ -57,6 +57,8 @@ Removed
 ## [1.0.0] - (2026-02-11)
 
 Changed
+- Moved thread and application sub-/system initialization to main.c. Simpler overview of real-time related initializations.
+- Tweaked levels of a handful of debug prints.
 - Updated **.devcontainer files** with better container structure.
 - Removed **ChibiOS** command from .vscode files. 
 

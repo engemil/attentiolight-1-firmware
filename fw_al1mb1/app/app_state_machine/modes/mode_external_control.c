@@ -47,7 +47,7 @@ SOFTWARE.
 /*===========================================================================*/
 
 static void external_control_enter(void) {
-    DBG_INFO("MODE ExternalCtrl: enter waiting for external commands");
+    DBG_DEBUG("MODE ExternalCtrl: enter waiting for external commands");
     /* TO DO: Initialize ESP32 WiFi/BLE communication here */
     /* TO DO: Register command handlers for external color/animation control */
     /* Show a distinctive color to indicate external control mode */
@@ -56,7 +56,7 @@ static void external_control_enter(void) {
 }
 
 static void external_control_exit(void) {
-    DBG_INFO("MODE ExternalCtrl: exit");
+    DBG_DEBUG("MODE ExternalCtrl: exit");
     /* TO DO: Cleanup ESP32 communication and unregister command handlers */
 }
 

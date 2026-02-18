@@ -38,7 +38,7 @@ SOFTWARE.
 /* Color Palette                                                             */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
  * @brief   Color names for debug output.
  */
@@ -78,7 +78,7 @@ const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
 /*===========================================================================*/
 
 static void solid_color_enter(void) {
-    DBG_INFO("MODE SolidColor: enter: color=%s brightness=%d",
+    DBG_DEBUG("MODE SolidColor: enter: color=%s brightness=%d",
              color_names[global_color_index], global_brightness);
     /* Display current color */
     anim_thread_set_solid(
@@ -90,7 +90,7 @@ static void solid_color_enter(void) {
 }
 
 static void solid_color_exit(void) {
-    DBG_INFO("MODE SolidColor: exit");
+    DBG_DEBUG("MODE SolidColor: exit");
     
 }
 
@@ -100,7 +100,7 @@ static void solid_color_on_short_press(void) {
     /* Cycle to next color */
     global_color_index = (global_color_index + 1) % APP_SM_COLOR_COUNT;
 
-    DBG_INFO("MODE SolidColor: color set from %s to %s",
+    DBG_DEBUG("MODE SolidColor: color set from %s to %s",
              color_names[old_idx], color_names[global_color_index]);
 
     /* Display new color */

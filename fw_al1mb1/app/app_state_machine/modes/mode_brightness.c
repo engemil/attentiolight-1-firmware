@@ -39,7 +39,7 @@ SOFTWARE.
 /* Brightness Levels                                                         */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
  * @brief   Brightness level names for debug output.
  */
@@ -76,7 +76,7 @@ extern uint8_t global_brightness;
 /*===========================================================================*/
 
 static void brightness_enter(void) {
-    DBG_INFO("MODE Brightness: enter level=%s (%d)",
+    DBG_DEBUG("MODE Brightness: enter level=%s (%d)",
              brightness_names[current_level_index],
              brightness_levels[current_level_index]);
     /* Display current color at current brightness level */
@@ -88,7 +88,7 @@ static void brightness_enter(void) {
 }
 
 static void brightness_exit(void) {
-    DBG_INFO("MODE Brightness: exit global_brightness=%d",
+    DBG_DEBUG("MODE Brightness: exit global_brightness=%d",
              brightness_levels[current_level_index]);
     /* Update global brightness for other modes to use */
     global_brightness = brightness_levels[current_level_index];
@@ -100,7 +100,7 @@ static void brightness_on_short_press(void) {
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % APP_SM_BRIGHTNESS_LEVELS;
 
-    DBG_INFO("MODE Brightness: level set from %s to %s (%d to %d)",
+    DBG_DEBUG("MODE Brightness: level set from %s to %s (%d to %d)",
              brightness_names[old_idx], brightness_names[current_level_index],
              brightness_levels[old_idx], brightness_levels[current_level_index]);
 

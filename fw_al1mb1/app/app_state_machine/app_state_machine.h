@@ -48,6 +48,7 @@ SOFTWARE.
 #include <stdbool.h>
 
 #include "app_state_machine_config.h"
+#include "button_driver.h"
 
 /*===========================================================================*/
 /* Data Types                                                                */
@@ -278,6 +279,17 @@ const char* app_sm_mode_name(app_sm_mode_t mode);
  * @api
  */
 const char* app_sm_input_name(app_sm_input_t input);
+
+/**
+ * @brief   Gets the button event callback for the state machine.
+ * @details Use this to register the state machine's button handler with
+ *          the button driver during initialization in main().
+ *
+ * @return  Button callback function pointer.
+ *
+ * @api
+ */
+button_callback_t app_sm_get_button_event_callback(void);
 
 #ifdef __cplusplus
 }

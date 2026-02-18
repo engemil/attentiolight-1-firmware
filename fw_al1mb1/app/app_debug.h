@@ -50,9 +50,8 @@ SOFTWARE.
 #include "ch.h"
 #include "hal.h"
 #include "chprintf.h"
-
-/* Forward declaration - SDU1 is defined in usbcfg.c */
-extern SerialUSBDriver SDU1;
+#include "portab.h"
+#include "usbcfg.h"
 
 /*===========================================================================*/
 /* Debug Level Configuration                                                 */
@@ -85,7 +84,7 @@ extern SerialUSBDriver SDU1;
 /**
  * @brief   Debug output stream (USB CDC serial).
  */
-#define DBG_STREAM              ((BaseSequentialStream*)&SDU1)
+#define DBG_STREAM              ((BaseSequentialStream*)&PORTAB_SDU1)
 
 /**
  * @brief   Suppress unused variable warnings for debug-only variables.

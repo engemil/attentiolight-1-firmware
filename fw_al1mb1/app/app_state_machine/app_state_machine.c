@@ -186,12 +186,13 @@ static void on_button_event(button_event_t event) {
 }
 
 /**
- * @brief   Initializes the button driver and registers the callback.
- * @details Called from state_boot_enter() to set up button handling.
+ * @brief   Returns the button event callback for the state machine.
+ * @details Used by main() to register the callback with button driver.
+ *
+ * @return  Button callback function pointer.
  */
-void app_sm_init_button(void) {
-    button_init(LINE_USER_BUTTON, PAL_LOW);
-    button_register_callback(on_button_event);
+button_callback_t app_sm_get_button_event_callback(void) {
+    return on_button_event;
 }
 
 /**
@@ -222,7 +223,7 @@ static void transition_to_state(app_sm_system_state_t new_state) {
             break;
     }
 
-    DBG_INFO("SM %s -> %s", system_state_names[old_state], system_state_names[new_state]);
+    DBG_DEBUG("SM %s -> %s", system_state_names[old_state], system_state_names[new_state]);
 
     /* Update state */
     system_state = new_state;

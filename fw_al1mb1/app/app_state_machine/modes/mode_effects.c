@@ -43,7 +43,7 @@ SOFTWARE.
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
  * @brief   Submode names for debug output.
  */
@@ -91,13 +91,13 @@ static void start_current_submode(void) {
 /*===========================================================================*/
 
 static void effects_enter(void) {
-    DBG_INFO("MODE Effects: enter submode=%s", submode_names[current_submode]);
+    DBG_DEBUG("MODE Effects: enter submode=%s", submode_names[current_submode]);
     /* Start current effects submode */
     start_current_submode();
 }
 
 static void effects_exit(void) {
-    DBG_INFO("MODE Effects: exit");
+    DBG_DEBUG("MODE Effects: exit");
     
 }
 
@@ -108,7 +108,7 @@ static void effects_on_short_press(void) {
     current_submode = (app_sm_effects_submode_t)
                       ((current_submode + 1) % APP_SM_EFFECTS_COUNT);
 
-    DBG_INFO("MODE Effects: submode %s -> %s",
+    DBG_DEBUG("MODE Effects: submode %s -> %s",
              submode_names[old_submode], submode_names[current_submode]);
 
     /* Start new effect */

@@ -844,7 +844,7 @@ static THD_FUNCTION(anim_thread_func, arg) {
 
 uint8_t anim_thread_init(void) {
     if (anim_thread_state != ANIM_THREAD_UNINIT) {
-        DBG_ERROR("ANIM init failed - already initialized");
+        DBG_WARN("ANIM init failed - already initialized");
         return 1;
     }
 

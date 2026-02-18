@@ -116,12 +116,6 @@ void state_off_process(app_sm_input_t input);
 void state_off_exit(void);
 
 /**
- * @brief   Initializes the button driver and registers the state machine callback.
- * @details Should be called from state_boot_enter().
- */
-void app_sm_init_button(void);
-
-/**
  * @brief   Posts an input event to the state machine from ISR context.
  * @details This is ISR-safe and can be called from timer callbacks.
  *

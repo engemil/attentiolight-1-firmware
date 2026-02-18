@@ -31,6 +31,8 @@ SOFTWARE.
 #include "usbcfg.h"
 #include "ws2812b_led_driver.h"
 //#include "ee_esp32_wifi_ble_if_driver.h"
+#include "button_driver.h"
+#include "animation_thread.h"
 #include "app_state_machine.h"
 #include "app_debug.h"
 
@@ -43,7 +45,10 @@ static SerialConfig serial_cfg = {
     .cr3    = 0                 // No hardware flow control
 };
 
-int main(void) {
+/*
+ * System initialization.
+*/
+void init_system(void) {
     /*
      * ChibiOS HAL and RTOS initialization.
      */
@@ -82,32 +87,96 @@ int main(void) {
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);
+}
 
-    // Add a delay to ensure ChibiOS and USB (Serial) is fully initialized before starting the (main) application part.
-    chThdSleepMilliseconds(200);
+/*
+ * Initializes application threads and subsystems.
+*/
+void init_application_threads(void){
+
+    DBG_INFO("MAIN initializing application...");
+    /*
+     * Initialize button driver.
+     * Creates button thread in STOPPED state (started later by state machine).
+     */
+    DBG_DEBUG("MAIN button_init()...");
+    if (button_init(LINE_USER_BUTTON, PAL_LOW) != 0) {
+        DBG_ERROR("MAIN button_init() FAILED");
+    }
+    DBG_DEBUG("MAIN button_init() OK");
 
     /*
-     * Initializes and starts Application State Machine.
+     * Initialize animation subsystem.
+     * Creates animation thread and initializes LED driver.
+     */
+    DBG_DEBUG("MAIN anim_thread_init()...");
+    if (anim_thread_init() != 0) {
+        DBG_ERROR("MAIN anim_thread_init() FAILED");
+    }
+    DBG_DEBUG("MAIN anim_thread_init() OK");
+
+    DBG_DEBUG("MAIN anim_thread_start()...");
+    if (anim_thread_start() != 0) {
+        DBG_ERROR("MAIN anim_thread_start() FAILED");
+    }
+    DBG_DEBUG("MAIN anim_thread_start() OK");
+
+    /*
+     * Initialize Application State Machine.
      */
     DBG_DEBUG("MAIN app_sm_init()...");
-    app_sm_init();
+    if (app_sm_init() != 0) {
+        DBG_ERROR("MAIN app_sm_init() FAILED");
+    }
+    DBG_DEBUG("MAIN app_sm_init() OK");
+
+    /*
+     * Register button callback with state machine.
+     */
+    DBG_DEBUG("MAIN registering button callback...");
+    button_register_callback(app_sm_get_button_event_callback());
+    DBG_DEBUG("MAIN button callback registered");
+
+    /*
+     * Start Application State Machine.
+     */
     DBG_DEBUG("MAIN app_sm_start()...");
-    app_sm_start();
-    DBG_INFO("MAIN state machine started");
+    if (app_sm_start() != 0) {
+        DBG_ERROR("MAIN app_sm_start() FAILED");
+    }
+    DBG_DEBUG("MAIN state machine started");
+
+    DBG_INFO("Initialized AttentioLight-1 by EngEmil.io");
+}
+
+int main(void) {
     
+    /* Initialize system (HAL, board, USB, etc.) */
+    init_system();
+
+    /* Add a delay to ensure USB (Serial) is fully initialized before starting the (main) application part */
+    chThdSleepMilliseconds(500);
+
+    /* Initialize application threads and subsystems. */
+    init_application_threads();
+
+    
+    // TEST CODE
     uint32_t test_serial_usb = 0;
     uint32_t test_serial_vcp = 0;
 
     while (true) {
 
-        // TEST VCP SERIAL COMMUNICATION
+        // TEST CODE // TEST VCP SERIAL COMMUNICATION
         //chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
-        // TEST USB SERIAL COMMUNICATION
+        // TEST CODE // TEST USB SERIAL COMMUNICATION
         chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
 
+        // TEST CODE
         test_serial_usb++;
         test_serial_vcp++;
 
+        /* Nothing happening in main thread (except for test code) */
         chThdSleepMilliseconds(500);
 
     }

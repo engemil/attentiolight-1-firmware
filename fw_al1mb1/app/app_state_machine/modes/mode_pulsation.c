@@ -39,7 +39,7 @@ SOFTWARE.
 /* Pulse Speeds                                                              */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
+#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
  * @brief   Pulse speed names for debug output.
  */
@@ -72,7 +72,7 @@ static uint8_t current_speed_index = 1;  /* Default to slow */
 /*===========================================================================*/
 
 static void pulsation_enter(void) {
-    DBG_INFO("MODE Pulsation: enter speed=%s (%dms period)",
+    DBG_DEBUG("MODE Pulsation: enter speed=%s (%dms period)",
              speed_names[current_speed_index], pulse_periods[current_speed_index]);
     /* Start pulse animation with shared color */
     anim_thread_pulse(
@@ -83,7 +83,7 @@ static void pulsation_enter(void) {
 }
 
 static void pulsation_exit(void) {
-    DBG_INFO("MODE Pulsation exit");
+    DBG_DEBUG("MODE Pulsation exit");
     
 }
 
@@ -93,7 +93,7 @@ static void pulsation_on_short_press(void) {
     /* Cycle to next pulse speed */
     current_speed_index = (current_speed_index + 1) % PULSE_SPEED_COUNT;
 
-    DBG_INFO("MODE Pulsation: speed from %s to %s (%dms to %dms)",
+    DBG_DEBUG("MODE Pulsation: speed from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              pulse_periods[old_idx], pulse_periods[current_speed_index]);
 

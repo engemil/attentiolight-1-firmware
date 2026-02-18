@@ -114,7 +114,7 @@ static void dma_callback(void *p, uint32_t flags) {
 }
 
 uint8_t ws2812b_led_driver_init(void){
-    DBG_INFO("WS2812B: init");
+    DBG_DEBUG("WS2812B: init");
     driver_status.initialized = true;
     ws2812b_led_driver_start();
     return 0;
@@ -125,7 +125,7 @@ uint8_t ws2812b_led_driver_start(void){
 
     /* Prevent double initialization */
     if (driver_status.started) {
-        DBG_DEBUG("WS2812B: start skipped - already started");
+        DBG_WARN("WS2812B: start skipped - already started");
         return 0;
     }
 

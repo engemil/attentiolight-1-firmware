@@ -42,19 +42,9 @@ SOFTWARE.
 void state_boot_enter(void) {
     DBG_DEBUG("state_boot_enter()");
 
-    /* Initialize button driver and register callback */
-    DBG_DEBUG("calling app_sm_init_button()...");
-    app_sm_init_button();
-    DBG_DEBUG("app_sm_init_button() returned");
-
-    /* Initialize animation thread */
-    DBG_DEBUG("calling anim_thread_init()...");
-    anim_thread_init();
-    DBG_DEBUG("anim_thread_init() returned");
-
-    DBG_DEBUG("calling anim_thread_start()...");
-    anim_thread_start();
-    DBG_DEBUG("anim_thread_start() returned");
+    /*
+     * Boot state just signals the transition to powerup.
+     */
 
     /* Boot is instant - signal transition to powerup */
     DBG_DEBUG("posting BOOT_COMPLETE input...");
