@@ -31,6 +31,7 @@ SOFTWARE.
  */
 
 #include "system_states.h"
+#include "state_powerdown_config.h"
 #include "../animation/animation_thread.h"
 #include "../app_state_machine_config.h"
 #include "button_driver.h"

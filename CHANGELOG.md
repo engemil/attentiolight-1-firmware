@@ -39,6 +39,8 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Separated and moved the configurations for each subsystem, state or mode.
+- Moved effects for effect mode to their separate files.
 - Moved thread and application sub-/system initialization to main.c. Simpler overview of real-time related initializations.
 - Tweaked levels of a handful of debug prints.
 - Changed going from off state to startup state, requires only reach the long button press to start (hold in until classified as long press).

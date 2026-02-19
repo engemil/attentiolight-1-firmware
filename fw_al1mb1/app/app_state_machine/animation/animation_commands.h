@@ -31,6 +31,7 @@ SOFTWARE.
 #define ANIMATION_COMMANDS_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /*===========================================================================*/
 /* Animation Command Types                                                   */

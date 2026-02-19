@@ -146,6 +146,20 @@ CSRC = $(ALLCSRC) \
        app/ws2812b_led_driver/ws2812b_led_driver.c \
        app/app_state_machine/app_state_machine.c \
        app/app_state_machine/animation/animation_thread.c \
+       app/app_state_machine/animation/animation_helpers.c \
+       app/app_state_machine/modes/effects/effect_breathing.c \
+       app/app_state_machine/modes/effects/effect_candle.c \
+       app/app_state_machine/modes/effects/effect_fire.c \
+       app/app_state_machine/modes/effects/effect_lava_lamp.c \
+       app/app_state_machine/modes/effects/effect_day_night.c \
+       app/app_state_machine/modes/effects/effect_ocean.c \
+       app/app_state_machine/modes/effects/effect_northern_lights.c \
+       app/app_state_machine/modes/effects/effect_thunder_storm.c \
+       app/app_state_machine/modes/effects/effect_police.c \
+       app/app_state_machine/modes/effects/effect_health_pulse.c \
+       app/app_state_machine/modes/effects/effect_memory.c \
+       app/app_state_machine/modes/effects/effect_rainbow.c \
+       app/app_state_machine/modes/effects/effect_color_cycle.c \
        app/app_state_machine/system_states/state_boot.c \
        app/app_state_machine/system_states/state_powerup.c \
        app/app_state_machine/system_states/state_active.c \
@@ -203,7 +217,8 @@ UINCDIR = ./app_header \
           ./app/app_state_machine \
           ./app/app_state_machine/animation \
           ./app/app_state_machine/system_states \
-          ./app/app_state_machine/modes
+          ./app/app_state_machine/modes \
+          ./app/app_state_machine/modes/effects
 
 # List the user directory to look for the libraries here
 ULIBDIR =
