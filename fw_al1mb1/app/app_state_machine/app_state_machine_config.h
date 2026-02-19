@@ -221,11 +221,35 @@ SOFTWARE.
 /*===========================================================================*/
 
 /**
- * @brief   Breathing effect period in milliseconds.
- * @details Full cycle (slow inhale, slower exhale).
+ * @brief   Breathing effect: rise time in milliseconds.
+ * @details Time to go from low to high brightness.
  */
-#ifndef APP_SM_BREATHING_PERIOD_MS
-#define APP_SM_BREATHING_PERIOD_MS      4000
+#ifndef APP_SM_BREATHING_RISE_MS
+#define APP_SM_BREATHING_RISE_MS        3000
+#endif
+
+/**
+ * @brief   Breathing effect: fall time in milliseconds.
+ * @details Time to go from high to low brightness.
+ */
+#ifndef APP_SM_BREATHING_FALL_MS
+#define APP_SM_BREATHING_FALL_MS        4000
+#endif
+
+/**
+ * @brief   Breathing effect: hold high time in milliseconds.
+ * @details Time to stay at peak brightness.
+ */
+#ifndef APP_SM_BREATHING_HOLD_HIGH_MS
+#define APP_SM_BREATHING_HOLD_HIGH_MS   2000
+#endif
+
+/**
+ * @brief   Breathing effect: hold low time in milliseconds.
+ * @details Time to stay at minimum brightness.
+ */
+#ifndef APP_SM_BREATHING_HOLD_LOW_MS
+#define APP_SM_BREATHING_HOLD_LOW_MS    2000
 #endif
 
 /**
@@ -242,6 +266,15 @@ SOFTWARE.
 #endif
 
 /**
+ * @brief   Breathing effect total period (computed from phases).
+ * @details This is the sum of all 4 phase durations. Used by mode_effects.c.
+ */
+#ifndef APP_SM_BREATHING_PERIOD_MS
+#define APP_SM_BREATHING_PERIOD_MS      (APP_SM_BREATHING_RISE_MS + APP_SM_BREATHING_HOLD_HIGH_MS + \
+                                         APP_SM_BREATHING_FALL_MS + APP_SM_BREATHING_HOLD_LOW_MS)
+#endif
+
+/**
  * @brief   Candle flicker base period in milliseconds.
  * @details Base timing for random flicker variations.
  */
@@ -250,10 +283,26 @@ SOFTWARE.
 #endif
 
 /**
+ * @brief   Candle flicker randomness range in milliseconds.
+ * @details Flicker period varies from (base - range/2) to (base + range/2).
+ */
+#ifndef APP_SM_CANDLE_RANDOM_RANGE_MS
+#define APP_SM_CANDLE_RANDOM_RANGE_MS   80
+#endif
+
+/**
  * @brief   Fire effect base period in milliseconds.
  */
 #ifndef APP_SM_FIRE_PERIOD_MS
-#define APP_SM_FIRE_PERIOD_MS           80
+#define APP_SM_FIRE_PERIOD_MS           60
+#endif
+
+/**
+ * @brief   Fire effect randomness range in milliseconds.
+ * @details Flicker period varies randomly within this range.
+ */
+#ifndef APP_SM_FIRE_RANDOM_RANGE_MS
+#define APP_SM_FIRE_RANDOM_RANGE_MS     100
 #endif
 
 /**
