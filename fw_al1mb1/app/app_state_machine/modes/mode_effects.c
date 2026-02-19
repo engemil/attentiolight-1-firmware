@@ -28,8 +28,18 @@ SOFTWARE.
  *
  * @details Contains multiple effects sub-modes:
  *          - Rainbow: Smooth HSV color cycling
- *          - Strobe: Fast flash effect
  *          - Color Cycle: Step through colors
+ *          - Breathing: Asymmetric breathing (soft azure)
+ *          - Candle: Warm flickering candle
+ *          - Fire: Intense red/orange flickering
+ *          - Lava Lamp: Organic slow color morphing
+ *          - Day/Night: Sunrise/sunset cycle
+ *          - Ocean: Blue/cyan gentle waves
+ *          - Northern Lights: Aurora-like shifting
+ *          - Thunder Storm: Dark blue with lightning
+ *          - Police: Red/blue smooth transitions
+ *          - Health Pulse: Red heartbeat
+ *          - Memory: Random warm soft glows
  *
  *          Short press cycles through sub-modes.
  */
@@ -48,7 +58,9 @@ SOFTWARE.
  * @brief   Submode names for debug output.
  */
 static const char* const submode_names[APP_SM_EFFECTS_COUNT] = {
-    "RAINBOW", "STROBE", "COLOR_CYCLE"
+    "RAINBOW", "COLOR_CYCLE", "BREATHING", "CANDLE", "FIRE", "LAVA_LAMP",
+    "DAY_NIGHT", "OCEAN", "NORTHERN_LIGHTS", "THUNDER_STORM", "POLICE",
+    "HEALTH_PULSE", "MEMORY"
 };
 #endif
 
@@ -70,14 +82,58 @@ static void start_current_submode(void) {
             anim_thread_rainbow(global_brightness, APP_SM_RAINBOW_PERIOD_MS);
             break;
 
-        case APP_SM_EFFECTS_STROBE:
-            anim_thread_strobe(255, 255, 255, global_brightness,
-                               APP_SM_STROBE_INTERVAL_MS);
-            break;
-
         case APP_SM_EFFECTS_COLOR_CYCLE:
             anim_thread_color_cycle(global_brightness,
                                     APP_SM_COLOR_CYCLE_INTERVAL_MS);
+            break;
+
+        case APP_SM_EFFECTS_BREATHING:
+            anim_thread_breathing(APP_SM_BREATHING_R, APP_SM_BREATHING_G,
+                                  APP_SM_BREATHING_B, global_brightness,
+                                  APP_SM_BREATHING_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_CANDLE:
+            anim_thread_candle(global_brightness, APP_SM_CANDLE_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_FIRE:
+            anim_thread_fire(global_brightness, APP_SM_FIRE_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_LAVA_LAMP:
+            anim_thread_lava_lamp(global_brightness, APP_SM_LAVA_LAMP_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_DAY_NIGHT:
+            anim_thread_day_night(global_brightness, APP_SM_DAY_NIGHT_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_OCEAN:
+            anim_thread_ocean(global_brightness, APP_SM_OCEAN_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_NORTHERN_LIGHTS:
+            anim_thread_northern_lights(global_brightness,
+                                        APP_SM_NORTHERN_LIGHTS_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_THUNDER_STORM:
+            anim_thread_thunder_storm(global_brightness,
+                                      APP_SM_THUNDER_STORM_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_POLICE:
+            anim_thread_police(global_brightness, APP_SM_POLICE_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_HEALTH_PULSE:
+            anim_thread_health_pulse(global_brightness,
+                                     APP_SM_HEALTH_PULSE_PERIOD_MS);
+            break;
+
+        case APP_SM_EFFECTS_MEMORY:
+            anim_thread_memory(global_brightness, APP_SM_MEMORY_PERIOD_MS);
             break;
 
         default:

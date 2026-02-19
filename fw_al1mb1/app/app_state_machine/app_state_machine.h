@@ -85,8 +85,18 @@ typedef enum {
  */
 typedef enum {
     APP_SM_EFFECTS_RAINBOW = 0,     /**< Rainbow color cycle                */
-    APP_SM_EFFECTS_STROBE,          /**< Strobe/flash effect                */
     APP_SM_EFFECTS_COLOR_CYCLE,     /**< Smooth color transitions           */
+    APP_SM_EFFECTS_BREATHING,       /**< Asymmetric breathing (soft azure)  */
+    APP_SM_EFFECTS_CANDLE,          /**< Candle flicker effect              */
+    APP_SM_EFFECTS_FIRE,            /**< Fire flickering effect             */
+    APP_SM_EFFECTS_LAVA_LAMP,       /**< Organic slow color morphing        */
+    APP_SM_EFFECTS_DAY_NIGHT,       /**< Day/night cycle (sunrise/sunset)   */
+    APP_SM_EFFECTS_OCEAN,           /**< Ocean blue/cyan gentle waves       */
+    APP_SM_EFFECTS_NORTHERN_LIGHTS, /**< Aurora-like shifting colors        */
+    APP_SM_EFFECTS_THUNDER_STORM,   /**< Dark blue with lightning flashes   */
+    APP_SM_EFFECTS_POLICE,          /**< Red/blue with smooth transitions   */
+    APP_SM_EFFECTS_HEALTH_PULSE,    /**< Red heartbeat double-pulse         */
+    APP_SM_EFFECTS_MEMORY,          /**< Random warm soft glows             */
     APP_SM_EFFECTS_COUNT            /**< Number of effects sub-modes        */
 } app_sm_effects_submode_t;
 

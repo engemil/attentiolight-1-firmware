@@ -18,6 +18,7 @@ NB! Notes added here during development to keep track of changes.
 Added
 - Brightness config setting for **change mode feedback**.
 - **global/shared color** and brightness between solid, brightness, blinking and pulsation states.
+- New **effects** in *effect mode**; breathing, candle, fire, lava lamp, day/night cycle, ocean, northern lights, thunder storm, police, health pulse, memory.
 - New **powerdown animation sequence**.
 - New **powerup animation sequence**.
 - New **Render modes**; static, transitions, and continuous, to handle different types of modes and animations.
@@ -51,6 +52,7 @@ Changed
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.
 
 Removed
+- **strobe effect** removed.
 - Redundant **powerup timer**.
 - Unecessary skip powerup button press.
 

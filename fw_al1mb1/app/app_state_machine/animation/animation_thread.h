@@ -148,22 +148,6 @@ uint8_t anim_thread_pulse(uint8_t r, uint8_t g, uint8_t b,
 uint8_t anim_thread_rainbow(uint8_t brightness, uint16_t period_ms);
 
 /**
- * @brief   Starts a strobe animation.
- *
- * @param[in] r         Color red component.
- * @param[in] g         Color green component.
- * @param[in] b         Color blue component.
- * @param[in] brightness Brightness level.
- * @param[in] interval_ms Strobe interval in milliseconds.
- *
- * @return  0 on success.
- *
- * @api
- */
-uint8_t anim_thread_strobe(uint8_t r, uint8_t g, uint8_t b,
-                           uint8_t brightness, uint16_t interval_ms);
-
-/**
  * @brief   Starts a color cycle animation.
  *
  * @param[in] brightness Brightness level.
@@ -174,6 +158,142 @@ uint8_t anim_thread_strobe(uint8_t r, uint8_t g, uint8_t b,
  * @api
  */
 uint8_t anim_thread_color_cycle(uint8_t brightness, uint16_t interval_ms);
+
+/**
+ * @brief   Starts a breathing animation (asymmetric: slow in, slower out).
+ *
+ * @param[in] r         Color red component.
+ * @param[in] g         Color green component.
+ * @param[in] b         Color blue component.
+ * @param[in] brightness Max brightness level.
+ * @param[in] period_ms Full breathing cycle period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_breathing(uint8_t r, uint8_t g, uint8_t b,
+                              uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a candle flicker animation.
+ *
+ * @param[in] brightness Max brightness level.
+ * @param[in] period_ms Base flicker period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_candle(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a fire animation.
+ *
+ * @param[in] brightness Max brightness level.
+ * @param[in] period_ms Base flicker period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_fire(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a lava lamp animation (organic slow color morphing).
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Full color morph cycle in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_lava_lamp(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a day/night cycle animation.
+ *
+ * @param[in] brightness Max brightness level.
+ * @param[in] period_ms Full cycle period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_day_night(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts an ocean wave animation.
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Wave period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_ocean(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a northern lights (aurora) animation.
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Color shift period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_northern_lights(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a thunder storm animation.
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Average time between lightning flashes in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_thunder_storm(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a police lights animation.
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Transition period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_police(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a health pulse (heartbeat) animation.
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Heartbeat period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_health_pulse(uint8_t brightness, uint16_t period_ms);
+
+/**
+ * @brief   Starts a memory animation (random warm soft glows).
+ *
+ * @param[in] brightness Brightness level.
+ * @param[in] period_ms Base timing period in milliseconds.
+ *
+ * @return  0 on success.
+ *
+ * @api
+ */
+uint8_t anim_thread_memory(uint8_t brightness, uint16_t period_ms);
 
 /**
  * @brief   Starts a traffic light animation.

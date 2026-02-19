@@ -210,17 +210,112 @@ SOFTWARE.
 #endif
 
 /**
- * @brief   Default strobe interval in milliseconds.
- */
-#ifndef APP_SM_STROBE_INTERVAL_MS
-#define APP_SM_STROBE_INTERVAL_MS       100
-#endif
-
-/**
  * @brief   Default color cycle interval in milliseconds.
  */
 #ifndef APP_SM_COLOR_CYCLE_INTERVAL_MS
 #define APP_SM_COLOR_CYCLE_INTERVAL_MS  1000
+#endif
+
+/*===========================================================================*/
+/* Effects Mode Animation Configuration                                      */
+/*===========================================================================*/
+
+/**
+ * @brief   Breathing effect period in milliseconds.
+ * @details Full cycle (slow inhale, slower exhale).
+ */
+#ifndef APP_SM_BREATHING_PERIOD_MS
+#define APP_SM_BREATHING_PERIOD_MS      4000
+#endif
+
+/**
+ * @brief   Breathing effect color (soft azure).
+ */
+#ifndef APP_SM_BREATHING_R
+#define APP_SM_BREATHING_R              180
+#endif
+#ifndef APP_SM_BREATHING_G
+#define APP_SM_BREATHING_G              220
+#endif
+#ifndef APP_SM_BREATHING_B
+#define APP_SM_BREATHING_B              255
+#endif
+
+/**
+ * @brief   Candle flicker base period in milliseconds.
+ * @details Base timing for random flicker variations.
+ */
+#ifndef APP_SM_CANDLE_PERIOD_MS
+#define APP_SM_CANDLE_PERIOD_MS         100
+#endif
+
+/**
+ * @brief   Fire effect base period in milliseconds.
+ */
+#ifndef APP_SM_FIRE_PERIOD_MS
+#define APP_SM_FIRE_PERIOD_MS           80
+#endif
+
+/**
+ * @brief   Lava lamp effect period in milliseconds.
+ * @details Full color morph cycle.
+ */
+#ifndef APP_SM_LAVA_LAMP_PERIOD_MS
+#define APP_SM_LAVA_LAMP_PERIOD_MS      8000
+#endif
+
+/**
+ * @brief   Day/Night cycle full period in milliseconds.
+ * @details Complete sunrise -> day -> sunset -> night cycle.
+ */
+#ifndef APP_SM_DAY_NIGHT_PERIOD_MS
+#define APP_SM_DAY_NIGHT_PERIOD_MS      60000
+#endif
+
+/**
+ * @brief   Ocean effect wave period in milliseconds.
+ */
+#ifndef APP_SM_OCEAN_PERIOD_MS
+#define APP_SM_OCEAN_PERIOD_MS          5000
+#endif
+
+/**
+ * @brief   Northern lights effect period in milliseconds.
+ */
+#ifndef APP_SM_NORTHERN_LIGHTS_PERIOD_MS
+#define APP_SM_NORTHERN_LIGHTS_PERIOD_MS 10000
+#endif
+
+/**
+ * @brief   Thunder storm base period in milliseconds.
+ * @details Average time between lightning flashes.
+ */
+#ifndef APP_SM_THUNDER_STORM_PERIOD_MS
+#define APP_SM_THUNDER_STORM_PERIOD_MS  3000
+#endif
+
+/**
+ * @brief   Police lights transition period in milliseconds.
+ * @details Time for one red-blue cycle with smooth transitions.
+ */
+#ifndef APP_SM_POLICE_PERIOD_MS
+#define APP_SM_POLICE_PERIOD_MS         800
+#endif
+
+/**
+ * @brief   Health pulse (heartbeat) period in milliseconds.
+ * @details Time for one complete heartbeat (double-pulse).
+ */
+#ifndef APP_SM_HEALTH_PULSE_PERIOD_MS
+#define APP_SM_HEALTH_PULSE_PERIOD_MS   1600
+#endif
+
+/**
+ * @brief   Memory effect base period in milliseconds.
+ * @details Base timing for random warm glows.
+ */
+#ifndef APP_SM_MEMORY_PERIOD_MS
+#define APP_SM_MEMORY_PERIOD_MS         4000
 #endif
 
 /**

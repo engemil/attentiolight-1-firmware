@@ -47,12 +47,23 @@ typedef enum {
     ANIM_CMD_BLINK,             /**< Blink on/off pattern                   */
     ANIM_CMD_PULSE,             /**< Breathing/pulse effect                 */
     ANIM_CMD_RAINBOW,           /**< Rainbow color cycle                    */
-    ANIM_CMD_STROBE,            /**< Fast strobe effect                     */
     ANIM_CMD_COLOR_CYCLE,       /**< Cycle through color palette            */
     ANIM_CMD_TRAFFIC_LIGHT,     /**< Traffic light R-Y-G sequence           */
     ANIM_CMD_FLASH_FEEDBACK,    /**< Quick flash for button feedback        */
     ANIM_CMD_POWERUP_SEQUENCE,  /**< powerup animation                      */
-    ANIM_CMD_POWERDOWN_SEQUENCE /**< Powerdown animation                    */
+    ANIM_CMD_POWERDOWN_SEQUENCE,/**< Powerdown animation                    */
+    /* Effects mode animations */
+    ANIM_CMD_BREATHING,         /**< Asymmetric breathing (slow in, slower out) */
+    ANIM_CMD_CANDLE,            /**< Candle flicker effect                  */
+    ANIM_CMD_FIRE,              /**< Fire flickering effect                 */
+    ANIM_CMD_LAVA_LAMP,         /**< Organic slow color morphing            */
+    ANIM_CMD_DAY_NIGHT,         /**< Day/night cycle (sunrise/sunset loop)  */
+    ANIM_CMD_OCEAN,             /**< Ocean blue/cyan gentle waves           */
+    ANIM_CMD_NORTHERN_LIGHTS,   /**< Aurora-like green/purple/blue shifting */
+    ANIM_CMD_THUNDER_STORM,     /**< Dark blue with random lightning        */
+    ANIM_CMD_POLICE,            /**< Red/blue with smooth transitions       */
+    ANIM_CMD_HEALTH_PULSE,      /**< Red heartbeat double-pulse             */
+    ANIM_CMD_MEMORY             /**< Random warm soft glows, irregular timing */
 } anim_cmd_type_t;
 
 /**

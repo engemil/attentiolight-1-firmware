@@ -234,15 +234,25 @@ static render_mode_t get_render_mode(anim_cmd_type_t type) {
         case ANIM_CMD_STOP:
             return RENDER_STATIC;
         case ANIM_CMD_BLINK:
-        case ANIM_CMD_STROBE:
         case ANIM_CMD_TRAFFIC_LIGHT:
         case ANIM_CMD_COLOR_CYCLE:
         case ANIM_CMD_FLASH_FEEDBACK:
+        case ANIM_CMD_THUNDER_STORM:
+        case ANIM_CMD_HEALTH_PULSE:
             return RENDER_TRANSITIONS;
         case ANIM_CMD_PULSE:
         case ANIM_CMD_RAINBOW:
         case ANIM_CMD_POWERUP_SEQUENCE:
         case ANIM_CMD_POWERDOWN_SEQUENCE:
+        case ANIM_CMD_BREATHING:
+        case ANIM_CMD_CANDLE:
+        case ANIM_CMD_FIRE:
+        case ANIM_CMD_LAVA_LAMP:
+        case ANIM_CMD_DAY_NIGHT:
+        case ANIM_CMD_OCEAN:
+        case ANIM_CMD_NORTHERN_LIGHTS:
+        case ANIM_CMD_POLICE:
+        case ANIM_CMD_MEMORY:
         default:
             return RENDER_CONTINUOUS;
     }
@@ -348,25 +358,469 @@ static void process_rainbow(void) {
 }
 
 /**
- * @brief   Processes strobe animation tick.
+ * @brief   Simple pseudo-random number generator for effects.
+ * @details Uses a linear congruential generator for reproducible randomness.
  */
-static void process_strobe(void) {
+static uint32_t effect_random_seed = 12345;
+
+static uint32_t effect_random(void) {
+    effect_random_seed = effect_random_seed * 1103515245 + 12345;
+    return (effect_random_seed >> 16) & 0x7FFF;
+}
+
+/**
+ * @brief   Processes breathing animation tick (asymmetric: slow in, slower out).
+ */
+static void process_breathing(void) {
     uint32_t now = chVTGetSystemTime();
     uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
     uint32_t cycle_pos = elapsed % anim_state.period_ms;
 
-    uint8_t current_state = (cycle_pos < (anim_state.period_ms / 10)) ? 1 : 0;
+    /* Asymmetric breathing: 40% inhale, 60% exhale */
+    uint32_t inhale_time = (anim_state.period_ms * 40) / 100;
+    uint8_t brightness_factor;
 
+    if (cycle_pos < inhale_time) {
+        /* Inhale (faster rise) - use quadratic ease-in */
+        uint32_t progress = (cycle_pos * 255) / inhale_time;
+        brightness_factor = (uint8_t)((progress * progress) / 255);
+    } else {
+        /* Exhale (slower fall) - use exponential ease-out */
+        uint32_t exhale_elapsed = cycle_pos - inhale_time;
+        uint32_t exhale_duration = anim_state.period_ms - inhale_time;
+        uint32_t progress = (exhale_elapsed * 255) / exhale_duration;
+        /* Inverse exponential for smooth decay */
+        brightness_factor = (uint8_t)(255 - ((progress * progress) / 255));
+    }
+
+    uint8_t effective_brightness = (uint8_t)(((uint16_t)anim_state.brightness * brightness_factor) / 255);
+    render_color(anim_state.target_r, anim_state.target_g,
+                 anim_state.target_b, effective_brightness);
+}
+
+/**
+ * @brief   Processes candle flicker animation tick.
+ */
+static void process_candle(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+
+    /* Flicker every period_ms with randomness */
+    uint32_t tick = elapsed / anim_state.period_ms;
+    
+    /* Use tick as part of random seed for varied but smooth flicker */
+    effect_random_seed = tick * 7919 + 1;
+    uint32_t rand_val = effect_random();
+    
+    /* Brightness varies from 60% to 100% */
+    uint8_t min_bright = 60;
+    uint8_t range = 40;
+    uint8_t brightness_pct = min_bright + (rand_val % range);
+    
+    /* Occasional dim flicker (10% chance) */
+    if ((rand_val % 10) == 0) {
+        brightness_pct = 40 + (rand_val % 30);
+    }
+    
+    uint8_t effective_brightness = (anim_state.brightness * brightness_pct) / 100;
+    
+    /* Warm orange/yellow candle color */
+    render_color(255, 120 + (rand_val % 40), 20, effective_brightness);
+}
+
+/**
+ * @brief   Processes fire animation tick.
+ */
+static void process_fire(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+
+    uint32_t tick = elapsed / anim_state.period_ms;
+    
+    effect_random_seed = tick * 6361 + 3;
+    uint32_t rand_val = effect_random();
+    uint32_t rand_val2 = effect_random();
+    
+    /* More aggressive flicker than candle (40% to 100%) */
+    uint8_t brightness_pct = 40 + (rand_val % 60);
+    uint8_t effective_brightness = (anim_state.brightness * brightness_pct) / 100;
+    
+    /* Color varies between red, orange, and yellow */
+    uint8_t r = 255;
+    uint8_t g = 60 + (rand_val2 % 140);  /* 60-200 for red to yellow range */
+    uint8_t b = (rand_val2 % 30);         /* Hint of blue for depth */
+    
+    render_color(r, g, b, effective_brightness);
+}
+
+/**
+ * @brief   Processes lava lamp animation tick (organic slow color morphing).
+ */
+static void process_lava_lamp(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+
+    /* Slow hue rotation with sine-wave modulation for organic feel */
+    uint16_t base_hue = (uint16_t)((cycle_pos * 360) / anim_state.period_ms);
+    
+    /* Add secondary slower wave for variation */
+    uint32_t slow_cycle = elapsed % (anim_state.period_ms * 3);
+    uint16_t wave_offset = (uint16_t)((slow_cycle * 60) / (anim_state.period_ms * 3));
+    
+    uint16_t hue = (base_hue + wave_offset) % 360;
+    
+    /* Vary saturation slightly for more organic look (200-255) */
+    uint8_t saturation = 200 + ((cycle_pos * 55) / anim_state.period_ms) % 56;
+    
+    uint8_t r, g, b;
+    hsv_to_rgb(hue, saturation, 255, &r, &g, &b);
+    
+    render_color(r, g, b, anim_state.brightness);
+}
+
+/**
+ * @brief   Processes day/night cycle animation tick.
+ */
+static void process_day_night(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+
+    /* Divide cycle into phases:
+     * 0-20%:   Night (dark blue) -> Sunrise (red/orange)
+     * 20-30%:  Sunrise (orange) -> Day (bright warm white)
+     * 30-70%:  Day (bright warm white)
+     * 70-80%:  Day -> Sunset (orange/red)
+     * 80-100%: Sunset (red) -> Night (dark blue)
+     */
+    uint32_t phase_pct = (cycle_pos * 100) / anim_state.period_ms;
+    
+    uint8_t r, g, b;
+    uint8_t brightness_factor;
+    
+    if (phase_pct < 20) {
+        /* Night to sunrise: dark blue -> deep red/orange */
+        uint32_t progress = (phase_pct * 255) / 20;
+        r = (progress * 200) / 255;         /* 0 -> 200 */
+        g = (progress * 50) / 255;          /* 0 -> 50 */
+        b = 40 - (progress * 40) / 255;     /* 40 -> 0 */
+        brightness_factor = 30 + (progress * 70) / 255;  /* 30% -> 100% */
+    } else if (phase_pct < 30) {
+        /* Sunrise to day: red/orange -> warm white */
+        uint32_t progress = ((phase_pct - 20) * 255) / 10;
+        r = 200 + (progress * 55) / 255;    /* 200 -> 255 */
+        g = 50 + (progress * 180) / 255;    /* 50 -> 230 */
+        b = (progress * 200) / 255;         /* 0 -> 200 */
+        brightness_factor = 100;
+    } else if (phase_pct < 70) {
+        /* Day: warm bright white */
+        r = 255;
+        g = 230;
+        b = 200;
+        brightness_factor = 100;
+    } else if (phase_pct < 80) {
+        /* Day to sunset: warm white -> orange/red */
+        uint32_t progress = ((phase_pct - 70) * 255) / 10;
+        r = 255;
+        g = 230 - (progress * 180) / 255;   /* 230 -> 50 */
+        b = 200 - (progress * 200) / 255;   /* 200 -> 0 */
+        brightness_factor = 100;
+    } else {
+        /* Sunset to night: red -> dark blue */
+        uint32_t progress = ((phase_pct - 80) * 255) / 20;
+        r = 200 - (progress * 200) / 255;   /* 200 -> 0 */
+        g = 50 - (progress * 50) / 255;     /* 50 -> 0 */
+        b = (progress * 40) / 255;          /* 0 -> 40 */
+        brightness_factor = 100 - (progress * 70) / 255;  /* 100% -> 30% */
+    }
+    
+    uint8_t effective_brightness = (anim_state.brightness * brightness_factor) / 100;
+    render_color(r, g, b, effective_brightness);
+}
+
+/**
+ * @brief   Processes ocean wave animation tick.
+ */
+static void process_ocean(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+
+    /* Gentle sine wave for brightness (60% to 100%) */
+    uint32_t half_period = anim_state.period_ms / 2;
+    uint8_t brightness_factor;
+    
+    if (cycle_pos < half_period) {
+        brightness_factor = 60 + ((cycle_pos * 40) / half_period);
+    } else {
+        brightness_factor = 100 - (((cycle_pos - half_period) * 40) / half_period);
+    }
+    
+    /* Subtle color variation between cyan and deep blue */
+    uint8_t color_blend = (cycle_pos * 255) / anim_state.period_ms;
+    uint8_t r = 0;
+    uint8_t g = 100 + ((128 - color_blend / 2) * 55) / 128;  /* 100-155 */
+    uint8_t b = 255;
+    
+    uint8_t effective_brightness = (anim_state.brightness * brightness_factor) / 100;
+    render_color(r, g, b, effective_brightness);
+}
+
+/**
+ * @brief   Processes northern lights (aurora) animation tick.
+ */
+static void process_northern_lights(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+
+    /* Multi-hue blending between green, cyan, and purple */
+    /* Three main colors: green (120), cyan (180), purple (280) */
+    uint32_t third = anim_state.period_ms / 3;
+    uint16_t hue;
+    
+    if (cycle_pos < third) {
+        /* Green to cyan */
+        hue = 120 + ((cycle_pos * 60) / third);
+    } else if (cycle_pos < third * 2) {
+        /* Cyan to purple */
+        hue = 180 + (((cycle_pos - third) * 100) / third);
+    } else {
+        /* Purple back to green (wrap through blue) */
+        uint32_t progress = ((cycle_pos - third * 2) * 200) / third;
+        if (progress < 80) {
+            hue = 280 + progress;  /* 280 -> 360 */
+        } else {
+            hue = (progress - 80) * 120 / 120;  /* 0 -> 120 */
+        }
+    }
+    
+    /* Gentle brightness wave */
+    uint32_t bright_cycle = elapsed % (anim_state.period_ms / 2);
+    uint8_t brightness_factor = 70 + ((bright_cycle * 30) / (anim_state.period_ms / 2));
+    
+    uint8_t r, g, b;
+    hsv_to_rgb(hue % 360, 200, 255, &r, &g, &b);
+    
+    uint8_t effective_brightness = (anim_state.brightness * brightness_factor) / 100;
+    render_color(r, g, b, effective_brightness);
+}
+
+/**
+ * @brief   Processes thunder storm animation tick.
+ */
+static void process_thunder_storm(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+
+    /* Use a tick-based system for pseudo-random lightning timing */
+    uint32_t tick = elapsed / 100;  /* 100ms ticks */
+    
+    effect_random_seed = tick * 8191 + 17;
+    uint32_t rand_val = effect_random();
+    
+    /* Base dark blue-gray storm color */
+    uint8_t base_r = 10;
+    uint8_t base_g = 15;
+    uint8_t base_b = 40;
+    
+    /* Lightning flash probability based on period (longer period = rarer flashes) */
+    uint32_t flash_threshold = 100 - (10000 / anim_state.period_ms);
+    if (flash_threshold > 95) flash_threshold = 95;
+    if (flash_threshold < 80) flash_threshold = 80;
+    
+    uint8_t current_state;
+    if ((rand_val % 100) > flash_threshold) {
+        /* Lightning flash! */
+        current_state = 1;
+    } else {
+        current_state = 0;
+    }
+    
     /* Only render on state transition */
     if (current_state != last_transition_state) {
         last_transition_state = current_state;
         if (current_state) {
-            render_color(anim_state.target_r, anim_state.target_g,
-                         anim_state.target_b, anim_state.brightness);
+            /* Bright white lightning */
+            render_color(255, 255, 255, anim_state.brightness);
         } else {
-            render_off();
+            /* Dark storm background */
+            render_color(base_r, base_g, base_b, anim_state.brightness / 3);
         }
     }
+}
+
+/**
+ * @brief   Processes police lights animation tick (smooth transitions).
+ */
+static void process_police(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+
+    /* Smooth transition: red -> transition -> blue -> transition -> red
+     * 0-40%: red with fade
+     * 40-50%: red to blue transition
+     * 50-90%: blue with fade
+     * 90-100%: blue to red transition
+     */
+    uint32_t phase_pct = (cycle_pos * 100) / anim_state.period_ms;
+    
+    uint8_t r, g, b;
+    
+    if (phase_pct < 40) {
+        /* Red phase with slight pulse */
+        uint8_t pulse = 80 + ((phase_pct * 20) / 40);
+        r = 255;
+        g = 0;
+        b = 0;
+        uint8_t effective_brightness = (anim_state.brightness * pulse) / 100;
+        render_color(r, g, b, effective_brightness);
+    } else if (phase_pct < 50) {
+        /* Red to blue transition */
+        uint32_t progress = ((phase_pct - 40) * 255) / 10;
+        r = 255 - (progress * 255) / 255;
+        g = 0;
+        b = (progress * 255) / 255;
+        render_color(r, g, b, anim_state.brightness);
+    } else if (phase_pct < 90) {
+        /* Blue phase with slight pulse */
+        uint8_t pulse = 80 + (((phase_pct - 50) * 20) / 40);
+        r = 0;
+        g = 0;
+        b = 255;
+        uint8_t effective_brightness = (anim_state.brightness * pulse) / 100;
+        render_color(r, g, b, effective_brightness);
+    } else {
+        /* Blue to red transition */
+        uint32_t progress = ((phase_pct - 90) * 255) / 10;
+        r = (progress * 255) / 255;
+        g = 0;
+        b = 255 - (progress * 255) / 255;
+        render_color(r, g, b, anim_state.brightness);
+    }
+}
+
+/**
+ * @brief   Processes health pulse (heartbeat) animation tick.
+ */
+static void process_health_pulse(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+
+    /* Heartbeat pattern: quick beat, pause, quick beat, long pause
+     * 0-15%:  First beat (up and down)
+     * 15-30%: Short pause
+     * 30-45%: Second beat (up and down)
+     * 45-100%: Long pause
+     */
+    uint32_t phase_pct = (cycle_pos * 100) / anim_state.period_ms;
+    
+    uint8_t brightness_factor;
+    uint8_t current_state;
+    
+    if (phase_pct < 8) {
+        /* First beat rise */
+        brightness_factor = (phase_pct * 100) / 8;
+        current_state = 1;
+    } else if (phase_pct < 15) {
+        /* First beat fall */
+        brightness_factor = 100 - (((phase_pct - 8) * 100) / 7);
+        current_state = 2;
+    } else if (phase_pct < 30) {
+        /* Short pause */
+        brightness_factor = 10;
+        current_state = 3;
+    } else if (phase_pct < 38) {
+        /* Second beat rise */
+        brightness_factor = 10 + (((phase_pct - 30) * 70) / 8);  /* Slightly weaker */
+        current_state = 4;
+    } else if (phase_pct < 45) {
+        /* Second beat fall */
+        brightness_factor = 80 - (((phase_pct - 38) * 70) / 7);
+        current_state = 5;
+    } else {
+        /* Long pause */
+        brightness_factor = 10;
+        current_state = 6;
+    }
+    
+    /* Only render on state transition for efficiency */
+    if (current_state != last_transition_state || 
+        current_state == 1 || current_state == 2 || 
+        current_state == 4 || current_state == 5) {
+        last_transition_state = current_state;
+        uint8_t effective_brightness = (anim_state.brightness * brightness_factor) / 100;
+        /* Red heartbeat color */
+        render_color(255, 0, 30, effective_brightness);
+    }
+}
+
+/**
+ * @brief   Processes memory animation tick (random warm soft glows).
+ */
+static void process_memory(void) {
+    uint32_t now = chVTGetSystemTime();
+    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    
+    /* Use variable timing based on pseudo-random intervals */
+    uint32_t tick = elapsed / (anim_state.period_ms / 4);
+    
+    effect_random_seed = tick * 4099 + 7;
+    uint32_t rand_timing = effect_random();
+    uint32_t rand_color = effect_random();
+    uint32_t rand_bright = effect_random();
+    
+    /* Create irregular glow pattern */
+    uint32_t glow_duration = anim_state.period_ms / 2 + (rand_timing % (anim_state.period_ms / 2));
+    uint32_t local_pos = elapsed % glow_duration;
+    
+    /* Soft fade in and out */
+    uint8_t brightness_factor;
+    uint32_t half_glow = glow_duration / 2;
+    
+    if (local_pos < half_glow) {
+        /* Fade in */
+        brightness_factor = (local_pos * 80) / half_glow;
+    } else {
+        /* Fade out */
+        brightness_factor = 80 - (((local_pos - half_glow) * 80) / half_glow);
+    }
+    
+    /* Add base dim glow */
+    brightness_factor = 15 + (brightness_factor * 85) / 100;
+    
+    /* Warm color palette: ambers, soft oranges, warm yellows */
+    uint8_t r, g, b;
+    uint8_t color_choice = rand_color % 5;
+    
+    switch (color_choice) {
+        case 0:  /* Amber */
+            r = 255; g = 140; b = 20;
+            break;
+        case 1:  /* Soft orange */
+            r = 255; g = 100; b = 50;
+            break;
+        case 2:  /* Warm yellow */
+            r = 255; g = 180; b = 60;
+            break;
+        case 3:  /* Peachy */
+            r = 255; g = 160; b = 100;
+            break;
+        default: /* Soft red */
+            r = 255; g = 80; b = 60;
+            break;
+    }
+    
+    /* Slight random brightness variation */
+    brightness_factor = brightness_factor + (rand_bright % 20) - 10;
+    if (brightness_factor > 100) brightness_factor = 100;
+    if (brightness_factor < 10) brightness_factor = 10;
+    
+    uint8_t effective_brightness = (anim_state.brightness * brightness_factor) / 100;
+    render_color(r, g, b, effective_brightness);
 }
 
 /**
@@ -780,9 +1234,6 @@ static void process_tick(void) {
         case ANIM_CMD_RAINBOW:
             process_rainbow();
             break;
-        case ANIM_CMD_STROBE:
-            process_strobe();
-            break;
         case ANIM_CMD_COLOR_CYCLE:
             process_color_cycle();
             break;
@@ -797,6 +1248,39 @@ static void process_tick(void) {
             break;
         case ANIM_CMD_POWERDOWN_SEQUENCE:
             process_powerdown_sequence();
+            break;
+        case ANIM_CMD_BREATHING:
+            process_breathing();
+            break;
+        case ANIM_CMD_CANDLE:
+            process_candle();
+            break;
+        case ANIM_CMD_FIRE:
+            process_fire();
+            break;
+        case ANIM_CMD_LAVA_LAMP:
+            process_lava_lamp();
+            break;
+        case ANIM_CMD_DAY_NIGHT:
+            process_day_night();
+            break;
+        case ANIM_CMD_OCEAN:
+            process_ocean();
+            break;
+        case ANIM_CMD_NORTHERN_LIGHTS:
+            process_northern_lights();
+            break;
+        case ANIM_CMD_THUNDER_STORM:
+            process_thunder_storm();
+            break;
+        case ANIM_CMD_POLICE:
+            process_police();
+            break;
+        case ANIM_CMD_HEALTH_PULSE:
+            process_health_pulse();
+            break;
+        case ANIM_CMD_MEMORY:
+            process_memory();
             break;
         default:
             break;
@@ -980,20 +1464,6 @@ uint8_t anim_thread_rainbow(uint8_t brightness, uint16_t period_ms) {
     return anim_thread_send_command(&cmd);
 }
 
-uint8_t anim_thread_strobe(uint8_t r, uint8_t g, uint8_t b,
-                           uint8_t brightness, uint16_t interval_ms) {
-    anim_command_t cmd = {
-        .type = ANIM_CMD_STROBE,
-        .r = r,
-        .g = g,
-        .b = b,
-        .brightness = brightness,
-        .period_ms = interval_ms,
-        .param = 0
-    };
-    return anim_thread_send_command(&cmd);
-}
-
 uint8_t anim_thread_color_cycle(uint8_t brightness, uint16_t interval_ms) {
     anim_command_t cmd = {
         .type = ANIM_CMD_COLOR_CYCLE,
@@ -1002,6 +1472,150 @@ uint8_t anim_thread_color_cycle(uint8_t brightness, uint16_t interval_ms) {
         .b = 0,
         .brightness = brightness,
         .period_ms = interval_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_breathing(uint8_t r, uint8_t g, uint8_t b,
+                              uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_BREATHING,
+        .r = r,
+        .g = g,
+        .b = b,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_candle(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_CANDLE,
+        .r = 255,
+        .g = 140,
+        .b = 20,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_fire(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_FIRE,
+        .r = 255,
+        .g = 100,
+        .b = 0,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_lava_lamp(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_LAVA_LAMP,
+        .r = 0,
+        .g = 0,
+        .b = 0,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_day_night(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_DAY_NIGHT,
+        .r = 0,
+        .g = 0,
+        .b = 0,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_ocean(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_OCEAN,
+        .r = 0,
+        .g = 128,
+        .b = 255,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_northern_lights(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_NORTHERN_LIGHTS,
+        .r = 0,
+        .g = 255,
+        .b = 128,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_thunder_storm(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_THUNDER_STORM,
+        .r = 10,
+        .g = 15,
+        .b = 40,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_police(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_POLICE,
+        .r = 255,
+        .g = 0,
+        .b = 0,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_health_pulse(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_HEALTH_PULSE,
+        .r = 255,
+        .g = 0,
+        .b = 30,
+        .brightness = brightness,
+        .period_ms = period_ms,
+        .param = 0
+    };
+    return anim_thread_send_command(&cmd);
+}
+
+uint8_t anim_thread_memory(uint8_t brightness, uint16_t period_ms) {
+    anim_command_t cmd = {
+        .type = ANIM_CMD_MEMORY,
+        .r = 255,
+        .g = 140,
+        .b = 50,
+        .brightness = brightness,
+        .period_ms = period_ms,
         .param = 0
     };
     return anim_thread_send_command(&cmd);

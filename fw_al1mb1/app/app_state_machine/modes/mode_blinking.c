@@ -50,7 +50,7 @@ static const char* const speed_names[6] = {
 /**
  * @brief   Blink interval options (ms).
  */
-#define BLINK_SPEED_COUNT   5
+#define BLINK_SPEED_COUNT   6
 
 static const uint16_t blink_speeds[BLINK_SPEED_COUNT] = {
     4000,   /* Ultra Slow - 0.25Hz */
