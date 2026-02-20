@@ -30,10 +30,15 @@ SOFTWARE.
  *
  * All defines use #ifndef guards so they can be overridden externally
  * (e.g., in your build system or a project-level config header).
+ *
+ * @note    Thread priority and poll interval are centralized in
+ *          app/rt_config.h for easier real-time tuning.
  */
 
 #ifndef BUTTON_DRIVER_CONFIG_H
 #define BUTTON_DRIVER_CONFIG_H
+
+#include "rt_config.h"
 
 /*===========================================================================*/
 /* Timing Configuration                                                      */
@@ -70,33 +75,6 @@ SOFTWARE.
  */
 #ifndef BTN_EXTENDED_MIN_MS
 #define BTN_EXTENDED_MIN_MS          5000
-#endif
-
-/**
- * @brief   Thread polling interval while button is pressed (milliseconds).
- * @details Used to check for threshold crossings while button is held.
- */
-#ifndef BTN_POLL_INTERVAL_MS
-#define BTN_POLL_INTERVAL_MS         50
-#endif
-
-/*===========================================================================*/
-/* Thread Configuration                                                      */
-/*===========================================================================*/
-
-/**
- * @brief   Button thread working area size in bytes.
- */
-#ifndef BTN_THREAD_WA_SIZE
-#define BTN_THREAD_WA_SIZE           256
-#endif
-
-/**
- * @brief   Button thread priority.
- * @details Low priority since button handling is not time-critical.
- */
-#ifndef BTN_THREAD_PRIORITY
-#define BTN_THREAD_PRIORITY          (LOWPRIO + 1)
 #endif
 
 #endif /* BUTTON_DRIVER_CONFIG_H */

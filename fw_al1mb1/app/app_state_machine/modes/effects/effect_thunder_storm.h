@@ -33,7 +33,7 @@ SOFTWARE.
 #define EFFECT_THUNDER_STORM_H
 
 #include <stdint.h>
-#include "../../animation/animation_commands.h"
+#include "animation_commands.h"
 
 #ifdef __cplusplus
 extern "C" {

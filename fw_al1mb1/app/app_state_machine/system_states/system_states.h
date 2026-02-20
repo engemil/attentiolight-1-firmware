@@ -30,7 +30,7 @@ SOFTWARE.
 #ifndef SYSTEM_STATES_H
 #define SYSTEM_STATES_H
 
-#include "../app_state_machine.h"
+#include "app_state_machine.h"
 
 /*===========================================================================*/
 /* System State Handlers                                                     */

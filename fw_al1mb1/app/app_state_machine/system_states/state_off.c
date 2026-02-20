@@ -35,7 +35,7 @@ SOFTWARE.
 */
 
 #include "system_states.h"
-#include "../animation/animation_thread.h"
+#include "animation_thread.h"
 #include "button_driver.h"
 
 /*===========================================================================*/

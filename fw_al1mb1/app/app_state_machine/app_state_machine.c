@@ -33,8 +33,9 @@ SOFTWARE.
 #include "app_state_machine.h"
 #include "system_states/system_states.h"
 #include "modes/modes.h"
-#include "animation/animation_thread.h"
+#include "animation_thread.h"
 #include "button_driver.h"
+#include "rt_config.h"
 
 /* Debug support */
 #include "app_debug.h"
@@ -353,7 +354,7 @@ uint8_t app_sm_start(void) {
 
     /* Create state machine thread */
     sm_thread_ref = chThdCreateStatic(wa_sm_thread, sizeof(wa_sm_thread),
-                                      APP_SM_THREAD_PRIORITY,
+                                      RT_STATE_MACHINE_THREAD_PRIORITY,
                                       sm_thread_func, NULL);
 
     driver_state = APP_SM_STATE_RUNNING;

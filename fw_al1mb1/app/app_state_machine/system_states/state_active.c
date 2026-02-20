@@ -31,9 +31,9 @@ SOFTWARE.
  */
 
 #include "system_states.h"
-#include "../modes/modes.h"
-#include "../animation/animation_thread.h"
-#include "../app_state_machine_config.h"
+#include "modes.h"
+#include "animation_thread.h"
+#include "app_state_machine_config.h"
 #include "button_driver.h"
 
 /*===========================================================================*/

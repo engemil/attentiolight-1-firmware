@@ -11,11 +11,13 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 ---
 
-## [Development] (2026-02-19)
+## [Development] (2026-02-20)
 
 NB! Notes added here during development to keep track of changes.
 
 Added
+- WS2812B Driver **DMA Error Counter**.
+- **rt_config.h** to gather all real-time related configurations together.
 - Brightness config setting for **change mode feedback**.
 - **global/shared color** and brightness between solid, brightness, blinking and pulsation states.
 - New **effects** in *effect mode**; breathing, candle, fire, lava lamp, day/night cycle, ocean, northern lights, thunder storm, police, health pulse, memory.
@@ -39,6 +41,7 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Simplified include paths, since Makefile make all available.
 - Separated and moved the configurations for each subsystem, state or mode.
 - Moved effects for effect mode to their separate files.
 - Moved thread and application sub-/system initialization to main.c. Simpler overview of real-time related initializations.

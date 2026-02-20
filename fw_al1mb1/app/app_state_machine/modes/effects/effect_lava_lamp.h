@@ -35,7 +35,7 @@ SOFTWARE.
 #define EFFECT_LAVA_LAMP_H
 
 #include <stdint.h>
-#include "../../animation/animation_commands.h"
+#include "animation_commands.h"
 
 #ifdef __cplusplus
 extern "C" {

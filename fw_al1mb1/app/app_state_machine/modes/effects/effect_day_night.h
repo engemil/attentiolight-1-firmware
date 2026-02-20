@@ -34,7 +34,7 @@ SOFTWARE.
 #define EFFECT_DAY_NIGHT_H
 
 #include <stdint.h>
-#include "../../animation/animation_commands.h"
+#include "animation_commands.h"
 
 #ifdef __cplusplus
 extern "C" {

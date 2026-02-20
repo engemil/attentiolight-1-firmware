@@ -32,8 +32,8 @@ SOFTWARE.
 
 #include "system_states.h"
 #include "state_powerup_config.h"
-#include "../animation/animation_thread.h"
-#include "../app_state_machine_config.h"
+#include "animation_thread.h"
+#include "app_state_machine_config.h"
 
 /*===========================================================================*/
 /* Local Variables                                                           */

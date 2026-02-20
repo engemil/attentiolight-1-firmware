@@ -25,50 +25,16 @@ SOFTWARE.
 /**
  * @file    app_state_machine_config.h
  * @brief   Configuration defines for the Application State Machine.
+ *
+ * @note    Thread priorities and animation tick rate are centralized in
+ *          app/rt_config.h for easier real-time tuning.
  */
 
 #ifndef APP_STATE_MACHINE_CONFIG_H
 #define APP_STATE_MACHINE_CONFIG_H
 
-/*===========================================================================*/
-/* Thread Configuration                                                      */
-/*===========================================================================*/
+#include "rt_config.h"
 
-/**
- * @brief   State machine thread working area size.
- */
-#ifndef APP_SM_THREAD_WA_SIZE
-#define APP_SM_THREAD_WA_SIZE           512
-#endif
-
-/**
- * @brief   State machine thread priority.
- */
-#ifndef APP_SM_THREAD_PRIORITY
-#define APP_SM_THREAD_PRIORITY          (NORMALPRIO)
-#endif
-
-/**
- * @brief   Animation thread working area size.
- */
-#ifndef APP_SM_ANIM_THREAD_WA_SIZE
-#define APP_SM_ANIM_THREAD_WA_SIZE      512
-#endif
-
-/**
- * @brief   Animation thread priority.
- * @details Higher than SM thread for smooth animations.
- */
-#ifndef APP_SM_ANIM_THREAD_PRIORITY
-#define APP_SM_ANIM_THREAD_PRIORITY     (NORMALPRIO + 1)
-#endif
-
-/**
- * @brief   Input event queue size.
- */
-#ifndef APP_SM_INPUT_QUEUE_SIZE
-#define APP_SM_INPUT_QUEUE_SIZE         8
-#endif
 
 /*===========================================================================*/
 /* Timing Configuration                                                      */
@@ -86,15 +52,6 @@ SOFTWARE.
  */
 #ifndef APP_SM_POWERDOWN_FADE_MS
 #define APP_SM_POWERDOWN_FADE_MS        500
-#endif
-
-/**
- * @brief   Animation update interval in milliseconds.
- * @details 33ms = ~30 FPS, good balance of smoothness and CPU usage.
- *          Reduced from 20ms (50 FPS) to improve timing stability.
- */
-#ifndef APP_SM_ANIM_TICK_MS
-#define APP_SM_ANIM_TICK_MS             33
 #endif
 
 /**
@@ -124,22 +81,6 @@ SOFTWARE.
  */
 #ifndef APP_SM_LONG_PRESS_FEEDBACK
 #define APP_SM_LONG_PRESS_FEEDBACK      1
-#endif
-
-/**
- * @brief   Enable mode persistence to flash.
- * @details Set to 1 to save current mode to flash on powerdown.
- *          Requires flash driver implementation.
- */
-#ifndef APP_SM_PERSIST_MODE
-#define APP_SM_PERSIST_MODE             0
-#endif
-
-/**
- * @brief   Enable debug output.
- */
-#ifndef APP_SM_DEBUG
-#define APP_SM_DEBUG                    0
 #endif
 
 /*===========================================================================*/

@@ -38,6 +38,7 @@ SOFTWARE.
 
 #include "ws2812b_led_driver.h"
 #include "app_debug.h"
+#include "rt_config.h"
 
 /* Driver status tracking (non-blocking, safe to query anytime) */
 static ws2812b_status_t driver_status = {0};
@@ -53,7 +54,6 @@ static ws2812b_status_t driver_status = {0};
 
 #define DMA_DRIVER (1U) // DMA1
 #define DMA_CHANNEL (1U) // Channel 1
-#define DMA_PRIORITY (0U) // Low priority
 //#define DMA_REQUEST (44U) // DMAMUX request 44 for TIM16_CH1 (See RM0490 Reference Manual, Table 49)
 //#define DMA_PERIPHERAL (&(TIM16->CCR1)) // DMA peripheral address
 #define DMA_REQUEST (22U) // DMAMUX request 22 for TIM1_CH3 (See RM0490 Reference Manual, Table 49)
@@ -67,7 +67,7 @@ static ws2812b_status_t driver_status = {0};
     | STM32_DMA_CR_MSIZE_BYTE /* Memory size 8 bits */ \
     | STM32_DMA_CR_TCIE /* Transfer complete interrupt enable */ \
     | STM32_DMA_CR_TEIE /* Transfer error interrupt enable */ \
-    | STM32_DMA_CR_PL(0) /* Priority low */ \
+    | STM32_DMA_CR_PL(RT_WS2812B_DMA_PRIORITY) /* Priority from rt_config.h */ \
 )
 
 // Common DMA mode settings (without MINC)
@@ -77,7 +77,7 @@ static ws2812b_status_t driver_status = {0};
     | STM32_DMA_CR_MSIZE_BYTE /* Memory size 8 bits */ \
     | STM32_DMA_CR_TCIE /* Transfer complete interrupt enable */ \
     | STM32_DMA_CR_TEIE /* Transfer error interrupt enable */ \
-    | STM32_DMA_CR_PL(0) /* Priority low */ \
+    | STM32_DMA_CR_PL(RT_WS2812B_DMA_PRIORITY) /* Priority from rt_config.h */ \
 )
 
 
@@ -110,7 +110,11 @@ static void dma_callback(void *p, uint32_t flags) {
     if (flags & STM32_DMA_ISR_TCIF) {
         dma_ready = true;
     }
-    // Handle errors if flags & STM32_DMA_ISR_TEIF, etc.
+    if (flags & STM32_DMA_ISR_TEIF) {
+        /* DMA transfer error - count it and allow retry on next frame */
+        driver_status.dma_error_count++;
+        dma_ready = true;
+    }
 }
 
 uint8_t ws2812b_led_driver_init(void){
@@ -134,7 +138,7 @@ uint8_t ws2812b_led_driver_start(void){
 
     // Setup DMA
     dma_stream = dmaStreamAlloc(STM32_DMA_STREAM_ID(DMA_DRIVER, DMA_CHANNEL),
-                                    DMA_PRIORITY, (stm32_dmaisr_t)dma_callback, NULL);
+                                    RT_WS2812B_DMA_PRIORITY, (stm32_dmaisr_t)dma_callback, NULL);
     if (dma_stream == NULL) {
         DBG_ERROR("WS2812B: DMA alloc failed!");
         return 1;

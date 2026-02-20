@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 #include "effect_memory.h"
-#include "../../animation/animation_helpers.h"
+#include "animation_helpers.h"
 #include "ch.h"
 
 /*===========================================================================*/

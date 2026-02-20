@@ -45,24 +45,24 @@ SOFTWARE.
  */
 
 #include "modes.h"
-#include "../animation/animation_thread.h"
-#include "../app_state_machine_config.h"
+#include "animation_thread.h"
+#include "app_state_machine_config.h"
 #include "app_debug.h"
 
 /* Effect configuration includes */
-#include "effects/effect_breathing.h"
-#include "effects/effect_candle.h"
-#include "effects/effect_color_cycle.h"
-#include "effects/effect_day_night.h"
-#include "effects/effect_fire.h"
-#include "effects/effect_health_pulse.h"
-#include "effects/effect_lava_lamp.h"
-#include "effects/effect_memory.h"
-#include "effects/effect_northern_lights.h"
-#include "effects/effect_ocean.h"
-#include "effects/effect_police.h"
-#include "effects/effect_rainbow.h"
-#include "effects/effect_thunder_storm.h"
+#include "effect_breathing.h"
+#include "effect_candle.h"
+#include "effect_color_cycle.h"
+#include "effect_day_night.h"
+#include "effect_fire.h"
+#include "effect_health_pulse.h"
+#include "effect_lava_lamp.h"
+#include "effect_memory.h"
+#include "effect_northern_lights.h"
+#include "effect_ocean.h"
+#include "effect_police.h"
+#include "effect_rainbow.h"
+#include "effect_thunder_storm.h"
 
 /*===========================================================================*/
 /* Local Variables                                                           */

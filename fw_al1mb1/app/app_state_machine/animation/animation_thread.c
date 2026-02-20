@@ -30,26 +30,27 @@ SOFTWARE.
 #include "animation_thread.h"
 #include "animation_helpers.h"
 #include "ws2812b_led_driver.h"
-#include "../app_state_machine_config.h"
-#include "../modes/modes.h"
-#include "../modes/mode_traffic_light_config.h"
-#include "../system_states/state_powerup_config.h"
-#include "../system_states/state_powerdown_config.h"
+#include "rt_config.h"
+#include "app_state_machine_config.h"
+#include "modes.h"
+#include "mode_traffic_light_config.h"
+#include "state_powerup_config.h"
+#include "state_powerdown_config.h"
 
 /* Effect mode includes */
-#include "../modes/effects/effect_breathing.h"
-#include "../modes/effects/effect_candle.h"
-#include "../modes/effects/effect_color_cycle.h"
-#include "../modes/effects/effect_day_night.h"
-#include "../modes/effects/effect_fire.h"
-#include "../modes/effects/effect_health_pulse.h"
-#include "../modes/effects/effect_lava_lamp.h"
-#include "../modes/effects/effect_memory.h"
-#include "../modes/effects/effect_northern_lights.h"
-#include "../modes/effects/effect_ocean.h"
-#include "../modes/effects/effect_police.h"
-#include "../modes/effects/effect_rainbow.h"
-#include "../modes/effects/effect_thunder_storm.h"
+#include "effect_breathing.h"
+#include "effect_candle.h"
+#include "effect_color_cycle.h"
+#include "effect_day_night.h"
+#include "effect_fire.h"
+#include "effect_health_pulse.h"
+#include "effect_lava_lamp.h"
+#include "effect_memory.h"
+#include "effect_northern_lights.h"
+#include "effect_ocean.h"
+#include "effect_police.h"
+#include "effect_rainbow.h"
+#include "effect_thunder_storm.h"
 
 /* Debug support */
 #include "app_debug.h"
@@ -694,12 +695,12 @@ static THD_FUNCTION(anim_thread_func, arg) {
     chRegSetThreadName("animation_thread");
 
     /* Start the virtual timer for first tick */
-    chVTSet(&anim_tick_vt, TIME_MS2I(APP_SM_ANIM_TICK_MS), anim_tick_callback, NULL);
+    chVTSet(&anim_tick_vt, TIME_MS2I(RT_ANIMATION_TICK_MS), anim_tick_callback, NULL);
 
     while (!chThdShouldTerminateX()) {
         /* Wait for events (tick or command notification) */
         eventmask_t events = chEvtWaitAnyTimeout(ANIM_EVT_TICK | ANIM_EVT_CMD, 
-                                                  TIME_MS2I(APP_SM_ANIM_TICK_MS * 2));
+                                                  TIME_MS2I(RT_ANIMATION_TICK_MS * 2));
 
         /* Process any pending commands (non-blocking) */
         msg_t msg;
@@ -712,7 +713,7 @@ static THD_FUNCTION(anim_thread_func, arg) {
         if (events & ANIM_EVT_TICK) {
             process_tick();
             /* Restart timer for next tick */
-            chVTSet(&anim_tick_vt, TIME_MS2I(APP_SM_ANIM_TICK_MS), anim_tick_callback, NULL);
+            chVTSet(&anim_tick_vt, TIME_MS2I(RT_ANIMATION_TICK_MS), anim_tick_callback, NULL);
         }
     }
 
@@ -765,7 +766,7 @@ uint8_t anim_thread_start(void) {
 
     /* Create animation thread */
     anim_thread_ref = chThdCreateStatic(wa_anim_thread, sizeof(wa_anim_thread),
-                                        APP_SM_ANIM_THREAD_PRIORITY,
+                                        RT_ANIMATION_THREAD_PRIORITY,
                                         anim_thread_func, NULL);
 
     anim_thread_state = ANIM_THREAD_RUNNING;

@@ -30,6 +30,7 @@ SOFTWARE.
  */
 
 #include "button_driver.h"
+#include "rt_config.h"
 
 /*===========================================================================*/
 /* Driver Local Definitions                                                  */
@@ -187,7 +188,7 @@ static THD_FUNCTION(button_thread, arg) {
             timeout = TIME_MS2I(BTN_DEBOUNCE_MS);
         } else {
             /* Pressed state: poll for threshold checking */
-            timeout = TIME_MS2I(BTN_POLL_INTERVAL_MS);
+            timeout = TIME_MS2I(RT_BUTTON_POLL_MS);
         }
 
         /* Wait for signal or timeout */
@@ -339,7 +340,7 @@ uint8_t button_init(ioline_t button_line, uint8_t active_state) {
     /* Create button thread */
     btn_thread_ptr = chThdCreateStatic(wa_button_thread,
                                        sizeof(wa_button_thread),
-                                       BTN_THREAD_PRIORITY,
+                                       RT_BUTTON_THREAD_PRIORITY,
                                        button_thread,
                                        NULL);
 

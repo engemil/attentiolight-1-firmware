@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 #include "modes.h"
-#include "../app_state_machine_config.h"
+#include "app_state_machine_config.h"
 
 /*===========================================================================*/
 /* External References                                                       */

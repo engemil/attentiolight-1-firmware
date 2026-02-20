@@ -32,8 +32,8 @@ SOFTWARE.
 
 #include "modes.h"
 #include "mode_night_light_config.h"
-#include "../animation/animation_thread.h"
-#include "../app_state_machine_config.h"
+#include "animation_thread.h"
+#include "app_state_machine_config.h"
 #include "app_debug.h"
 
 /*===========================================================================*/

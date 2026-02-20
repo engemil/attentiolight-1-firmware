@@ -30,7 +30,7 @@ SOFTWARE.
 #ifndef MODES_H
 #define MODES_H
 
-#include "../app_state_machine.h"
+#include "app_state_machine.h"
 
 /*===========================================================================*/
 /* Mode Interface                                                            */

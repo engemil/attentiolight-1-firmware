@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 #include "effect_day_night.h"
-#include "../../animation/animation_helpers.h"
+#include "animation_helpers.h"
 #include "ch.h"
 
 /*===========================================================================*/

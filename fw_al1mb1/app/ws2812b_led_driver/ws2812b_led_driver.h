@@ -127,6 +127,7 @@ typedef struct {
     uint32_t render_count;          /**< Total render calls              */
     uint32_t reset_render_count;    /**< Total reset render calls        */
     uint32_t dma_wait_count;        /**< Times waited for DMA            */
+    uint32_t dma_error_count;       /**< DMA transfer errors             */
     uint8_t  last_r;                /**< Last red value set              */
     uint8_t  last_g;                /**< Last green value set            */
     uint8_t  last_b;                /**< Last blue value set             */

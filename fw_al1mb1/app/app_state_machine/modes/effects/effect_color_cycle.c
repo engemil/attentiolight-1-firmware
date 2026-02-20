@@ -28,8 +28,8 @@ SOFTWARE.
  */
 
 #include "effect_color_cycle.h"
-#include "../../animation/animation_helpers.h"
-#include "../modes.h"
+#include "animation_helpers.h"
+#include "modes.h"
 #include "ch.h"
 
 /*===========================================================================*/

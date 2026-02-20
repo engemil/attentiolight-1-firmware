@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 #include "effect_health_pulse.h"
-#include "../../animation/animation_helpers.h"
+#include "animation_helpers.h"
 #include "ch.h"
 
 /*===========================================================================*/

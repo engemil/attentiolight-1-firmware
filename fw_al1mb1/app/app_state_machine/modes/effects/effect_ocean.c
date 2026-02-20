@@ -28,7 +28,7 @@ SOFTWARE.
  */
 
 #include "effect_ocean.h"
-#include "../../animation/animation_helpers.h"
+#include "animation_helpers.h"
 #include "ch.h"
 
 /*===========================================================================*/
