@@ -36,8 +36,9 @@ SOFTWARE.
 /*===========================================================================*/
 
 void process_candle(const anim_state_t *state) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - state->start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
 
     /* Warm orange/yellow candle color */
     uint8_t base_r = 255;

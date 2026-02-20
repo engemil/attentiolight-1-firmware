@@ -36,8 +36,9 @@ SOFTWARE.
 /*===========================================================================*/
 
 void process_day_night(const anim_state_t *state) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - state->start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
     uint32_t cycle_pos = elapsed % state->period_ms;
 
     /* Calculate progress through cycle as 0-65535 (16-bit) for maximum precision */
@@ -98,9 +99,10 @@ void process_day_night(const anim_state_t *state) {
         WP0, WP1, WP2, WP3, WP4, WP5, WP6, WP7, WP8, WP9, WP10, WP11, WP12
     };
     
-    /* Find which segment we're in */
-    uint8_t seg = 0;
-    for (uint8_t i = 1; i < 13; i++) {
+    /* Find which segment we're in (default to last segment for edge case
+     * when progress_16bit == 65535, which would otherwise leave seg at 0) */
+    uint8_t seg = 11;
+    for (uint8_t i = 1; i < 12; i++) {
         if (progress_16bit < wp_pos[i]) {
             seg = i - 1;
             break;

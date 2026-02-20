@@ -205,8 +205,9 @@ static void process_solid(void) {
  * @brief   Processes blink animation tick.
  */
 static void process_blink(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
     uint32_t cycle_pos = elapsed % anim_state.period_ms;
 
     uint8_t current_state = (cycle_pos < (anim_state.period_ms / 2)) ? 1 : 0;
@@ -227,8 +228,9 @@ static void process_blink(void) {
  * @brief   Processes pulse/breathing animation tick.
  */
 static void process_pulse(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
     uint32_t cycle_pos = elapsed % anim_state.period_ms;
 
     /* Use sine-like curve: 0 -> max -> 0 */
@@ -252,8 +254,9 @@ static void process_pulse(void) {
  * @brief   Processes traffic light animation tick.
  */
 static void process_traffic_light(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
 
     uint32_t total_period = APP_SM_TRAFFIC_RED_MS + APP_SM_TRAFFIC_YELLOW_MS +
                             APP_SM_TRAFFIC_GREEN_MS;
@@ -284,8 +287,9 @@ static void process_traffic_light(void) {
  * @brief   Processes flash feedback (quick flash then return).
  */
 static void process_flash_feedback(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
 
     uint8_t current_state = (elapsed < anim_state.period_ms) ? 1 : 0;
 
@@ -335,8 +339,9 @@ typedef enum {
  *          Phase 4: Complete (stop animation)
  */
 static void process_powerup_sequence(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
 
     /* Calculate phase boundaries */
     uint32_t phase1_start = APP_SM_POWERUP_RAINBOW_FADE_MS;
@@ -478,8 +483,9 @@ static void process_powerup_sequence(void) {
  *          Phase 3: Complete (stop animation)
  */
 static void process_powerdown_sequence(void) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - anim_state.start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
 
     /* Calculate phase boundaries */
     uint32_t phase1_start = APP_SM_POWERDOWN_COLOR_FADE_MS;

@@ -32,6 +32,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "ch.h"
 
 /*===========================================================================*/
 /* Animation Command Types                                                   */
@@ -94,7 +95,7 @@ typedef struct {
     uint8_t current_b;              /**< Current blue                       */
     uint8_t brightness;             /**< Current brightness                 */
     uint16_t period_ms;             /**< Animation period                   */
-    uint32_t start_time;            /**< Animation start time               */
+    systime_t start_time;           /**< Animation start time (system ticks)*/
     uint32_t elapsed_ms;            /**< Elapsed time in current cycle      */
     uint8_t phase;                  /**< Animation phase (for multi-phase)  */
     bool active;                    /**< Animation is active                */

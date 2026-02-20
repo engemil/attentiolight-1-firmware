@@ -36,8 +36,9 @@ SOFTWARE.
 /*===========================================================================*/
 
 void process_ocean(const anim_state_t *state) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - state->start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
     
     /* Determine which cycle we're in */
     uint32_t cycle_num = elapsed / state->period_ms;
@@ -81,7 +82,7 @@ void process_ocean(const anim_state_t *state) {
     }
     
     /* Find which wave we're in */
-    uint8_t current_wave = 0;
+    uint8_t current_wave = wave_count - 1;
     for (uint8_t i = 0; i < wave_count; i++) {
         if (cycle_pos >= wave_starts[i] && cycle_pos < wave_starts[i + 1]) {
             current_wave = i;

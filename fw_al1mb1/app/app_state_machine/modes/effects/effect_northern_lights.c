@@ -36,8 +36,9 @@ SOFTWARE.
 /*===========================================================================*/
 
 void process_northern_lights(const anim_state_t *state) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - state->start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
     
     /* Super-cycle is 3x the base period for dark/aurora episodes */
     uint32_t super_period = state->period_ms * 3;

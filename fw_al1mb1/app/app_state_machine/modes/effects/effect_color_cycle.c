@@ -37,8 +37,9 @@ SOFTWARE.
 /*===========================================================================*/
 
 void process_color_cycle(const anim_state_t *state, uint8_t *last_state) {
-    uint32_t now = chVTGetSystemTime();
-    uint32_t elapsed = TIME_I2MS(now - state->start_time);
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
+    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
     uint32_t total_period = state->period_ms * APP_SM_COLOR_COUNT;
     uint32_t cycle_pos = elapsed % total_period;
 
