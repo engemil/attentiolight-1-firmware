@@ -282,7 +282,7 @@ To fix this, power cycle it. This is only necessary when starting with a factory
 
 MIT License, see `LICENSE`-file for details.
 
-Portions of this project incorporate code from:
+Portions of this project incorporates code from:
 - **ChibiOS**, Apache License 2.0.
 - **STMicroelectronics**, Apache License 2.0.
 - **ee_stm32_bootloader**, MIT License.
