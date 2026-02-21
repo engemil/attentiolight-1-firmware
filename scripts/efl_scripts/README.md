@@ -8,13 +8,13 @@ These scripts provide a convenient command-line interface to read flash memory f
 
 ### EFL Memory Region Configuration
 
-Based on linker script `STM32C071xB_chibios_efl.ld`:
+Based on linker script `STM32C071xB_ee_bootloader_efl.ld`.
 
-- **Base Address**: `0x0801E000`
-- **Size**: `8192 bytes` (8KB)
-- **End Address**: `0x0801FFFF`
-- **Organization**: 4 pages × 2KB per page
-- **Location**: Last 8KB of 128KB flash memory
+**Compatibility Note:** The EFL region is at the same location in both:
+- `STM32C071xB_ee_bootloader_efl.ld` (with bootloader) - **Primary/Recommended**
+- `STM32C071xB_chibios_efl.ld` (standalone, no bootloader)
+
+These scripts work with either configuration.
 
 ## Requirements
 
@@ -26,6 +26,14 @@ Based on linker script `STM32C071xB_chibios_efl.ld`:
 - `st-flash` (stlink tools) - [Install Instructions](https://github.com/stlink-org/stlink)
 - `bash` shell
 - `od` utility (standard on most Linux systems)
+
+### Firmware Configuration
+
+**⚠️ IMPORTANT:** Your firmware must be built with an EFL-enabled linker script that defines the EFL region (hardcoded in scripts!).
+
+
+**Warning:** If your firmware uses a non-EFL linker script, the scripts will still read the EFL region, but that region may contain application code instead of storage data, resulting in meaningless output.
+
 
 ## Installation
 
@@ -184,44 +192,6 @@ Example:
 
 ## Troubleshooting
 
-### ST-Link not detected
-
-**Error:**
-```
-Error: ST-Link device not detected. Please connect your ST-Link programmer.
-```
-
-**Solutions:**
-1. Check USB connection
-2. Try reconnecting ST-Link
-3. Check if another tool is using ST-Link:
-   ```bash
-   sudo killall st-util openocd
-   ```
-4. Try with sudo (permissions issue):
-   ```bash
-   sudo ./scripts/read_efl.sh
-   ```
-
-### st-flash not found
-
-**Error:**
-```
-Error: st-flash not found. Please install stlink tools.
-```
-
-**Solution:** Install stlink tools:
-```bash
-# Ubuntu/Debian
-sudo apt-get install stlink-tools
-
-# From source
-git clone https://github.com/stlink-org/stlink.git
-cd stlink
-make
-sudo make install
-```
-
 ### Invalid address or range
 
 **Error:**
@@ -256,7 +226,7 @@ Permission denied
 ### Memory Read Process
 
 1. **Validate parameters** - Check offset and length are within EFL bounds
-2. **Calculate address** - Add offset to EFL base address (0x0801E000)
+2. **Calculate address** - Add offset to EFL base address
 3. **Read via st-flash** - Execute `st-flash read` command
 4. **Format output** - Parse binary data and format as hex dump
 5. **Display/save** - Show to console and/or save to file
@@ -280,12 +250,6 @@ read_efl.sh (Main CLI)
 - **Error handling** - Proper error messages and exit codes
 - **No device halt** - Reading doesn't interfere with running firmware
 
-## Related Files
-
-- `STM32C071xB_chibios_efl.ld` - Linker script defining EFL region
-- `libs/hal_efl_stm32c0xx/efl_storage.h` - EFL storage helper macros
-- `libs/hal_efl_stm32c0xx/efl_test.c` - EFL driver test code
-- `app/main.c` - Application using EFL storage
 
 ## Use Cases
 
@@ -311,4 +275,48 @@ Check specific addresses where data should be stored:
 Check if a sector was properly erased (should show 0xFF):
 ```bash
 /workspace/scripts/efl_scripts/read_efl.sh --offset 0 --length 2048
+```
+
+### 5. Restore EFL Data from Backup
+Flash EFL data from a previously saved backup file using st-flash:
+
+```bash
+# Restore entire EFL region from backup
+st-flash write efl_backup.bin 0x0801E000
+
+# Or restore partial region (e.g., 2KB at specific offset)
+# First 2KB page:
+st-flash write partial_backup.bin 0x0801E000
+
+# Second 2KB page:
+st-flash write partial_backup.bin 0x0801E800
+
+# Third 2KB page:
+st-flash write partial_backup.bin 0x0801F000
+
+# Fourth 2KB page:
+st-flash write partial_backup.bin 0x0801F800
+```
+
+**Important notes:**
+- ⚠️ **Writing to flash erases the page first** - All data in that 2KB page will be replaced
+- ⚠️ **Ensure device is halted or not running critical code** during flash operations
+- ⚠️ **Verify backup file size** matches the region you're writing to
+- ✅ **Best practice**: Always read and save a backup before writing new data
+- ✅ **Verification**: Use `read_efl.sh` after writing to verify the restore was successful
+
+**Example workflow - Full backup and restore:**
+```bash
+# 1. Backup current EFL data
+/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup_before.bin
+
+# 2. Make changes to firmware or EFL data
+# ... (your modifications) ...
+
+# 3. Restore from backup if needed
+st-flash write efl_backup_before.bin 0x0801E000
+
+# 4. Verify restore was successful
+/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup_after.bin
+diff efl_backup_before.bin efl_backup_after.bin && echo "Restore successful!"
 ```
