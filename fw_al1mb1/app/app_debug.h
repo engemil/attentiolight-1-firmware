@@ -35,6 +35,7 @@ SOFTWARE.
  *          make debug LEVEL=2    - Errors + warnings
  *          make debug LEVEL=3    - Errors + warnings + info
  *          make debug LEVEL=4    - Everything (verbose)
+ *          make debug LEVEL=5    - Verbose + skip low-power mode
  *
  *          Debug levels are hierarchical:
  *            0 = NONE  - No output (release build)
@@ -42,6 +43,12 @@ SOFTWARE.
  *            2 = WARN  - Errors + warnings
  *            3 = INFO  - Errors + warnings + state/mode changes
  *            4 = DEBUG - Everything (verbose details)
+ *            5 = POWER - Verbose + disable Stop mode in off state
+ *
+ *          Level 5 (POWER) is useful during debugging as Stop mode halts
+ *          all clocks including the debug interface, causing the debugger
+ *          to lose connection. Use this level to keep the debugger
+ *          connected while testing the off state behavior.
  */
 
 #ifndef APP_DEBUG_H
@@ -66,6 +73,7 @@ SOFTWARE.
 #define DBG_LEVEL_WARN          2       /**< Errors + warnings               */
 #define DBG_LEVEL_INFO          3       /**< + state/mode changes            */
 #define DBG_LEVEL_DEBUG         4       /**< + verbose details               */
+#define DBG_LEVEL_POWER         5       /**< + skip low-power Stop mode      */
 /** @} */
 
 /**
@@ -160,5 +168,24 @@ SOFTWARE.
 #define DBG_DEBUG(fmt, ...) \
     do { } while (0)
 #endif
+
+/*===========================================================================*/
+/* Low-Power Mode Control                                                    */
+/*===========================================================================*/
+
+/**
+ * @brief   Macro to check if low-power Stop mode should be skipped.
+ * @details When APP_DEBUG_LEVEL >= DBG_LEVEL_POWER (5), Stop mode is disabled
+ *          to keep the debugger connected. The MCU will remain in normal run
+ *          mode during the "off" state instead of entering Stop mode.
+ *
+ * @note    Use this in low-power code:
+ *          @code
+ *          #if !DBG_SKIP_LOW_POWER
+ *              enter_stop_mode();
+ *          #endif
+ *          @endcode
+ */
+#define DBG_SKIP_LOW_POWER      (APP_DEBUG_LEVEL >= DBG_LEVEL_POWER)
 
 #endif /* APP_DEBUG_H */

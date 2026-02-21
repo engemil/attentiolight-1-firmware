@@ -154,6 +154,7 @@ Debug levels (hierarchical):
 - `2` = WARN  
 - `3` = INFO
 - `4` = DEBUG (default for `make debug`)
+- `5` = POWER (verbose + disables Stop mode for debugging)
 
 
 ## Project Structure
