@@ -16,6 +16,7 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 NB! Notes added here during development to keep track of changes.
 
 Added
+- **EFL (Embedded Flash) Driver** to store persistent data on Flash.
 - Additional debug level (level 5) for disabling low-power Stop mode when debugging system.
 - Lower-power mode **Stop mode** implemented, with wake-up from User Button (EXTI) (and in future with USB).
 - WS2812B Driver **DMA Error Counter**.

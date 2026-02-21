@@ -2,7 +2,7 @@
 LIBS_DIR := $(LIBS)
 
 # List of library directories (add more as needed)
-LIB_DIRS := usbcfg portab ee_esp32_wifi_ble_if_driver
+LIB_DIRS := usbcfg portab ee_esp32_wifi_ble_if_driver hal_efl_stm32c0xx
 
 # Collect all source files from library directories
 LIBSSRC := $(foreach dir,$(LIB_DIRS),$(wildcard $(LIBS_DIR)/$(dir)/*.c))

@@ -132,11 +132,19 @@ include $(CHIBIOS)/os/hal/lib/streams/streams.mk
 LIBS     := ./libs
 include $(LIBS)/libs.mk
 
-# Define linker script file here
-# ChibiOS provides a default linker script for STM32C0xx devices. Use it if you do not want to use bootloader. NB! Write to address 0x08000000.
+# Define linker script file(s) here. Only uncomment one!
+
+# ChibiOS provides a default linker script for STM32C0xx devices. Use it if you do not want to use bootloader.
 #LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
-# Custom linmker script, used with the internal bootloader, that starts at the bootloader address (0x1FFF0000).
-LDSCRIPT= STM32C071xB_bootloader.ld
+#LDSCRIPT= STM32C071xB_chibios_original.ld
+# ChibiOS Original Linker Script with EFL support.
+#LDSCRIPT= STM32C071xB_chibios_efl.ld
+# Custom linker script, used with the custom bootloader, that starts at the bootloader address.
+#LDSCRIPT= STM32C071xB_ee_bootloader.ld
+# Custom linker script, used with the custom bootloader and with EFL support, that starts at the bootloader address.
+LDSCRIPT= STM32C071xB_ee_bootloader_efl.ld
+
+
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.

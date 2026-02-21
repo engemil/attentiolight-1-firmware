@@ -177,15 +177,43 @@ Debug levels (hierarchical):
 (TO DO: Add more info)
 
 
-## Memory Usage
+## Memory Map
 
-Check Flash and RAM usage after building:
+**STM32C071RB:** 128KB Flash, 24KB RAM
+
+```
+FLASH (128KB)                              RAM (24KB)
+┌──────────────────────────────┐ 0x08020000 ┌──────────────────┐ 0x20006000
+│ EFL Storage    8KB (4 pages) │ 0x0801E000 │ Heap             │
+├──────────────────────────────┤            ├──────────────────┤
+│                              │            │ BSS + Data       │
+│ Application   ~104KB         │ 0x08004100 ├──────────────────┤
+│ Code + Data                  │            │ Main Stack       │
+├──────────────────────────────┤            ├──────────────────┤
+│ Vectors        192B (aligned)│ 0x08004100 │ Process Stack    │
+├──────────────────────────────┤            └──────────────────┘ 0x20000000
+│ Padding        224B          │ 0x08004020
+├──────────────────────────────┤
+│ App Header     32B           │ 0x08004000
+├──────────────────────────────┤
+│ Bootloader     16KB          │ 0x08000000
+└──────────────────────────────┘
+```
+
+| Region | Address | Size | Notes |
+|--------|---------|------|-------|
+| Bootloader | 0x08000000 | 16KB | Do not overwrite if you use bootloader (see bootloader submodule for more info) |
+| App Header | 0x08004000 | 32B | Magic, version, size, CRC32 |
+| Application | 0x08004100 | ~104KB | Code, vectors, read-only data |
+| EFL Storage | 0x0801E000 | 8KB | Persistent settings (4 × 2KB pages) |
+
+### Memory Usage
+
+Check usage after building:
 
 ```bash
 ./scripts/check_memory_usage.sh fw_al1mb1/build/fw_al1mb1.elf
 ```
-
-**STM32C071RB limits:** 128 KB Flash (112 KB for app with bootloader), 24 KB RAM.
 
 **NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
 
@@ -200,6 +228,31 @@ Check Flash and RAM usage after building:
 - EngEmil ESP32 Wifi BLE Interface Driver (placeholder, to control enable pin for wireless module)
 
 
+## Utility Scripts
+
+### EFL Memory Reader (`/workspace/scripts/efl_scripts/`)
+
+CLI tools for reading the EFL (Embedded Flash) storage region via ST-Link debugger.
+
+**Quick usage:**
+```bash
+# Read entire 8KB EFL region
+/workspace/scripts/efl_scripts/read_efl.sh
+
+# Read specific range
+/workspace/scripts/efl_scripts/read_efl.sh --offset 0 --length 65
+
+# Save to file
+/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup.bin
+```
+
+**Features:**
+- Hex dump with ASCII representation
+- Read any offset/length within EFL region (0x0801E000 - 0x0801FFFF)
+- Save to binary file
+- No device halt required
+
+See `/workspace/scripts/efl_scripts/README.md` for complete documentation.
 
 
 ## Troubleshooting
