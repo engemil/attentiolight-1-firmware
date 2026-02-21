@@ -184,9 +184,9 @@ Check Flash and RAM usage after building:
 ./scripts/check_memory_usage.sh fw_al1mb1/build/fw_al1mb1.elf
 ```
 
-**STM32C071RB limits:** 128 KB Flash (112 KB for app), 24 KB RAM.
+**STM32C071RB limits:** 128 KB Flash (112 KB for app with bootloader), 24 KB RAM.
 
-The `.heap` section shows 100% usage by design - ChibiOS allocates all remaining RAM to the heap.
+**NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
 
 
 ## Libraries and Drivers
