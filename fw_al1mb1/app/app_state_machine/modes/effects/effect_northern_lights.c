@@ -87,31 +87,31 @@ void process_northern_lights(const anim_state_t *state) {
     
     /* === Aurora color calculation (runs always for smooth transitions) === */
     
-    /* Primary slow wave: oscillates in green range (100-150 hue) */
+    /* Primary slow wave: oscillates in green range (90-140 hue) */
     uint32_t slow_cycle_pos = elapsed % state->period_ms;
     uint32_t half_period = state->period_ms / 2;
     uint16_t slow_hue_offset;
     if (slow_cycle_pos < half_period) {
-        slow_hue_offset = (slow_cycle_pos * 50) / half_period;
+        slow_hue_offset = (slow_cycle_pos * 40) / half_period;
     } else {
-        slow_hue_offset = 50 - (((slow_cycle_pos - half_period) * 50) / half_period);
+        slow_hue_offset = 40 - (((slow_cycle_pos - half_period) * 40) / half_period);
     }
     
-    /* Secondary faster wave: adds blue hints (±30 degrees toward blue) */
+    /* Secondary faster wave: adds subtle hue variation (±15 degrees) */
     uint32_t fast_period = state->period_ms / 4;
     uint32_t fast_cycle_pos = elapsed % fast_period;
     uint32_t fast_half = fast_period / 2;
     int16_t fast_hue_offset;
     if (fast_cycle_pos < fast_half) {
-        fast_hue_offset = (fast_cycle_pos * 30) / fast_half;
+        fast_hue_offset = (fast_cycle_pos * 15) / fast_half;
     } else {
-        fast_hue_offset = 30 - (((fast_cycle_pos - fast_half) * 40) / fast_half);
+        fast_hue_offset = 15 - (((fast_cycle_pos - fast_half) * 30) / fast_half);
     }
     
-    /* Combine hue: base green (110) + offsets */
-    int16_t hue = 110 + (int16_t)slow_hue_offset + fast_hue_offset;
-    if (hue < 100) hue = 100;
-    if (hue > 200) hue = 200;
+    /* Combine hue: base green (100) + offsets */
+    int16_t hue = 100 + (int16_t)slow_hue_offset + fast_hue_offset;
+    if (hue < 90) hue = 90;
+    if (hue > 150) hue = 150;
     
     /* === Brightness calculation === */
     
