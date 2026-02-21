@@ -21,6 +21,7 @@
 
 #include "hal.h"
 #include "portab.h"
+#include "app_header.h"
 
 /* Virtual serial port over USB.*/
 SerialUSBDriver PORTAB_SDU1;
@@ -41,8 +42,8 @@ static const uint8_t vcom_device_descriptor_data[18] = {
                          0x00,          /* bDeviceSubClass.                 */
                          0x00,          /* bDeviceProtocol.                 */
                          0x40,          /* bMaxPacketSize.                  */
-                         0x0483,        /* idVendor (ST).                   */
-                         0x5740,        /* idProduct.                       */
+                         USB_VID,       /* idVendor (from app_header.h).    */
+                         USB_PID,       /* idProduct (from app_header.h).   */
                          0x0200,        /* bcdDevice.                       */
                          1,             /* iManufacturer.                   */
                          2,             /* iProduct.                        */
@@ -156,23 +157,20 @@ static const uint8_t vcom_string0[] = {
  * Vendor string.
  */
 static const uint8_t vcom_string1[] = {
-  USB_DESC_BYTE(38),                    /* bLength.                         */
+  USB_DESC_BYTE(22),                    /* bLength.                         */
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  'S', 0, 'T', 0, 'M', 0, 'i', 0, 'c', 0, 'r', 0, 'o', 0, 'e', 0,
-  'l', 0, 'e', 0, 'c', 0, 't', 0, 'r', 0, 'o', 0, 'n', 0, 'i', 0,
-  'c', 0, 's', 0
+  'E', 0, 'n', 0, 'g', 0, 'E', 0, 'm', 0, 'i', 0, 'l', 0, '.', 0,
+  'i', 0, 'o', 0
 };
 
 /*
  * Device Description string.
  */
 static const uint8_t vcom_string2[] = {
-  USB_DESC_BYTE(56),                    /* bLength.                         */
+  USB_DESC_BYTE(32),                    /* bLength.                         */
   USB_DESC_BYTE(USB_DESCRIPTOR_STRING), /* bDescriptorType.                 */
-  'C', 0, 'h', 0, 'i', 0, 'b', 0, 'i', 0, 'O', 0, 'S', 0, '/', 0,
-  'R', 0, 'T', 0, ' ', 0, 'V', 0, 'i', 0, 'r', 0, 't', 0, 'u', 0,
-  'a', 0, 'l', 0, ' ', 0, 'C', 0, 'O', 0, 'M', 0, ' ', 0, 'P', 0,
-  'o', 0, 'r', 0, 't', 0
+  'A', 0, 't', 0, 't', 0, 'e', 0, 'n', 0, 't', 0, 'i', 0, 'o', 0,
+  'L', 0, 'i', 0, 'g', 0, 'h', 0, 't', 0, '-', 0, '1', 0
 };
 
 /*

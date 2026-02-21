@@ -203,7 +203,7 @@ FLASH (128KB)                              RAM (24KB)
 | Region | Address | Size | Notes |
 |--------|---------|------|-------|
 | Bootloader | 0x08000000 | 16KB | Do not overwrite if you use bootloader (see bootloader submodule for more info) |
-| App Header | 0x08004000 | 32B | Magic, version, size, CRC32 |
+| App Header | 0x08004000 | 32B | Magic, version, size, CRC32, USB VID/PID |
 | Application | 0x08004100 | ~104KB | Code, vectors, read-only data |
 | EFL Storage | 0x0801E000 | 8KB | Persistent settings (4 × 2KB pages) |
 

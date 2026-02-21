@@ -35,6 +35,8 @@ SOFTWARE.
  * 
  * The size and crc32 fields are automatically signed by the
  * sign_app_header script during the build process.
+ * 
+ * The usb_vid and usb_pid fields are used by the bootloader in DFU mode.
  */
 
 #include "app_header.h"
@@ -47,5 +49,7 @@ const app_header_t app_header = {
     .version = APP_VERSION,          /* 0x00010000 (v1.0.0) */
     .size = 0,                       /* Signed by build script */
     .crc32 = 0,                      /* Signed by build script */
-    .reserved = {0, 0, 0, 0}
+    .usb_vid = USB_VID,              /* USB Vendor ID for bootloader */
+    .usb_pid = USB_PID,              /* USB Product ID for bootloader */
+    .reserved = {0, 0, 0}
 };
