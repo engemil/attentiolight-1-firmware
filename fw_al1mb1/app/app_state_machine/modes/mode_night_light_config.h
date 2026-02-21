@@ -47,11 +47,4 @@ SOFTWARE.
 #define APP_SM_NIGHT_LIGHT_B            41
 #endif
 
-/**
- * @brief   Night light default brightness (lower for night use).
- */
-#ifndef APP_SM_NIGHT_LIGHT_BRIGHTNESS
-#define APP_SM_NIGHT_LIGHT_BRIGHTNESS   32
-#endif
-
 #endif /* MODE_NIGHT_LIGHT_CONFIG_H */

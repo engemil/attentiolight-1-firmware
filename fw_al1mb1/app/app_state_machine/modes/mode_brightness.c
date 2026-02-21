@@ -69,7 +69,7 @@ static const uint8_t brightness_levels[APP_SM_BRIGHTNESS_LEVELS] = {
 static uint8_t current_level_index = 3;  /* Default to 50% */
 
 /* Global brightness defined in app_state_machine.c */
-extern uint8_t global_brightness;
+//extern uint8_t global_brightness;
 
 /*===========================================================================*/
 /* Mode Functions                                                            */

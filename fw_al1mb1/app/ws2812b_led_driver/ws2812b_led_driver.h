@@ -57,11 +57,6 @@ SOFTWARE.
 #error "PWM not enabled in halconf.h"
 #endif
 
-
-#if !HAL_USE_PWM
-#error "PWM not enabled in halconf.h"
-#endif
-
 #if !(STM32_PWM_USE_TIM1 || STM32_PWM_USE_TIM3 || STM32_PWM_USE_TIM14 || STM32_PWM_USE_TIM16 || STM32_PWM_USE_TIM17)
 #error "At least one PWM timer must be enabled in mcuconf.h"
 #endif

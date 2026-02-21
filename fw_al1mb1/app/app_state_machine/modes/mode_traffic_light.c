@@ -62,7 +62,7 @@ typedef enum {
 static traffic_state_t current_state = TRAFFIC_GREEN;
 
 /* External reference to global brightness */
-extern uint8_t global_brightness;
+//extern uint8_t global_brightness;
 
 /*===========================================================================*/
 /* Local Functions                                                           */

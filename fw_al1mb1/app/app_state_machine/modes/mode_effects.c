@@ -82,7 +82,7 @@ static const char* const submode_names[APP_SM_EFFECTS_COUNT] = {
 static app_sm_effects_submode_t current_submode = APP_SM_EFFECTS_RAINBOW;
 
 /* External reference to global brightness */
-extern uint8_t global_brightness;
+//extern uint8_t global_brightness;
 
 /*===========================================================================*/
 /* Local Functions                                                           */
