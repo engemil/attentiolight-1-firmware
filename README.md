@@ -1,10 +1,70 @@
 # AttentioLight-1 MainBoard-1 Firmware
 
-(DEVELOPMENT IN-PROGRESS)
+This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1mb1`) microcontroller (STM32C071RB).
 
-This is the source code (firmware) for the AttentioLight-1 MainBoard-1 (`al1mb1`).
+**Features:**
+- Standalone Application, list of modes
+    - Solid Color Mode (shared with other modes)
+    - Brightness Mode (shared with other modes)
+    - Blinking Mode
+    - Pulsation Mode
+    - Effects Mode (rainbow, color cycle, breathing, candle, fire, lava lamp, Day/Night Cycle, Ocean, Northern Lights, Thunder Storm, Police, Health Pulse, and Memory)
+    - Traffic Light Mode (Cycle between Green, Yellow, and Red)
+    - Night Light Mode (3 levels of low brightness)
+- More to come...
 
-(TO DO: Add more info)
+
+## Standalone Application (and HOW-TO Use it)
+
+The AttentioLight1 as a standalone application means it operates without any additional hardware, the device in itself only receives power from cable (USB-C). Where the only interaction is with the User Button infront of the device.
+
+
+### Button Controls
+
+| Press Duration | Action |
+|----------------|--------|
+| **Short** (< 1s) | Mode-specific action (cycle color, speed, etc.) |
+| **Long** (2-5s) | Switch to next mode *(white flash at 2s)* |
+| **Extended** (≥ 5s) | Power off |
+| **Long (when OFF)** (2s) | Wake up |
+
+### LED Feedback
+
+- **White flash** — Long press threshold reached (2s)
+- **Powerup** — Rainbow fade-in followed by blue pulse (~8s)
+- **Powerdown** — Amber pulse with fading intensity (~4s)
+
+### Mode Sequence
+
+Modes cycle via long press (wraps after Night Light):
+
+```
+Solid Color → Brightness → Blinking → Pulsation → Effects → Traffic Light → Night Light
+     ↑                                                                            │
+     └────────────────────────────────────────────────────────────────────────────┘
+```
+
+### State Sequence
+
+System states flow during power cycle:
+
+```
+BOOT → POWERUP → ACTIVE → POWERDOWN → OFF
+          ↑                            │
+          └────────────────────────────┘
+```
+
+### Mode Details
+
+| Mode | Short Press Action | Options |
+|------|-------------------|---------|
+| **Solid Color** | Cycle through colors | 12 colors: Azure, Blue, Purple, Magenta, Pink, Red, Orange, Yellow, Lime, Green, Spring, Cyan *(shared with Blinking, Pulsation)* |
+| **Brightness** | Cycle brightness level | 8 levels: 12%, 25%, 37%, 50%, 62%, 75%, 87%, 100% *(shared with all modes except Night Light)* |
+| **Blinking** | Cycle blink speed | 6 speeds: Ultra Slow, Very Slow, Slow, Medium, Fast, Very Fast |
+| **Pulsation** | Cycle pulse speed | 5 speeds: Ultra Slow, Very Slow, Slow, Medium, Fast |
+| **Effects** | Cycle through effects | 13 effects: Rainbow, Color Cycle, Breathing, Candle, Fire, Lava Lamp, Day/Night, Ocean, Northern Lights, Thunder Storm, Police, Health Pulse, Memory |
+| **Traffic Light** | Cycle traffic light colors | Green → Yellow → Red |
+| **Night Light** | Cycle dim level | 4 warm amber levels (very dim) |
 
 
 ## Dependencies
@@ -70,7 +130,7 @@ cd fw_al1mb1 && make clean && make
 # Upload test firmware (NB! This may take 5 min or more.)
 sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/fw_al1mb1_signed.bin
 ```
-<!-- Not working?! 
+<!-- Not working?! Might be due to tweaks for making it work with bootloader
 ```
 # Alternatively with the ST-LINK connected
 st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
@@ -84,16 +144,16 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 cd fw_al1mb1
 
 make                  # Release build (no debug output)
-make debug            # Debug build with INFO level (state/mode changes)
-make debug LEVEL=4    # Debug build with all verbose output
+make debug            # Debug build with all outputs
+make debug LEVEL=4    # Debug build with all outputs
 ```
 
 Debug levels (hierarchical):
 - `0` = NONE (release)
 - `1` = ERROR
 - `2` = WARN  
-- `3` = INFO (default for `make debug`)
-- `4` = DEBUG (verbose)
+- `3` = INFO
+- `4` = DEBUG (default for `make debug`)
 
 
 ## Project Structure
@@ -136,129 +196,9 @@ The `.heap` section shows 100% usage by design - ChibiOS allocates all remaining
 (TO DO move to cfg file and a portability/drivers/library folder?)
 
 **Project-based Libraries/Drivers**
-- EngEmil WS2812B ChibiOS Driver (application driver) 
+- EngEmil ESP32 Wifi BLE Interface Driver (placeholder, to control enable pin for wireless module)
 
 
-## Bugs and Issues
-
-
-### Fixing chThdSleep on STM32C071RB
-
-- Changes in projects files:
-    - `cfg/mcuconf.h`
-        ```
-        #define STM32_ST_USE_TIMER                  17 // TIM17. Note that TIM2 is not working with ChibiOS on STM32C071RB
-        ```
-    - `cfg/chconf.h`
-        ```
-        #define CH_CFG_ST_RESOLUTION                16 // Adjust for 16-bit timer. Default was 32-bit.
-        #define CH_CFG_INTERVALS_SIZE               16 // Adjust for 16-bit timer. Default was 32-bit.
-        #define CH_CFG_TIME_TYPES_SIZE              16 // Adjust for 16-bit timer. Default was 32-bit.
-        ```
-
-
-### Fixing Serial over USB on STM32C071RB
-
-- Changes in projects files for Serial over USB
-    - `cfg/halconf.h`
-        ```
-        #define HAL_USE_SERIAL TRUE
-        ...
-        #define HAL_USE_SERIAL_USB TRUE
-        ...
-        #define HAL_USE_USB TRUE
-        ```
-    - `cfg/mcuconf.h`
-        ```
-        #define STM32_USB_USE_USB1 TRUE
-        ...
-        #define STM32_USB_USB1_LP_IRQ_PRIORITY      3
-        ```
-    - `Makefile`
-        ```
-        include $(CHIBIOS)/os/hal/lib/streams/streams.mk
-        ```
-
-- Add temporary missing USB port for STM32C0xx
-    - In `os/hal/ports/STM32/STM32C0xx/stm32_isr.h` (line 129 to 137), add the following
-        ```
-        /*
-        * USB units.
-        */
-        #define STM32_USB1_HP_HANDLER               Vector60
-        #define STM32_USB1_LP_HANDLER               Vector60
-        #define STM32_USB1_HP_NUMBER                8
-        #define STM32_USB1_LP_NUMBER                8
-        ```
-
-    - In `os/hal/ports/STM32/STM32C0xx/stm32_rcc.h` (line 611 to 666), add the following
-        ```
-        /**
-        * @name    USB peripheral specific RCC operations
-        * @{
-        */
-        /**
-        * @brief   Enables the USB peripheral clock.
-        *
-        * @param[in] lp        low power enable flag
-        *
-        * @api
-        */
-        #define rccEnableUSB(lp) rccEnableAPBR1(RCC_APBENR1_USBEN, lp)
-
-        /**
-        * @brief   Disables the USB peripheral clock.
-        *
-        * @api
-        */
-        #define rccDisableUSB() rccDisableAPBR1(RCC_APBENR1_USBEN)
-
-        /**
-        * @brief   Resets the USB peripheral.
-        *
-        * @api
-        */
-        #define rccResetUSB() rccResetAPBR1(RCC_APBRSTR1_USBRST)
-        /** @} */
-
-        /**
-        * @name    CRC peripheral specific RCC operations
-        * @{
-        */
-        /**
-        * @brief   Enables the CRC peripheral clock.
-        *
-        * @param[in] lp        low power enable flag
-        *
-        * @api
-        */
-        #define rccEnableCRC(lp) rccEnableAHB(RCC_AHBENR_CRCEN, lp)
-
-        /**
-        * @brief   Disables the CRC peripheral clock.
-        *
-        * @api
-        */
-        #define rccDisableCRC() rccDisableAHB(RCC_AHBENR_CRCEN)
-
-        /**
-        * @brief   Resets the CRC peripheral.
-        *
-        * @api
-        */
-        #define rccResetCRC() rccResetAHB(RCC_AHBRSTR_CRCRST)
-        /** @} */
-        ```
-
-
-
-### First time programming a STM32C071RB
-
-(Info from https://github.com/cbiffle/stm32c0-metapac-example)
-
-The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, where the EMPTY bit in the flash controller (used to determine if there's code worth booting in the flash) seems not to get re-evaluated at reset, and only at power-on. This means the very first time you program an STM32C0xx, if you reset it, it will bounce right back into the ROM like it's not programmed.
-
-To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 
 
 ## Troubleshooting
@@ -279,7 +219,7 @@ Serial Communication, both VCP (through STLINK) and USB.
 - `minicom -D /dev/ttyACM1 -b 115200`
 
 
-NB! Bootloader doesn't work so good with the debug setup in VS Code (extensions, etc.). 
+**NB!** Bootloader doesn't work so good with the debug setup in VS Code (extensions, etc.). 
 
 <!-- Do the following:
 - Change in Makefile:
@@ -301,6 +241,35 @@ NB! Bootloader doesn't work so good with the debug setup in VS Code (extensions,
     - Undo change in `Makefile`.
     - Compile application again and flash (with dfu-util).
 -->
+
+## Bugs and Issues
+
+
+### Fixing system timer issues on STM32C071RB ChibiOS port
+
+- Changes in projects files:
+    - `cfg/mcuconf.h`
+        ```
+        #define STM32_ST_USE_TIMER                  16 // TIM17. Note that TIM2 is not working with ChibiOS on STM32C071RB
+        ```
+    - `cfg/chconf.h`
+        ```
+        #define CH_CFG_ST_RESOLUTION                16 // Adjust for 16-bit timer. Default was 32-bit.
+        ```
+
+
+### Bug Serial over USB on STM32C071RB
+
+- USB port seem not to work propely. It might fill up a buffer somewhere and freeze the MCU. It remains frozen until you read it.
+
+
+### Bug first time programming a STM32C071RB
+
+(Info from https://github.com/cbiffle/stm32c0-metapac-example)
+
+The STM32C0xx series picked up the same odd behavior from the STM32G0xx series, where the EMPTY bit in the flash controller (used to determine if there's code worth booting in the flash) seems not to get re-evaluated at reset, and only at power-on. This means the very first time you program an STM32C0xx, if you reset it, it will bounce right back into the ROM like it's not programmed.
+
+To fix this, power cycle it. This is only necessary when starting with a factory-fresh part.
 
 
 ## Additional Sources

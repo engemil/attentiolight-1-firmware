@@ -133,8 +133,9 @@ LIBS     := ./libs
 include $(LIBS)/libs.mk
 
 # Define linker script file here
-# ChibiOS provides a default linker script for STM32C0xx devices, but we use 
+# ChibiOS provides a default linker script for STM32C0xx devices. Use it if you do not want to use bootloader. NB! Write to address 0x08000000.
 #LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
+# Custom linmker script, used with the internal bootloader, that starts at the bootloader address (0x1FFF0000).
 LDSCRIPT= STM32C071xB_bootloader.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
@@ -291,7 +292,7 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 # Debug build - forces clean rebuild with debug flags
 # Default LEVEL=3 (INFO) if not specified
 debug: clean-build
-	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),3)"
+	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),4)"
 
 # Explicit release build (no debug output)
 release: clean-build
