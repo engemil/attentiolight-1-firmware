@@ -36,9 +36,8 @@ SOFTWARE.
 #include "app_state_machine.h"
 #include "app_debug.h"
 
-/* EFL (Embedded Flash) driver test - uncomment to enable */
-#include "efl_test.h"
-#include "efl_storage.h"
+/* Persisten Data Storage (EFL (Embedded Flash)) */
+#include "persistent_data.h"
 
 
 /* Serial Configuration for Virtual COM Port */
@@ -96,9 +95,27 @@ void init_system(void) {
 /*
  * Initializes application threads and subsystems.
 */
-void init_application_threads(void){
+void init_application_systems(void){
 
     DBG_INFO("MAIN initializing application...");
+
+    /*
+     * Initialize persistent data storage.
+     * Loads device configuration from EFL (or defaults on first boot).
+     */
+    DBG_DEBUG("MAIN persistent_data_init()...");
+    pd_result_t pd_result = persistent_data_init();
+    if (pd_result != PD_OK) {
+        DBG_WARN("MAIN persistent_data_init() returned: %s (using defaults)",
+                 persistent_data_result_str(pd_result));
+    } else {
+        DBG_DEBUG("MAIN persistent_data_init() OK");
+        const pd_data_t *pd = persistent_data_get();
+        if (pd != NULL) {
+            DBG_DEBUG("Device: %s, Serial: %s", pd->device_name, pd->serial_number);
+        }
+    }
+
     /*
      * Initialize button driver.
      * Creates button thread in STOPPED state (started later by state machine).
@@ -162,54 +179,38 @@ int main(void) {
     chThdSleepMilliseconds(500);
 
     /* Initialize application threads and subsystems. */
-    init_application_threads();
+    init_application_systems();
 
+    /* TEST CODE - Print persistent data at startup */
     /*
-     * EFL (Embedded Flash) Driver Test
-     * ---------------------------------
-     * Uncomment the code below to test the EFL driver.
-     * WARNING: This will ERASE DATA in the EFL storage region!
-     * 
-     * Requirements:
-     * 1. Use an EFL-enabled linker script:
-     *    - STM32C071xB_ee_bootloader_efl.ld (with bootloader)
-     *    - STM32C071xB_chibios_efl.ld (standalone)
-     * 2. Uncomment the includes at the top of this file:
-     *    #include "efl_test.h"
-     *    #include "efl_storage.h"
-     * 3. Uncomment the test code below.
-     *
-     * The test will:
-     * - Validate storage region configuration
-     * - Start the EFL driver
-     * - Erase the first storage sector
-     * - Program test data
-     * - Read back and verify
-     * - Output results to the debug serial port
-     */
-    efl_test_result_t efl_result;
-    efl_result = efl_test_run((BaseSequentialStream*)&SD2);
-    if (efl_result != EFL_TEST_OK) {
-        DBG_ERROR("EFL test FAILED: %s", efl_test_result_str(efl_result));
-    } else {
-        DBG_INFO("EFL test PASSED");
+    {
+        const pd_data_t *pd = persistent_data_get();
+        if (pd != NULL) {
+            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "=== Persistent Data ===\r\n");
+            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Device: %s\r\n", pd->device_name);
+            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Serial: %s\r\n", pd->serial_number);
+            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "=======================\r\n");
+        } else {
+            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "ERROR: Persistent data not initialized\r\n");
+        }
     }
+    */
 
     
     // TEST CODE
-    uint32_t test_serial_usb = 0;
-    uint32_t test_serial_vcp = 0;
+    //uint32_t test_serial_usb = 0;
+    //uint32_t test_serial_vcp = 0;
 
     while (true) {
 
         // TEST CODE // TEST VCP SERIAL COMMUNICATION
         //chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
         // TEST CODE // TEST USB SERIAL COMMUNICATION
-        chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
+        //chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
 
         // TEST CODE
-        test_serial_usb++;
-        test_serial_vcp++;
+        //test_serial_usb++;
+        //test_serial_vcp++;
 
         /* Nothing happening in main thread (except for test code) */
         chThdSleepMilliseconds(500);

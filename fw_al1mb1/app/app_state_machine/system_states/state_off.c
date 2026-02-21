@@ -219,7 +219,7 @@ void state_off_enter(void) {
     anim_thread_off();
 
 #if !DBG_SKIP_LOW_POWER
-    DBG_INFO("Entering Stop mode (low-power)...");
+    DBG_DEBUG("Entering Stop mode (low-power)...");
     
     /* Prepare peripherals for Stop mode */
     prepare_stop_mode();
@@ -230,9 +230,9 @@ void state_off_enter(void) {
     /* Wake-up occurred - restore system */
     restore_from_stop();
 
-    DBG_INFO("Woke up from Stop mode");
+    DBG_DEBUG("Woke up from Stop mode");
 #else
-    DBG_INFO("Stop mode disabled (debug level %d), staying in run mode", APP_DEBUG_LEVEL);
+    DBG_DEBUG("Stop mode disabled (debug level %d), staying in run mode", APP_DEBUG_LEVEL);
 #endif
 }
 

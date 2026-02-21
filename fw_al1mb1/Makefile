@@ -183,6 +183,7 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/modes/mode_traffic_light.c \
        app/app_state_machine/modes/mode_night_light.c \
        app/app_state_machine/modes/mode_external_control.c \
+       app/persistent_data/persistent_data.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -227,7 +228,8 @@ UINCDIR = ./app_header \
           ./app/app_state_machine/animation \
           ./app/app_state_machine/system_states \
           ./app/app_state_machine/modes \
-          ./app/app_state_machine/modes/effects
+          ./app/app_state_machine/modes/effects \
+          ./app/persistent_data
 
 # List the user directory to look for the libraries here
 ULIBDIR =
