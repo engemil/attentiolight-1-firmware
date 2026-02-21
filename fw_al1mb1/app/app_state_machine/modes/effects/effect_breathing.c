@@ -29,20 +29,15 @@ SOFTWARE.
 
 #include "effect_breathing.h"
 #include "animation_helpers.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_breathing(const anim_state_t *state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-    
-    /* Use the period from state for consistency with animation system */
+    /* Use pre-computed elapsed_ms from animation thread */
     uint32_t total_cycle = state->period_ms;
-    uint32_t cycle_pos = elapsed % total_cycle;
+    uint32_t cycle_pos = state->elapsed_ms % total_cycle;
     
     /* Calculate phase boundaries based on proportions of total cycle
      * Original proportions: rise=3000, hold_high=2000, fall=4000, hold_low=2000 (total=11000)

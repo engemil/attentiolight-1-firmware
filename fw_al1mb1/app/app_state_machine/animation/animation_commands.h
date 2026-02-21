@@ -96,7 +96,8 @@ typedef struct {
     uint8_t brightness;             /**< Current brightness                 */
     uint16_t period_ms;             /**< Animation period                   */
     systime_t start_time;           /**< Animation start time (system ticks)*/
-    uint32_t elapsed_ms;            /**< Elapsed time in current cycle      */
+    systime_t last_update_time;     /**< Last update time for delta calc    */
+    uint32_t elapsed_ms;            /**< Elapsed time in current cycle (ms) */
     uint8_t phase;                  /**< Animation phase (for multi-phase)  */
     bool active;                    /**< Animation is active                */
 } anim_state_t;

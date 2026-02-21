@@ -29,16 +29,14 @@ SOFTWARE.
 
 #include "effect_fire.h"
 #include "animation_helpers.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_fire(const anim_state_t *state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
+    /* Use pre-computed elapsed_ms from animation thread */
+    uint32_t elapsed = state->elapsed_ms;
 
     /* === Slow base undulation (like glowing embers, ~2 second cycle) === */
     uint32_t base_period = 2000;  /* 2 seconds */

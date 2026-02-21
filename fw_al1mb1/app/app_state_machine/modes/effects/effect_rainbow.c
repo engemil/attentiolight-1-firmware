@@ -29,17 +29,14 @@ SOFTWARE.
 
 #include "effect_rainbow.h"
 #include "animation_helpers.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_rainbow(const anim_state_t *state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-    uint32_t cycle_pos = elapsed % state->period_ms;
+    /* Use pre-computed elapsed_ms from animation thread */
+    uint32_t cycle_pos = state->elapsed_ms % state->period_ms;
 
     /* Map cycle position to hue (0-359) */
     uint16_t hue = (uint16_t)((cycle_pos * 360) / state->period_ms);

@@ -29,16 +29,14 @@ SOFTWARE.
 
 #include "effect_candle.h"
 #include "animation_helpers.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_candle(const anim_state_t *state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
+    /* Use pre-computed elapsed_ms from animation thread */
+    uint32_t elapsed = state->elapsed_ms;
 
     /* Warm orange/yellow candle color */
     uint8_t base_r = 255;

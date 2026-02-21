@@ -29,17 +29,14 @@ SOFTWARE.
 
 #include "effect_health_pulse.h"
 #include "animation_helpers.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_health_pulse(const anim_state_t *state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-    uint32_t cycle_pos = elapsed % state->period_ms;
+    /* Use pre-computed elapsed_ms from animation thread */
+    uint32_t cycle_pos = state->elapsed_ms % state->period_ms;
 
     /* Heartbeat pattern: quick beat, pause, quick beat, long pause
      * 0-15%:  First beat (up and down)

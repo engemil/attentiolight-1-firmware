@@ -30,18 +30,15 @@ SOFTWARE.
 #include "effect_color_cycle.h"
 #include "animation_helpers.h"
 #include "modes.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_color_cycle(const anim_state_t *state, uint8_t *last_state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
+    /* Use pre-computed elapsed_ms from animation thread */
     uint32_t total_period = state->period_ms * APP_SM_COLOR_COUNT;
-    uint32_t cycle_pos = elapsed % total_period;
+    uint32_t cycle_pos = state->elapsed_ms % total_period;
 
     /* Determine current color index */
     uint8_t color_idx = (uint8_t)(cycle_pos / state->period_ms);

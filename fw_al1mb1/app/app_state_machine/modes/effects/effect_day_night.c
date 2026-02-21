@@ -29,17 +29,16 @@ SOFTWARE.
 
 #include "effect_day_night.h"
 #include "animation_helpers.h"
-#include "ch.h"
 
 /*===========================================================================*/
 /* Effect Implementation                                                     */
 /*===========================================================================*/
 
 void process_day_night(const anim_state_t *state) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(state->start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-    uint32_t cycle_pos = elapsed % state->period_ms;
+    /* Use pre-computed elapsed_ms from animation thread.
+     * This handles 16-bit systime_t overflow correctly for long periods
+     * (up to 24 hours) by using incremental delta tracking. */
+    uint32_t cycle_pos = state->elapsed_ms % state->period_ms;
 
     /* Calculate progress through cycle as 0-65535 (16-bit) for maximum precision */
     uint32_t progress_16bit = (cycle_pos * 65536UL) / state->period_ms;

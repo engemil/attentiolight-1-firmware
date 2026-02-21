@@ -205,10 +205,7 @@ static void process_solid(void) {
  * @brief   Processes blink animation tick.
  */
 static void process_blink(void) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+    uint32_t cycle_pos = anim_state.elapsed_ms % anim_state.period_ms;
 
     uint8_t current_state = (cycle_pos < (anim_state.period_ms / 2)) ? 1 : 0;
 
@@ -228,10 +225,7 @@ static void process_blink(void) {
  * @brief   Processes pulse/breathing animation tick.
  */
 static void process_pulse(void) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-    uint32_t cycle_pos = elapsed % anim_state.period_ms;
+    uint32_t cycle_pos = anim_state.elapsed_ms % anim_state.period_ms;
 
     /* Use sine-like curve: 0 -> max -> 0 */
     uint16_t half_period = anim_state.period_ms / 2;
@@ -254,13 +248,9 @@ static void process_pulse(void) {
  * @brief   Processes traffic light animation tick.
  */
 static void process_traffic_light(void) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
-
     uint32_t total_period = APP_SM_TRAFFIC_RED_MS + APP_SM_TRAFFIC_YELLOW_MS +
                             APP_SM_TRAFFIC_GREEN_MS;
-    uint32_t cycle_pos = elapsed % total_period;
+    uint32_t cycle_pos = anim_state.elapsed_ms % total_period;
 
     uint8_t current_state;
     if (cycle_pos < APP_SM_TRAFFIC_RED_MS) {
@@ -287,9 +277,7 @@ static void process_traffic_light(void) {
  * @brief   Processes flash feedback (quick flash then return).
  */
 static void process_flash_feedback(void) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
+    uint32_t elapsed = anim_state.elapsed_ms;
 
     uint8_t current_state = (elapsed < anim_state.period_ms) ? 1 : 0;
 
@@ -339,9 +327,7 @@ typedef enum {
  *          Phase 4: Complete (stop animation)
  */
 static void process_powerup_sequence(void) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
+    uint32_t elapsed = anim_state.elapsed_ms;
 
     /* Calculate phase boundaries */
     uint32_t phase1_start = APP_SM_POWERUP_RAINBOW_FADE_MS;
@@ -483,9 +469,7 @@ static void process_powerup_sequence(void) {
  *          Phase 3: Complete (stop animation)
  */
 static void process_powerdown_sequence(void) {
-    systime_t now = chVTGetSystemTime();
-    sysinterval_t elapsed_ticks = chTimeDiffX(anim_state.start_time, now);
-    uint32_t elapsed = TIME_I2MS(elapsed_ticks);
+    uint32_t elapsed = anim_state.elapsed_ms;
 
     /* Calculate phase boundaries */
     uint32_t phase1_start = APP_SM_POWERDOWN_COLOR_FADE_MS;
@@ -599,6 +583,7 @@ static void process_command(const anim_command_t* cmd) {
     anim_state.brightness = cmd->brightness;
     anim_state.period_ms = cmd->period_ms;
     anim_state.start_time = chVTGetSystemTime();
+    anim_state.last_update_time = anim_state.start_time;
     anim_state.elapsed_ms = 0;
     anim_state.phase = 0;
     anim_state.active = (cmd->type != ANIM_CMD_STOP);
@@ -626,6 +611,16 @@ static void process_tick(void) {
     if (!anim_state.active) {
         return;
     }
+
+    /* Update elapsed_ms using incremental delta tracking.
+     * This handles 16-bit systime_t overflow correctly for long periods
+     * by accumulating small deltas rather than computing total elapsed.
+     * elapsed_ms will overflow after ~49.7 days of continuous operation,
+     * which is acceptable for this application. */
+    systime_t now = chVTGetSystemTime();
+    sysinterval_t delta_ticks = chTimeDiffX(anim_state.last_update_time, now);
+    anim_state.last_update_time = now;
+    anim_state.elapsed_ms += TIME_I2MS(delta_ticks);
 
     switch (anim_state.current_type) {
         case ANIM_CMD_SOLID:
