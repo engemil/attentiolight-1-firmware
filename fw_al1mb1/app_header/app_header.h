@@ -38,7 +38,7 @@ SOFTWARE.
  */
 typedef struct __attribute__((packed)) {
     uint32_t magic;          /* Magic number: 0xDEADBEEF */
-    uint32_t version;        /* Firmware version */
+    uint32_t version;        /* Application version */
     uint32_t size;           /* Firmware size in bytes (excluding header) */
     uint32_t crc32;          /* CRC32 of firmware (excluding this header) */
     uint16_t usb_vid;        /* USB Vendor ID for bootloader DFU mode */

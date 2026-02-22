@@ -9,13 +9,22 @@ All notable changes to the EngEmil STM32 Bootloader project will be documented i
 
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+Note: Update `app_header.h` when publishing new version.
+
 ---
 
-## [Development] (2026-02-21)
+## [Development] (2026-02-22)
+
+(to be added)
+
+---
+
+## [1.0.0] (2026-02-22)
 
 NB! Notes added here during development to keep track of changes.
 
 Added
+- Added USB PID and VID for app header file, for bootloader.
 - **Persistent Data** organizing/structuring the persistentt data, interfacing with EFL driver.
 - **EFL (Embedded Flash) Driver** to store persistent data on Flash.
 - Additional debug level (level 5) for disabling low-power Stop mode when debugging system.
@@ -38,6 +47,12 @@ Added
 - **License note** added/adjusted on most source files.
 - **Button Driver** for reading the button presses and "decode" different type of presses, as well as callback functionality.
 - **LED Test Thread** for testing LED rendering in it's own thread.
+- **Board Files** for ST_NUCLEO64_C071RB added (from ChibiOS) in boards-folder.
+- **ChibiOS** as submodule
+- **Integrated bootloader requirements** to be able to upload application firmware over USB.
+- **Bootloader** added as submodule.
+- Application Firmware first iteration as a prototype. With test code, LED light driver, USB driver, and VCP.
+- Application built on ChibiOS.
 
 Fixed
 - Fixed problem with early initialization debug prints to show up on serial com (USB).
@@ -45,6 +60,7 @@ Fixed
 - **Most Significant Bit (MSB)** order for WS2812B LED driver corrected.
 
 Changed
+- Moved linker scripts to a subfolder.
 - Simplified include paths, since Makefile make all available.
 - Separated and moved the configurations for each subsystem, state or mode.
 - Moved effects for effect mode to their separate files.
@@ -59,28 +75,13 @@ Changed
 - Changed **Button Driver** start and stop calls, to avoid affecting the the start-up/power-up and shutdown/power-down animation.
 - Renamed **Longest button press** to **extended button press**.
 - Renamed **ee_ws2812b_chibios_driver** to **ws2812b_led_driver** and move it from **libs** to **app** folder.
+- Updated **.devcontainer files** with better container structure.
+- Removed **ChibiOS** command from .vscode files. 
 
 Removed
 - **strobe effect** removed.
 - Redundant **powerup timer**.
 - Unecessary skip powerup button press.
-
-
----
-
-## [1.0.0] - (2026-02-11)
-
-Changed
-- Updated **.devcontainer files** with better container structure.
-- Removed **ChibiOS** command from .vscode files. 
-
-Added
-- **Board Files** for ST_NUCLEO64_C071RB added (from ChibiOS) in boards-folder.
-- **ChibiOS** as submodule
-- **Integrated bootloader requirements** to be able to upload application firmware over USB.
-- **Bootloader** added as submodule.
-- Application Firmware first iteration as a prototype. With test code, LED light driver, USB driver, and VCP.
-- Application built on ChibiOS.
 
 ---
 

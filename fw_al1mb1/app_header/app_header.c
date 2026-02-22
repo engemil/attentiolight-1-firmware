@@ -46,7 +46,7 @@ __attribute__((section(".app_header")))
 __attribute__((used))
 const app_header_t app_header = {
     .magic = APP_HEADER_MAGIC,      /* 0xDEADBEEF */
-    .version = APP_VERSION,          /* 0x00010000 (v1.0.0) */
+    .version = APP_VERSION,          /* Application Version */
     .size = 0,                       /* Signed by build script */
     .crc32 = 0,                      /* Signed by build script */
     .usb_vid = USB_VID,              /* USB Vendor ID for bootloader */
