@@ -136,13 +136,13 @@ include $(LIBS)/libs.mk
 
 # ChibiOS provides a default linker script for STM32C0xx devices. Use it if you do not want to use bootloader.
 #LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
-#LDSCRIPT= STM32C071xB_chibios_original.ld
+#LDSCRIPT= linker_scripts/STM32C071xB_chibios_original.ld
 # ChibiOS Original Linker Script with EFL support.
-#LDSCRIPT= STM32C071xB_chibios_efl.ld
+#LDSCRIPT= linker_scripts/STM32C071xB_chibios_efl.ld
 # Custom linker script, used with the custom bootloader, that starts at the bootloader address.
-#LDSCRIPT= STM32C071xB_ee_bootloader.ld
+#LDSCRIPT= linker_scripts/STM32C071xB_ee_bootloader.ld
 # Custom linker script, used with the custom bootloader and with EFL support, that starts at the bootloader address.
-LDSCRIPT= STM32C071xB_ee_bootloader_efl.ld
+LDSCRIPT= linker_scripts/STM32C071xB_ee_bootloader_efl.ld
 
 
 

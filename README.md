@@ -2,19 +2,51 @@
 
 This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1mb1`) microcontroller (STM32C071RB).
 
-**Features:**
-- Standalone Application, list of modes
-    - Solid Color Mode (shared with other modes)
-    - Brightness Mode (shared with other modes)
-    - Blinking Mode
-    - Pulsation Mode
-    - Effects Mode (rainbow, color cycle, breathing, candle, fire, lava lamp, Day/Night Cycle, Ocean, Northern Lights, Thunder Storm, Police, Health Pulse, and Memory)
-    - Traffic Light Mode (Cycle between Green, Yellow, and Red)
-    - Night Light Mode (3 levels of low brightness)
-- More to come...
+**Standalone Application Features**, with a varity of different modes.
+- Solid Color Mode (shared with other modes).
+- Brightness Mode (shared with other modes).
+- Blinking Mode.
+- Pulsation Mode.
+- Effects Mode (rainbow, color cycle, breathing, candle, fire, lava lamp, Day/Night Cycle, Ocean, Northern Lights, Thunder Storm, Police, Health Pulse, and Memory).
+- Traffic Light Mode (Cycle between Green, Yellow, and Red).
+- Night Light Mode (3 levels of low brightness).
+
+**Technical Features**
+- RGB LED rendering for animations with a varity of use-cases.
+- Real-time operative system integration with ChibiOS.
+- Persistent data for run-time data storage, with EFL (Embedded Flash) Driver. Including CRC32 integrity checking and factory default restoration.
+- Integration with Bootloader and application header for application firmware updates over USB.
+- Low-power mode with wake-up from user button.
+- USB serial port integration, for debug output (and future external integration over USB).
 
 
-## Standalone Application (and HOW-TO Use it)
+## Table of Contents
+
+- [Standalone Application](#standalone-application)
+  - [Button Controls](#button-controls)
+  - [LED Feedback](#led-feedback)
+  - [Mode Sequence](#mode-sequence)
+  - [State Sequence](#state-sequence)
+  - [Mode Details](#mode-details)
+- [Dependencies](#dependencies)
+  - [Required Tools](#required-tools)
+  - [Installation (Ubuntu/Debian)](#installation-ubuntudebian)
+- [Setup Repository](#setup-repository)
+- [Quick Start](#quick-start)
+- [Debug Builds](#debug-builds)
+- [Project Structure](#project-structure)
+- [Hardware](#hardware)
+- [Firmware Stack](#firmware-stack)
+- [Memory Map](#memory-map)
+- [Libraries and Drivers](#libraries-and-drivers)
+- [Utility Scripts](#utility-scripts)
+- [Troubleshooting](#troubleshooting)
+- [Bugs and Issues](#bugs-and-issues)
+- [Additional Sources](#additional-sources)
+- [License](#license)
+
+
+## Standalone Application
 
 The AttentioLight1 as a standalone application means it operates without any additional hardware, the device in itself only receives power from cable (USB-C). Where the only interaction is with the User Button infront of the device.
 
@@ -93,7 +125,7 @@ sudo apt install git build-essential gcc-arm-none-eabi \
 RUN apt install gdb-multiarch minicom usbutils -y 
 ```
 
-### Setup Repository
+## Setup Repository
 
 ```bash
 git clone https://github.com/engemil/ee_stm32_bootloader.git
@@ -159,22 +191,113 @@ Debug levels (hierarchical):
 
 ## Project Structure
 
-(TO DO: To be added)
+```
+.
+├── fw_al1mb1/                      # Application firmware
+│   ├── app/                        # Application source code and application drivers
+│   │   ├── main.c                  # Entry point
+│   │   ├── app_debug.h             # Debug macros & levels
+│   │   ├── rt_config.h             # Runtime configuration
+│   │   ├── app_state_machine/      # Core state machine
+│   │   │   ├── animation/          # LED animation engine
+│   │   │   ├── modes/              # User-selectable modes
+│   │   │   │   └── effects/        # effects implementation
+│   │   │   └── system_states/      # System state handlers
+│   │   ├── button_driver/          # Button input with debouncing
+│   │   ├── persistent_data/        # EFL settings storage
+│   │   └── ws2812b_led_driver/     # WS2812B SPI protocol
+│   ├── app_header/                 # Bootloader app header
+│   ├── boards/                     # Board support packages
+│   ├── cfg/                        # ChibiOS configuration
+│   ├── libs/                       # Libraries & drivers independent/indirectly of application
+│   │   ├── hal_efl_stm32c0xx/      # EFL driver for STM32C0
+│   │   ├── ee_esp32_wifi_ble_if_driver/  # WiFi/BLE module interface
+│   │   ├── usbcfg/                 # USB CDC configuration
+│   │   └── portab/                 # Portability layer
+│   ├── linker_scripts/             # Memory layout
+│   ├── Makefile                    # Build file (make)
+│   └── STM32C071.svd               # Debug register definitions
+├── bootloader/                     # USB DFU bootloader (git submodule)
+├── ext/                            # External dependencies
+│   └── ChibiOS/                    # ChibiOS RTOS (git submodule)
+├── scripts/                        # Utility scripts (related to system, build process, and more)
+├── .devcontainer/                  # Docker dev environment
+└── .vscode/                        # VS Code debug config
+```
 
 
 ## Hardware
 
-- Microcontroller: STM32C071RB
+| Component | Details |
+|-----------|---------|
+| MCU | STM32C071RB (ARM Cortex-M0+, 48MHz) |
+| Flash | 128KB |
+| RAM | 24KB |
+| LED | WS2812B addressable RGB |
+| Button | User button |
+| USB | USB 2.0 Full Speed compliant |
+| Debug | SWD + Virtual COM Port (UART) |
+| Oscillators | 48MHz HSE, 32.768kHz LSE |
+| Wireless Module| ESP32 WiFi/BLE module interface* |
 
-(TO DO: Add more info)
+(*) Code in this codebase related to the wireless module is only for interfacing with it.
 
 
-## Firmware stack
+## Firmware Stack
 
-- ChibiOS
-- more..
+```
+┌──────────────────────────────────────────────────────────────┐
+│                    APPLICATION LAYER                         │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ State Machine (app_state_machine/)                      │ │
+│  │   ├── System States                                     │ │
+│  │   ├── Modes                                             │ │
+│  │   └── Animation Engine                                  │ │
+│  └─────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│                    APPLICATION DRIVERS                       │
+│  ┌──────────────┐ ┌──────────────┐ ┌───────────────────────┐ │
+│  │ WS2812B LED  │ │ Button       │ │ Persistent Data       │ │
+│  │ Driver       │ │ Driver       │ │ (EFL Storage)         │ │
+│  └──────────────┘ └──────────────┘ └───────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│                    APP HEADER (app_header/)                  │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Bootloader Interface: magic, version, size, CRC32       │ │
+│  │ USB Descriptors: VID/PID for DFU identification         │ │
+│  └─────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│                    LIBRARIES (libs/)                         │
+│  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────┐  │
+│  │ hal_efl_stm32c0xx│ │ usbcfg           │ │ portab       │  │
+│  │ (Flash Driver)   │ │ (USB CDC Config) │ │ (Portability)│  │
+│  └──────────────────┘ └──────────────────┘ └──────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │ ee_esp32_wifi_ble_if_driver (WiFi/BLE Module Interface)  ││
+│  └──────────────────────────────────────────────────────────┘│
+├──────────────────────────────────────────────────────────────┤
+│                    ChibiOS/RT + HAL                          │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ RT Kernel: threads, semaphores, events, mailboxes       │ │
+│  │ HAL: GPIO, SPI, USB, PWR, EFL (Embedded Flash)          │ │
+│  └─────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│                    STM32C0xx LL/HAL                          │
+├──────────────────────────────────────────────────────────────┤
+│                    STM32C071RB Hardware                      │
+└──────────────────────────────────────────────────────────────┘
+```
 
-(TO DO: Add more info)
+**Key Components:**
+
+- **ChibiOS/RT** — Real-time kernel with threads and event-driven architecture
+- **ChibiOS HAL** — Hardware abstraction for GPIO, SPI, USB, PWR, timers
+- **hal_efl_stm32c0xx** — Custom EFL driver (STM32C0 not in mainline ChibiOS)
+- **USB Stack** — CDC/ACM for debug serial, DFU mode via bootloader
+- **WS2812B Driver** — SPI-based protocol using DMA for timing-critical LED data
+- **Power Management** — Low-power mode with EXTI wake-up.
+
+> **Note:** The goal is to follow this layered abstraction as closely as possible, but in practice some boundaries are crossed for performance or simplicity reasons.
 
 
 ## Memory Map
@@ -220,12 +343,12 @@ Check usage after building:
 
 ## Libraries and Drivers
 
+(TO DO: Add info about libraries, when we have worked on libraries implemented?)
+
+**Temporary notes:**
 - usbcfg and portab (temporary USB related files)
-
-(TO DO move to cfg file and a portability/drivers/library folder?)
-
-**Project-based Libraries/Drivers**
-- EngEmil ESP32 Wifi BLE Interface Driver (placeholder, to control enable pin for wireless module)
+- Project-based Libraries/Drivers
+    - EngEmil ESP32 Wifi BLE Interface Driver (placeholder, to control enable pin for wireless module)
 
 
 ## Utility Scripts
@@ -261,45 +384,30 @@ Useful CLI tools for debugging/troubleshooting: `minicom`,  `multiarch-gdb`, `us
 
 As well as the already mentioned tools `st-flash`/`st-erase`, `dfu-util`, `openocd`
 
-Use `make debug LEVEL=4` as mentioned, for debug info over serial communication.
+Compile for debug:
+- `make debug` or `make debug LEVEL=4` - for debug info over serial communication.
+- `make debug LEVEL=5` - for debug info + do not enter low-power Stop mode.
 
-(TO DO: Add more info)
 
-Serial Communication, both VCP (through STLINK) and USB.
+ Check which mode we are in with: `lsusb`
+- In normal operation, expect: `Bus 001 Device 051: ID 0483:df11 EngEmil.io AttentioLight-1`
+- In bootloader, expect: `Bus 001 Device 054: ID 0483:df11 EngEmil.io Bootloader DFU Mode`
 
-- `lsusb`
-- `ls /dev/ttyACM* /dev/ttyUSB*`
-- `minicom -D /dev/ttyACM0 -b 115200`
-- `minicom -D /dev/ttyACM1 -b 115200`
+Useful command to figure out which COM port (E.g. `/dev/ttyACM0` or `/dev/ttyUSB0`) to use: `ls -l /dev/serial/by-id`
+
+Use `minicom` for serial monitoring in terminal.
+- E.g.: `minicom -D /dev/ttyACM0 -b 115200`
 
 
 **NB!** Bootloader doesn't work so good with the debug setup in VS Code (extensions, etc.). 
 
-<!-- Do the following:
-- Change in Makefile:
-    ```Makefile
-    # uncomment
-    LDSCRIPT= $(STARTUPLD)/STM32C071xB.ld
-    # Comment out
-    #LDSCRIPT= STM32C071xB_bootloader.ld
-    ```
-- Do not use bootloader, and flash *not signed* firmware bin file with st-flash.
-    ```bash
-    # Upload application firmware over USB
-    cd fw_al1mb1 && make clean && make
-    st-flash erase && st-flash --reset write build/fw_al1mb1.bin 0x08000000
-     ```
-- When you want to use bootloader again:
-    - Clean the MCU: `st-flash erase`.
-    - Program the bootloader again.
-    - Undo change in `Makefile`.
-    - Compile application again and flash (with dfu-util).
--->
 
 ## Bugs and Issues
 
 
 ### Fixing system timer issues on STM32C071RB ChibiOS port
+
+For ChibiOS port of STM32C071RB, do NOT use timer 2 (TIM2), instead use Timer 16 (16-bit).
 
 - Changes in projects files:
     - `cfg/mcuconf.h`
@@ -314,7 +422,9 @@ Serial Communication, both VCP (through STLINK) and USB.
 
 ### Bug Serial over USB on STM32C071RB
 
-- USB port seem not to work propely. It might fill up a buffer somewhere and freeze the MCU. It remains frozen until you read it.
+ChibiOS USB port for STM32C071xx freezes the whole system. I assume there is a buffer somewhere that freezes the MCU, and remains frozen until you read the serial line on the receiving side (your computer).
+
+
 
 
 ### Bug first time programming a STM32C071RB

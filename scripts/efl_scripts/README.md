@@ -8,11 +8,11 @@ These scripts provide a convenient command-line interface to read flash memory f
 
 ### EFL Memory Region Configuration
 
-Based on linker script `STM32C071xB_ee_bootloader_efl.ld`.
+Based on linker script `fw_al1mb1/linker_scripts/STM32C071xB_ee_bootloader_efl.ld`.
 
 **Compatibility Note:** The EFL region is at the same location in both:
-- `STM32C071xB_ee_bootloader_efl.ld` (with bootloader) - **Primary/Recommended**
-- `STM32C071xB_chibios_efl.ld` (standalone, no bootloader)
+- `fw_al1mb1/linker_scripts/STM32C071xB_ee_bootloader_efl.ld` (with bootloader) - **Primary/Recommended**
+- `fw_al1mb1/linker_scripts/STM32C071xB_chibios_efl.ld` (standalone, no bootloader)
 
 These scripts work with either configuration.
 
