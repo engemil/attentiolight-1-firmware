@@ -13,9 +13,10 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-02-22)
+## [Development] (2026-02-23)
 
-(to be added)
+Changed
+- Minor tweak in udev stlink script.
 
 ---
 

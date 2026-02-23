@@ -4,7 +4,7 @@
 # This script creates a udev rule to allow non-root users to access the ST-LINK USB devices.
 # It also adds the current user to the 'plugdev' group, which is necessary for USB device access.
 #
-# Supports ST-LINK/V2-1, ST-LINK/V3E, ST-LINK/V2EC, and ST-LINK/V3EC, and the STM32C071RB chip in DFU mode.
+# Supports ST-LINK/V2-1, ST-LINK/V3E, ST-LINK/V2EC, and ST-LINK/V3EC, and the STM32 chip in DFU mode.
 #
 # HOW-TO use:
 # 1. Configure permissions: sudo chmod +x ./udevusb_stlink.sh
@@ -56,7 +56,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="3753", MODE="0666
 # STMicroelectronics ST-LINK/V3PWR
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="3757", MODE="0666", GROUP="plugdev", SYMLINK+="stlinkv3ec_%n"
 
-# STMicroelectronics STM32C071RB Chip
+# STMicroelectronics STM32 Chip in DFU mode
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE="0666", GROUP="plugdev", SYMLINK+="stm32c0_%n"
 EOF
 
