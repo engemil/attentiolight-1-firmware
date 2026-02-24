@@ -405,29 +405,7 @@ Use `minicom` for serial monitoring in terminal.
 ## Bugs and Issues
 
 
-### Fixing system timer issues on STM32C071RB ChibiOS port
-
-For ChibiOS port of STM32C071RB, do NOT use timer 2 (TIM2), instead use Timer 16 (16-bit).
-
-- Changes in projects files:
-    - `cfg/mcuconf.h`
-        ```
-        #define STM32_ST_USE_TIMER                  16 // TIM17. Note that TIM2 is not working with ChibiOS on STM32C071RB
-        ```
-    - `cfg/chconf.h`
-        ```
-        #define CH_CFG_ST_RESOLUTION                16 // Adjust for 16-bit timer. Default was 32-bit.
-        ```
-
-
-### Bug Serial over USB on STM32C071RB
-
-ChibiOS USB port for STM32C071xx freezes the whole system. I assume there is a buffer somewhere that freezes the MCU, and remains frozen until you read the serial line on the receiving side (your computer).
-
-
-
-
-### Bug first time programming a STM32C071RB
+### Bug: First time programming a STM32C071RB
 
 (Info from https://github.com/cbiffle/stm32c0-metapac-example)
 

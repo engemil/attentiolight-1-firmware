@@ -83,6 +83,7 @@
  *          timer counter width.
  */
 #if !defined(CH_CFG_ST_RESOLUTION)
+/* Note: TIM16 (16-bit timer) if you change to TIM2 (32-bit) update this: 32 */
 #define CH_CFG_ST_RESOLUTION                16
 #endif
 

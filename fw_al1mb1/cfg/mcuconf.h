@@ -197,6 +197,8 @@
  * ST driver system settings.
  */
 #define STM32_ST_IRQ_PRIORITY               2
+// TIM16 (16-bit). Note: Change CH_CFG_ST_RESOLUTION as well changing timer,
+// e.g. TIM2 (32-bit timer).
 #define STM32_ST_USE_TIMER                  16
 
 /*

@@ -13,10 +13,15 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-02-23)
+## [1.0.1] (2026-02-24)
+
+Fixed
+- Fixed problem with USB serial com. causing thread(s) to freeze. Change debug prints for a timeout alternative.
 
 Changed
 - Minor tweak in udev stlink script.
+- Added comments about timer in chibios config files.
+- Removed bugs notes in README.
 
 ---
 

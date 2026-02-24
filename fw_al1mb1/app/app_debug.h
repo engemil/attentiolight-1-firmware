@@ -59,6 +59,7 @@ SOFTWARE.
 #include "chprintf.h"
 #include "portab.h"
 #include "usbcfg.h"
+#include <stdarg.h>
 
 /*===========================================================================*/
 /* Debug Level Configuration                                                 */
@@ -85,6 +86,22 @@ SOFTWARE.
 #define APP_DEBUG_LEVEL         DBG_LEVEL_NONE
 #endif
 
+/**
+ * @brief   Debug output serial driver (USB CDC).
+ */
+#define DBG_SERIAL_DRIVER       PORTAB_SDU1
+
+/**
+ * @brief   Debug print buffer size.
+ */
+#define DBG_PRINT_BUF_SIZE      256
+
+/**
+ * @brief   Debug print timeout in milliseconds.
+ */
+#define DBG_PRINT_TIMEOUT_MS    50
+#define DBG_PRINT_TIMEOUT       TIME_MS2I(DBG_PRINT_TIMEOUT_MS)
+
 /*===========================================================================*/
 /* Debug Output Stream                                                       */
 /*===========================================================================*/
@@ -92,13 +109,38 @@ SOFTWARE.
 /**
  * @brief   Debug output stream (USB CDC serial).
  */
-#define DBG_STREAM              ((BaseSequentialStream*)&PORTAB_SDU1)
+#define DBG_STREAM              ((BaseSequentialStream*)&DBG_SERIAL_DRIVER)
 
 /**
  * @brief   Suppress unused variable warnings for debug-only variables.
  * @details Use this macro for variables that are only used in debug prints.
  */
 #define DBG_UNUSED(x)           (void)(x)
+
+/**
+ * @brief   Debug print with timeout.
+ * @details Formats message into buffer and writes to USB serial with timeout.
+ *          Prevents blocking if USB host is not reading.
+ *
+ * @param[in] timeout   Timeout in system ticks (use TIME_MS2I(ms))
+ * @param[in] fmt       Printf-style format string
+ * @param[in] ...       Format arguments
+ */
+static inline void dbg_printf_timeout(sysinterval_t timeout, const char *fmt, ...) {
+    char buf[DBG_PRINT_BUF_SIZE];
+    va_list ap;
+
+    va_start(ap, fmt);
+    int len = chvsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+
+    if (len > 0) {
+        size_t written = chnWriteTimeout(&DBG_SERIAL_DRIVER, (uint8_t*)buf, (size_t)len, timeout);
+        if (written < (size_t)len) {
+            /* TODO: Handle timeout or buffer full (host not reading) */
+        }
+    }
+}
 
 /*===========================================================================*/
 /* Debug Macros                                                              */
@@ -114,7 +156,7 @@ SOFTWARE.
  */
 #if (APP_DEBUG_LEVEL >= DBG_LEVEL_ERROR)
 #define DBG_ERROR(fmt, ...) \
-    chprintf(DBG_STREAM, "[ERROR] " fmt "\r\n", ##__VA_ARGS__)
+    dbg_printf_timeout(DBG_PRINT_TIMEOUT, "[ERROR] " fmt "\r\n", ##__VA_ARGS__)
 #else
 #define DBG_ERROR(fmt, ...) \
     do { } while (0)
@@ -130,7 +172,7 @@ SOFTWARE.
  */
 #if (APP_DEBUG_LEVEL >= DBG_LEVEL_WARN)
 #define DBG_WARN(fmt, ...) \
-    chprintf(DBG_STREAM, "[WARN] " fmt "\r\n", ##__VA_ARGS__)
+    dbg_printf_timeout(DBG_PRINT_TIMEOUT, "[WARN] " fmt "\r\n", ##__VA_ARGS__)
 #else
 #define DBG_WARN(fmt, ...) \
     do { } while (0)
@@ -147,7 +189,7 @@ SOFTWARE.
  */
 #if (APP_DEBUG_LEVEL >= DBG_LEVEL_INFO)
 #define DBG_INFO(fmt, ...) \
-    chprintf(DBG_STREAM, "[INFO] " fmt "\r\n", ##__VA_ARGS__)
+    dbg_printf_timeout(DBG_PRINT_TIMEOUT, "[INFO] " fmt "\r\n", ##__VA_ARGS__)
 #else
 #define DBG_INFO(fmt, ...) \
     do { } while (0)
@@ -163,7 +205,7 @@ SOFTWARE.
  */
 #if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 #define DBG_DEBUG(fmt, ...) \
-    chprintf(DBG_STREAM, "[DEBUG] " fmt "\r\n", ##__VA_ARGS__)
+    dbg_printf_timeout(DBG_PRINT_TIMEOUT, "[DEBUG] " fmt "\r\n", ##__VA_ARGS__)
 #else
 #define DBG_DEBUG(fmt, ...) \
     do { } while (0)
