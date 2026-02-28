@@ -7,7 +7,7 @@
         // Task(s) for the Development Environment
         
         {
-            "label": "clean",
+            "label": "Clean Application",
             "type": "shell",
             "command": "rm -rf ${config:settings.project.folder}/.dep ${config:settings.project.folder}/build",
             "options": {
@@ -17,10 +17,10 @@
                 "kind": "build"
             },
             "problemMatcher": [],
-            "detail": "Clean build files"
+            "detail": "Clean application build files"
         },
         {
-            "label": "build",
+            "label": "Build Application",
             "type": "shell",
             "command": "make -C ${config:settings.project.folder}",
             "args": [],
@@ -33,10 +33,26 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build the project"
+            "detail": "Build the application"
         },
         {
-            "label": "flash",
+            "label": "Build Application (DEBUG)",
+            "type": "shell",
+            "command": "make -C ${config:settings.project.folder} debug LEVEL=4",
+            "args": [],
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the application with debug enabled"
+        },
+        {
+            "label": "Flash Application (OpenOCD)",
             "type": "shell",
             "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.board} -f ${config:settings.openocd.interface} & sleep 2 && gdb-multiarch ${config:settings.project.compiledElfFile} -ex \"set confirm off\" -ex \"set pagination off\" -ex \"target extended-remote localhost:3333\" -ex \"load\" -ex \"monitor reset\" -ex \"quit\" ",
             "options": {
@@ -46,34 +62,141 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Flash the build file(s) to the chip"
+            "detail": "Flash application via OpenOCD (ST-Link SWD)"
         },
         {
-            "label": "rebuild",
+            "label": "Flash Application (st-flash)",
+            "type": "shell",
+            "command": "st-flash --reset write build/${config:settings.project.name}.bin 0x08004000",
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Flash application via st-flash (ST-Link)"
+        },
+        {
+            "label": "Flash Application (dfu-util)",
+            "type": "shell",
+            "command": "sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/${config:settings.project.name}_signed.bin",
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Flash application via USB DFU (bootloader must be running)"
+        },
+        {
+            "label": "Rebuild Application",
             "dependsOn": [
-                "clean",
-                "build"
+                "Clean Application",
+                "Build Application"
             ],
             "dependsOrder": "sequence",
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Rebuild (clean and build) the project"
+            "detail": "Rebuild (clean and build) the application"
         },
         {
-            "label": "rebuild and flash",
+            "label": "Rebuild Application (DEBUG)",
             "dependsOn": [
-                "clean",
-                "build",
-                "flash"
+                "Clean Application",
+                "Build Application (DEBUG)"
             ],
             "dependsOrder": "sequence",
             "group": {
                 "kind": "build"
             },
-            "detail": "Rebuild (clean and build) and flash the project to the chip"
+            "detail": "Rebuild (clean and build) the application with debug enabled"
         },
+
+
+        // Bootloader Tasks
+        
+        {
+            "label": "Build Bootloader",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}/bootloader/bootloader"
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the bootloader firmware"
+        },
+        {
+            "label": "Build Bootloader (DEBUG)",
+            "type": "shell",
+            "command": "make DEBUG=1",
+            "options": {
+                "cwd": "${workspaceFolder}/bootloader/bootloader"
+            },
+            "group": "build",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Build the bootloader firmware with debug enabled"
+        },
+        {
+            "label": "Clean Bootloader",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}/bootloader/bootloader"
+            },
+            "problemMatcher": [],
+            "detail": "Clean bootloader build files"
+        },
+        {
+            "label": "Rebuild Bootloader",
+            "dependsOn": [
+                "Clean Bootloader",
+                "Build Bootloader"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Clean and rebuild bootloader"
+        },
+        {
+            "label": "Rebuild Bootloader (DEBUG)",
+            "dependsOn": [
+                "Clean Bootloader",
+                "Build Bootloader (DEBUG)"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Clean and rebuild bootloader with debug enabled"
+        },
+        {
+            "label": "Flash Bootloader (OpenOCD)",
+            "type": "shell",
+            "command": "sudo openocd -f interface/stlink.cfg -c \"transport select swd\" -f target/stm32c0x.cfg -c \"program build/bootloader.bin 0x08000000 verify reset exit\"",
+            "options": {
+                "cwd": "${workspaceFolder}/bootloader/bootloader"
+            },
+            "dependsOn": "Build Bootloader",
+            "problemMatcher": [],
+            "detail": "Flash bootloader via OpenOCD (ST-Link SWD)"
+        },
+        {
+            "label": "Flash Bootloader (st-flash)",
+            "type": "shell",
+            "command": "st-flash --reset write build/bootloader.bin 0x08000000",
+            "options": {
+                "cwd": "${workspaceFolder}/bootloader/bootloader"
+            },
+            "dependsOn": "Build Bootloader",
+            "problemMatcher": [],
+            "detail": "Flash bootloader via st-flash (ST-Link)"
+        },
+
+        // Serial Monitor Tasks
 
         {
             "label": "Serial ACM0 (minicom ttyACM0)",

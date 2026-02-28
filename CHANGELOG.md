@@ -13,6 +13,13 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-02-28)
+
+Changed
+- VS Code tasks, for task improved usage.
+
+---
+
 ## [1.0.1] (2026-02-24)
 
 Fixed
