@@ -64,7 +64,7 @@
         {
             "label": "Flash Application (OpenOCD)",
             "type": "shell",
-            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program build/${config:settings.project.name}_signed.bin 0x08004000 verify reset exit\"",
+            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program build/${config:settings.project.name}_signed.bin ${config:settings.flash.appAddress} verify reset exit\"",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
@@ -86,7 +86,7 @@
         {
             "label": "Flash Application (dfu-util)",
             "type": "shell",
-            "command": "sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/${config:settings.project.name}_signed.bin",
+            "command": "sudo dfu-util -a 0 --dfuse-address ${config:settings.flash.appAddress}:leave -D build/${config:settings.project.name}_signed.bin",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
@@ -129,7 +129,7 @@
             "type": "shell",
             "command": "make",
             "options": {
-                "cwd": "${workspaceFolder}/bootloader/bootloader"
+                "cwd": "${config:settings.bootloader.folder}"
             },
             "group": "build",
             "problemMatcher": [
@@ -142,7 +142,7 @@
             "type": "shell",
             "command": "make debug",
             "options": {
-                "cwd": "${workspaceFolder}/bootloader/bootloader"
+                "cwd": "${config:settings.bootloader.folder}"
             },
             "group": "build",
             "problemMatcher": [
@@ -155,7 +155,7 @@
             "type": "shell",
             "command": "make clean",
             "options": {
-                "cwd": "${workspaceFolder}/bootloader/bootloader"
+                "cwd": "${config:settings.bootloader.folder}"
             },
             "problemMatcher": [],
             "detail": "Clean bootloader build files"
@@ -185,9 +185,9 @@
         {
             "label": "Flash Bootloader (OpenOCD)",
             "type": "shell",
-            "command": "openocd -f interface/stlink.cfg -c \"transport select swd\" -f target/stm32c0x.cfg -c \"program build/bootloader.bin 0x08000000 verify reset exit\"",
+            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program build/bootloader.bin ${config:settings.flash.bootloaderAddress} verify reset exit\"",
             "options": {
-                "cwd": "${workspaceFolder}/bootloader/bootloader"
+                "cwd": "${config:settings.bootloader.folder}"
             },
             "problemMatcher": [],
             "detail": "Flash bootloader via OpenOCD (ST-Link SWD)"
@@ -195,9 +195,9 @@
         {
             "label": "Flash Bootloader (st-flash)",
             "type": "shell",
-            "command": "st-flash --reset write build/bootloader.bin 0x08000000",
+            "command": "st-flash --reset write build/bootloader.bin ${config:settings.flash.bootloaderAddress}",
             "options": {
-                "cwd": "${workspaceFolder}/bootloader/bootloader"
+                "cwd": "${config:settings.bootloader.folder}"
             },
             "dependsOn": "Build Bootloader",
             "problemMatcher": [],
@@ -246,7 +246,7 @@
         {
             "label": "Serial ACM0 (minicom ttyACM0)",
             "type": "shell",
-            "command": "sleep 1 ; minicom -D /dev/ttyACM0 -b 115200",
+            "command": "sleep 1 ; minicom -D ${config:settings.serial.device0} -b ${config:settings.serial.baudRate}",
             "presentation": {
                 "echo": false,
                 "reveal": "always",
@@ -264,7 +264,7 @@
         {
             "label": "Serial ACM1 (minicom ttyACM1)",
             "type": "shell",
-            "command": "sleep 1 ; minicom -D /dev/ttyACM1 -b 115200",
+            "command": "sleep 1 ; minicom -D ${config:settings.serial.device1} -b ${config:settings.serial.baudRate}",
             "presentation": {
                 "echo": false,
                 "reveal": "always",

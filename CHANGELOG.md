@@ -20,6 +20,7 @@ Changed
 - README file changes.
 - Makefile comment tweaks.
 - Updated bootloader submodule.
+- Cleanup of vscode files.
 
 ---
 
