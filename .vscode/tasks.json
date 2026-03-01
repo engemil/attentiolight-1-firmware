@@ -54,26 +54,38 @@
         {
             "label": "Flash Application (OpenOCD)",
             "type": "shell",
-            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.board} -f ${config:settings.openocd.interface} & sleep 2 && gdb-multiarch ${config:settings.project.compiledElfFile} -ex \"set confirm off\" -ex \"set pagination off\" -ex \"target extended-remote localhost:3333\" -ex \"load\" -ex \"monitor reset\" -ex \"quit\" ",
+            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program build/${config:settings.project.name}_signed.bin 0x08004000 verify reset exit\"",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
+            "dependsOn": "Build Application",
             "group": "build",
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "detail": "Flash application via OpenOCD (ST-Link SWD)"
+            "problemMatcher": [],
+            "detail": "Flash signed application via OpenOCD (ST-Link SWD)"
+        },
+        {
+            "label": "Flash Application (OpenOCD - ELF)",
+            "type": "shell",
+            "command": "openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program ${config:settings.project.compiledElfFile} verify reset exit\"",
+            "options": {
+                "cwd": "${config:settings.project.folder}"
+            },
+            "dependsOn": "Build Application",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Flash application ELF via OpenOCD - bypasses bootloader validation"
         },
         {
             "label": "Flash Application (st-flash)",
             "type": "shell",
-            "command": "st-flash --reset write build/${config:settings.project.name}.bin 0x08004000",
+            "command": "st-flash --reset write build/${config:settings.project.name}_signed.bin 0x08004000",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
+            "dependsOn": "Build Application",
             "group": "build",
             "problemMatcher": [],
-            "detail": "Flash application via st-flash (ST-Link)"
+            "detail": "Flash signed application via st-flash (ST-Link)"
         },
         {
             "label": "Flash Application (dfu-util)",
@@ -82,9 +94,10 @@
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
+            "dependsOn": "Build Application",
             "group": "build",
             "problemMatcher": [],
-            "detail": "Flash application via USB DFU (bootloader must be running)"
+            "detail": "Flash signed application via USB DFU (bootloader must be running)"
         },
         {
             "label": "Rebuild Application",
@@ -194,6 +207,13 @@
             "dependsOn": "Build Bootloader",
             "problemMatcher": [],
             "detail": "Flash bootloader via st-flash (ST-Link)"
+        },
+        {
+            "label": "Erase Flash (st-flash)",
+            "type": "shell",
+            "command": "st-flash erase",
+            "problemMatcher": [],
+            "detail": "Erase entire flash memory via st-flash (ST-Link)"
         },
 
         // Serial Monitor Tasks
