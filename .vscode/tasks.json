@@ -76,16 +76,15 @@
             "detail": "Flash application ELF via OpenOCD - bypasses bootloader validation"
         },
         {
-            "label": "Flash Application (st-flash)",
+            "label": "Flash Application (st-flash) [BROKEN - DO NOT USE]",
             "type": "shell",
-            "command": "st-flash --reset write build/${config:settings.project.name}_signed.bin 0x08004000",
+            "command": "echo '=== ST-FLASH IS BROKEN FOR STM32C0 APPLICATION FLASHING ===' && echo 'st-flash erases the bootloader when writing to app region (0x08004000).' && echo 'This is a bug in st-flash with STM32C0 flash handling.' && echo '' && echo 'Use one of these alternatives instead:' && echo '  - Flash Application (OpenOCD)  - recommended' && echo '  - Flash Application (dfu-util) - requires bootloader running' && echo '' && exit 1",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
-            "dependsOn": "Build Application",
             "group": "build",
             "problemMatcher": [],
-            "detail": "Flash signed application via st-flash (ST-Link)"
+            "detail": "BROKEN: st-flash erases bootloader on STM32C0. Use OpenOCD or dfu-util instead."
         },
         {
             "label": "Flash Application (dfu-util)",
