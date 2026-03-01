@@ -301,7 +301,7 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 .PHONY: debug release clean-build
 
 # Debug build - forces clean rebuild with debug flags
-# Default LEVEL=3 (INFO) if not specified
+# Default debug level if not specified
 debug: clean-build
 	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
 

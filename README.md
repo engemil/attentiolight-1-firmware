@@ -34,6 +34,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - [Setup Repository](#setup-repository)
 - [Quick Start](#quick-start)
 - [Debug Builds](#debug-builds)
+- [VSCode Tasks](#vscode-tasks)
 - [Project Structure](#project-structure)
 - [Hardware](#hardware)
 - [Firmware Stack](#firmware-stack)
@@ -187,6 +188,52 @@ Debug levels (hierarchical):
 - `3` = INFO
 - `4` = DEBUG
 - `5` = POWER (verbose + disables Stop mode for debugging) (default for `make debug`)
+
+
+## VSCode Tasks
+
+Build tasks available in `.vscode/tasks.json`. Run via: `Ctrl+Shift+P` → "Tasks: Run Task"
+
+**One-Shot (Full Build & Flash)**
+
+| Task | Description |
+|------|-------------|
+| One-Shot | Clean, build, and flash bootloader + application |
+| One-Shot (DEBUG) | Same as above with debug builds |
+
+**Application Tasks**
+
+| Task | Description |
+|------|-------------|
+| Clean Application | Remove application build files |
+| Build Application | Build application |
+| Build Application (DEBUG) | Build application with debug enabled |
+| Rebuild Application | Clean and build application |
+| Rebuild Application (DEBUG) | Clean and build application with debug |
+| Flash Application (OpenOCD) | Flash application via ST-Link SWD |
+| Flash Application (st-flash) | **BROKEN** - Erases bootloader on STM32C0 before it flashes application |
+| Flash Application (dfu-util) | Flash application via USB DFU |
+
+**Bootloader Tasks**
+
+| Task | Description |
+|------|-------------|
+| Clean Bootloader | Remove bootloader build files |
+| Build Bootloader | Build bootloader |
+| Build Bootloader (DEBUG) | Build debug bootloader |
+| Rebuild Bootloader | Clean and build bootloader |
+| Rebuild Bootloader (DEBUG) | Clean and build debug bootloader |
+| Flash Bootloader (OpenOCD) | Flash bootloader via ST-Link SWD |
+| Flash Bootloader (st-flash) | Flash bootloader via st-flash |
+
+**Utility Tasks**
+
+| Task | Description |
+|------|-------------|
+| Erase Flash (st-flash) | Erase entire flash memory |
+| Serial ACM0 (minicom ttyACM0) | Open minicom on /dev/ttyACM0 |
+| Serial ACM1 (minicom ttyACM1) | Open minicom on /dev/ttyACM1 |
+| Monitor All Serial Comm. | Open minicom on ttyACM0 + ttyACM1 |
 
 
 ## Project Structure

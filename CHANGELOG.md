@@ -13,10 +13,13 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-02-28)
+## [Development] (2026-03-01)
 
 Changed
 - VS Code tasks, for task improved usage.
+- README file changes.
+- Makefile comment tweaks.
+- Updated bootloader submodule.
 
 ---
 

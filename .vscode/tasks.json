@@ -2,6 +2,16 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
+    "options": {
+        "presentation": {
+            "echo": true,
+            "reveal": "always",
+            "focus": false,
+            "panel": "shared",
+            "showReuseMessage": false,
+            "clear": true
+        }
+    },
     "tasks": [
 
         // Task(s) for the Development Environment
@@ -38,7 +48,7 @@
         {
             "label": "Build Application (DEBUG)",
             "type": "shell",
-            "command": "make -C ${config:settings.project.folder} debug LEVEL=4",
+            "command": "make -C ${config:settings.project.folder} debug",
             "args": [],
             "options": {
                 "cwd": "${config:settings.project.folder}"
@@ -58,22 +68,9 @@
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
-            "dependsOn": "Build Application",
             "group": "build",
             "problemMatcher": [],
             "detail": "Flash signed application via OpenOCD (ST-Link SWD)"
-        },
-        {
-            "label": "Flash Application (OpenOCD - ELF)",
-            "type": "shell",
-            "command": "openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program ${config:settings.project.compiledElfFile} verify reset exit\"",
-            "options": {
-                "cwd": "${config:settings.project.folder}"
-            },
-            "dependsOn": "Build Application",
-            "group": "build",
-            "problemMatcher": [],
-            "detail": "Flash application ELF via OpenOCD - bypasses bootloader validation"
         },
         {
             "label": "Flash Application (st-flash) [BROKEN - DO NOT USE]",
@@ -151,7 +148,7 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Build the bootloader firmware with debug enabled"
+            "detail": "Build debug bootloader (skips CRC/size validation for debugging)"
         },
         {
             "label": "Clean Bootloader",
@@ -183,16 +180,15 @@
             "dependsOrder": "sequence",
             "group": "build",
             "problemMatcher": [],
-            "detail": "Clean and rebuild bootloader with debug enabled"
+            "detail": "Clean and rebuild debug bootloader (skips CRC/size validation for debugging)"
         },
         {
             "label": "Flash Bootloader (OpenOCD)",
             "type": "shell",
-            "command": "sudo openocd -f interface/stlink.cfg -c \"transport select swd\" -f target/stm32c0x.cfg -c \"program build/bootloader.bin 0x08000000 verify reset exit\"",
+            "command": "openocd -f interface/stlink.cfg -c \"transport select swd\" -f target/stm32c0x.cfg -c \"program build/bootloader.bin 0x08000000 verify reset exit\"",
             "options": {
                 "cwd": "${workspaceFolder}/bootloader/bootloader"
             },
-            "dependsOn": "Build Bootloader",
             "problemMatcher": [],
             "detail": "Flash bootloader via OpenOCD (ST-Link SWD)"
         },
@@ -213,6 +209,36 @@
             "command": "st-flash erase",
             "problemMatcher": [],
             "detail": "Erase entire flash memory via st-flash (ST-Link)"
+        },
+        {
+            "label": "One-Shot",
+            "dependsOn": [
+                "Clean Bootloader",
+                "Build Bootloader",
+                "Flash Bootloader (OpenOCD)",
+                "Clean Application",
+                "Build Application",
+                "Flash Application (OpenOCD)"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Clean, build, and flash both bootloader and application (openocd)"
+        },
+        {
+            "label": "One-Shot (DEBUG)",
+            "dependsOn": [
+                "Clean Bootloader",
+                "Build Bootloader (DEBUG)",
+                "Flash Bootloader (OpenOCD)",
+                "Clean Application",
+                "Build Application (DEBUG)",
+                "Flash Application (OpenOCD)"
+            ],
+            "dependsOrder": "sequence",
+            "group": "build",
+            "problemMatcher": [],
+            "detail": "Clean, build (debug), and flash both bootloader and application (openocd)"
         },
 
         // Serial Monitor Tasks
