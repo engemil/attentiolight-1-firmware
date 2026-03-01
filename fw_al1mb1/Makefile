@@ -287,6 +287,7 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 #   make debug LEVEL=2    - Errors + warnings
 #   make debug LEVEL=3    - Errors + warnings + info (state/mode changes)
 #   make debug LEVEL=4    - Everything (verbose)
+#   make debug LEVEL=5    - Skips low-power mode (in off state)
 #   make release          - Explicit release build (no debug)
 #
 # Debug levels are hierarchical:
@@ -302,7 +303,7 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 # Debug build - forces clean rebuild with debug flags
 # Default LEVEL=3 (INFO) if not specified
 debug: clean-build
-	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),4)"
+	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
 
 # Explicit release build (no debug output)
 release: clean-build

@@ -177,7 +177,7 @@ cd fw_al1mb1
 
 make                  # Release build (no debug output)
 make debug            # Debug build with all outputs
-make debug LEVEL=4    # Debug build with all outputs
+make debug LEVEL=5    # Debug build with all outputs
 ```
 
 Debug levels (hierarchical):
@@ -185,8 +185,8 @@ Debug levels (hierarchical):
 - `1` = ERROR
 - `2` = WARN  
 - `3` = INFO
-- `4` = DEBUG (default for `make debug`)
-- `5` = POWER (verbose + disables Stop mode for debugging)
+- `4` = DEBUG
+- `5` = POWER (verbose + disables Stop mode for debugging) (default for `make debug`)
 
 
 ## Project Structure
