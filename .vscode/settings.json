@@ -17,7 +17,10 @@
 
     // Flash Address Settings
     "settings.flash.appAddress": "0x08004000", // Application flash start address
+    "settings.flash.appVectorTable": "0x08004100", // Application vector table address (256-byte aligned)
+    "settings.flash.appResetHandler": "0x08004104", // Reset handler pointer (vector table + 4)
     "settings.flash.bootloaderAddress": "0x08000000", // Bootloader flash start address
+    "settings.flash.vtorRegister": "0xE000ED08", // ARM Cortex-M VTOR register address
 
     // Serial Monitor Settings
     "settings.serial.baudRate": "115200", // Serial monitor baud rate

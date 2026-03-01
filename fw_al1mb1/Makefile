@@ -300,10 +300,10 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 
 .PHONY: debug release clean-build
 
-# Debug build - forces clean rebuild with debug flags
-# Default debug level if not specified
+# Debug build - forces clean rebuild with debug flags and -Og optimization
+# Default debug (LEVEL=5) if not specified
 debug: clean-build
-	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
+	$(MAKE) all USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16" UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
 
 # Explicit release build (no debug output)
 release: clean-build

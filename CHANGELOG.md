@@ -15,6 +15,13 @@ Note: Update `app_header.h` when publishing new version.
 
 ## [Development] (2026-03-01)
 
+Added
+- Alternative optimization for debugging.
+- Added warnings about max (3-4?) breakpoints.
+
+Fixed
+- Fixed debugging in VS Code (.vscode/launch.json-file).
+
 Changed
 - VS Code tasks, for task improved usage.
 - README file changes.

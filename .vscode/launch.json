@@ -5,7 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug",
+            // NOTE: STM32C0 (Cortex-M0+) has only (3-4?) hardware breakpoints.
+            // Software breakpoints don't work in flash. If breakpoints aren't
+            // hitting, check that you haven't exceeded this limit.
+
+            // Bypasses bootloader - flashes signed binary, then sets VTOR, PC, SP directly to application
+            "name": "Rebuild and Debug (Direct)",
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${config:settings.project.folder}",
@@ -14,16 +19,26 @@
             "device": "${config:settings.project.device}",
             "configFiles": [
                 "${config:settings.openocd.interface}",
-                "${config:settings.openocd.board}" // Optional
+                "${config:settings.openocd.board}"
             ],
-            "preLaunchTask": "build",
-            "svdFile": "${config:settings.project.svdFile}", // Optional
-            "openOCDLaunchCommands": [],
-            "openOCDPreConfigLaunchCommands": [],
+            "preLaunchTask": "Rebuild Application (DEBUG)",
+            "svdFile": "${config:settings.project.svdFile}",
+            "runToEntryPoint": "main",
+            "loadFiles": [],
+            "openOCDLaunchCommands": [
+                "program ${config:settings.project.folder}/build/${config:settings.project.name}_signed.bin ${config:settings.flash.appAddress} verify"
+            ],
+            "postLaunchCommands": [
+                "monitor reset halt",
+                "set $sp = *(${config:settings.flash.appVectorTable})",
+                "set $pc = *(${config:settings.flash.appResetHandler})",
+                "monitor mww ${config:settings.flash.vtorRegister} ${config:settings.flash.appVectorTable}"
+            ],
             "showDevDebugOutput": "none"
         },
         {
-            "name": "Rebuild and Debug",
+            // Lets bootloader run and validate the signed application
+            "name": "Rebuild and Debug (via Bootloader)",
             "type": "cortex-debug",
             "request": "launch",
             "cwd": "${config:settings.project.folder}",
@@ -32,12 +47,15 @@
             "device": "${config:settings.project.device}",
             "configFiles": [
                 "${config:settings.openocd.interface}",
-                "${config:settings.openocd.board}" // Optional
+                "${config:settings.openocd.board}"
             ],
-            "preLaunchTask": "rebuild",
-            "svdFile": "${config:settings.project.svdFile}", // Optional
-            "openOCDLaunchCommands": [],
-            "openOCDPreConfigLaunchCommands": [],
+            "preLaunchTask": "Rebuild Application (DEBUG)",
+            "svdFile": "${config:settings.project.svdFile}",
+            "runToEntryPoint": "main",
+            "loadFiles": [],
+            "openOCDLaunchCommands": [
+                "program ${config:settings.project.folder}/build/${config:settings.project.name}_signed.bin ${config:settings.flash.appAddress} verify"
+            ],
             "showDevDebugOutput": "none"
         }
     ]

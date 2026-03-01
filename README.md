@@ -33,7 +33,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
   - [Installation (Ubuntu/Debian)](#installation-ubuntudebian)
 - [Setup Repository](#setup-repository)
 - [Quick Start](#quick-start)
-- [Debug Builds](#debug-builds)
+- [Debugging](#debugging)
 - [VSCode Tasks](#vscode-tasks)
 - [Project Structure](#project-structure)
 - [Hardware](#hardware)
@@ -170,8 +170,9 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 ```
 -->
 
+## Debugging
 
-## Debug Builds
+### Debug Builds
 
 ```bash
 cd fw_al1mb1
@@ -188,6 +189,31 @@ Debug levels (hierarchical):
 - `3` = INFO
 - `4` = DEBUG
 - `5` = POWER (verbose + disables Stop mode for debugging) (default for `make debug`)
+
+
+
+
+### VS Code Debug Configurations
+
+Two debug configurations are available in `.vscode/launch.json`:
+
+| Configuration | Description |
+|---------------|-------------|
+| **Rebuild and Debug (Direct)** | Bypasses bootloader — flashes app, sets VTOR/PC/SP directly |
+| **Rebuild and Debug (via Bootloader)** | Flashes signed app, lets bootloader validate and jump |
+
+Both configurations:
+- Run `Rebuild Application (DEBUG)` before debugging
+- Flash the signed binary (`fw_al1mb1_signed.bin`)
+- Use `-Og` optimization (debug-friendly)
+
+### Hardware Breakpoint Limitation
+
+> **Warning:** The STM32C0 (Cortex-M0+) has only **(3-4?) hardware breakpoints**.
+> Software breakpoints do not work in flash memory.
+> 
+> If breakpoints are not being hit, check that you haven't exceeded this limit.
+> Remove unused breakpoints or use conditional breakpoints sparingly.
 
 
 ## VSCode Tasks
