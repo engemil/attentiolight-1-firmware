@@ -95,4 +95,4 @@ RUN sudo echo 'alias claude-unchained="claude --dangerously-skip-permissions"' >
 
 # Make workspace directory
 RUN sudo mkdir /workspace && sudo chown $USERNAME:$USERNAME /workspace
-WORKDIR sudo /workspace
+WORKDIR /workspace
