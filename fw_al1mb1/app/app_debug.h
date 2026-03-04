@@ -87,6 +87,16 @@ SOFTWARE.
 #endif
 
 /**
+ * @brief   Enable runtime stack watermark reporting.
+ * @details Set to 1 to enable dbg_print_stack_usage(), which prints stack
+ *          high-water marks for all threads over the debug serial port.
+ *          Disabled by default. Only effective in debug builds (requires
+ *          CH_DBG_FILL_THREADS and CH_CFG_USE_REGISTRY, both auto-enabled
+ *          in debug builds via chconf.h).
+ */
+#define DBG_ENABLE_STACK_WATERMARK          0
+
+/**
  * @brief   Debug output serial driver (USB CDC).
  */
 #define DBG_SERIAL_DRIVER       PORTAB_SDU1
@@ -229,5 +239,77 @@ static inline void dbg_printf_timeout(sysinterval_t timeout, const char *fmt, ..
  *          @endcode
  */
 #define DBG_SKIP_LOW_POWER      (APP_DEBUG_LEVEL >= DBG_LEVEL_POWER)
+
+/*===========================================================================*/
+/* Stack Watermark Analysis                                                  */
+/*===========================================================================*/
+
+/**
+ * @brief   Prints stack usage watermark for all threads.
+ * @details Requires CH_DBG_FILL_THREADS and CH_CFG_USE_REGISTRY (both enabled
+ *          automatically in debug builds). Iterates all registered threads and
+ *          counts how many fill-pattern bytes (0x55) remain untouched from the
+ *          bottom of each thread's working area.
+ *
+ *          Output format per thread:
+ *            [STACK] <name>: <used>/<total> bytes (<percent>%)
+ *
+ * @note    Call from a thread context (not ISR). Typically called from main()
+ *          after the system has been running for a while, or periodically.
+ *
+ * @note    This function itself uses ~40 bytes of stack. Call it from a thread
+ *          with sufficient stack space (e.g. the main thread).
+ *
+ * Usage example:
+ * @code
+ *     // Print stack usage of all threads once
+ *     dbg_print_stack_usage();
+ *
+ *     // Or periodically in a debug loop:
+ *     while (true) {
+ *         dbg_print_stack_usage();
+ *         chThdSleepMilliseconds(5000);
+ *     }
+ * @endcode
+ */
+#if (DBG_ENABLE_STACK_WATERMARK == 1) && (CH_DBG_FILL_THREADS == TRUE) && \
+    (CH_CFG_USE_REGISTRY == TRUE)
+static inline void dbg_print_stack_usage(void) {
+    thread_t *tp;
+
+    dbg_printf_timeout(DBG_PRINT_TIMEOUT,
+                       "\r\n[STACK] === Thread Stack Watermarks ===\r\n");
+
+    tp = chRegFirstThread();
+    while (tp != NULL) {
+        /* Count untouched fill bytes (0x55) from the bottom of the WA */
+        uint8_t *base = (uint8_t *)tp->wabase;
+        uint8_t *end  = (uint8_t *)(tp + 1);  /* thread_t sits at top of WA */
+        size_t total  = (size_t)(end - base);
+        size_t free   = 0;
+
+        while ((base + free) < end && base[free] == CH_DBG_STACK_FILL_VALUE) {
+            free++;
+        }
+
+        size_t used = total - free;
+        uint32_t pct = (total > 0) ? ((used * 100) / total) : 0;
+
+        dbg_printf_timeout(DBG_PRINT_TIMEOUT,
+                           "[STACK]  %-16s %4u / %4u bytes (%2lu%%)\r\n",
+                           tp->name ? tp->name : "???",
+                           (unsigned)used, (unsigned)total, (unsigned long)pct);
+
+        tp = chRegNextThread(tp);
+    }
+
+    dbg_printf_timeout(DBG_PRINT_TIMEOUT,
+                       "[STACK] ================================\r\n\r\n");
+}
+#else
+static inline void dbg_print_stack_usage(void) {
+    (void)0;
+}
+#endif
 
 #endif /* APP_DEBUG_H */

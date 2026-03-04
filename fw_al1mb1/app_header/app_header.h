@@ -47,7 +47,7 @@ typedef struct __attribute__((packed)) {
 } app_header_t;
 
 #define APP_HEADER_MAGIC    0xDEADBEEF
-#define APP_VERSION         0x00010001  /* Version 1.0.1 */
+#define APP_VERSION         0x00010100  /* Version 1.1.0 */
 
 /* USB VID/PID - customize these or use defaults (STMicroelectronics DFU) */
 #ifndef USB_VID

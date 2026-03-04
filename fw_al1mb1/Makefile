@@ -302,8 +302,9 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 
 # Debug build - forces clean rebuild with debug flags and -Og optimization
 # Default debug (LEVEL=5) if not specified
+# -fstack-usage generates .su files alongside .o files with per-function stack usage
 debug: clean-build
-	$(MAKE) all USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16" UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
+	$(MAKE) all USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16 -fstack-usage" UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
 
 # Explicit release build (no debug output)
 release: clean-build

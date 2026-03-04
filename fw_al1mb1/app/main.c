@@ -196,24 +196,17 @@ int main(void) {
     }
     */
 
-    
-    // TEST CODE
-    //uint32_t test_serial_usb = 0;
-    //uint32_t test_serial_vcp = 0;
-
+    /* Main thread */
     while (true) {
 
-        // TEST CODE // TEST VCP SERIAL COMMUNICATION
-        //chprintf((BaseSequentialStream*)&PORTAB_SDU1, "TEST SERIAL OVER USB. Count: %U\r\n", test_serial_usb);
-        // TEST CODE // TEST USB SERIAL COMMUNICATION
-        //chprintf((BaseSequentialStream*)&SD2, "TEST SERIAL OVER STLINK VCP. Count: %U\r\n", test_serial_vcp);
+#if (DBG_ENABLE_STACK_WATERMARK == 1)
+        /* Periodically print stack watermarks for all threads.
+         * This helps right-size thread working areas by showing peak usage.
+         * Enable by setting DBG_ENABLE_STACK_WATERMARK to 1 in app_debug.h */
+        dbg_print_stack_usage();
+#endif
 
-        // TEST CODE
-        //test_serial_usb++;
-        //test_serial_vcp++;
-
-        /* Nothing happening in main thread (except for test code) */
-        chThdSleepMilliseconds(500);
+        chThdSleepMilliseconds(5000);
 
     }
 

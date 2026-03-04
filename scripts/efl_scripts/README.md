@@ -37,7 +37,7 @@ These scripts work with either configuration.
 
 ## Installation
 
-The scripts are located in `/workspace/scripts/efl_scripts/` and are already executable.
+The scripts are located in `./scripts/efl_scripts/` and are already executable.
 
 Verify st-flash is installed:
 ```bash
@@ -66,7 +66,7 @@ Found 1 stlink programmers
 
 Read and display entire EFL region (8KB):
 ```bash
-cd /workspace/scripts/efl_scripts
+cd ./scripts/efl_scripts
 ./read_efl.sh
 ```
 
@@ -74,41 +74,41 @@ cd /workspace/scripts/efl_scripts
 
 **Read entire EFL region:**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh
+./scripts/efl_scripts/read_efl.sh
 ```
 
 **Read specific range (offset 256 bytes, length 128 bytes):**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --offset 256 --length 128
+./scripts/efl_scripts/read_efl.sh --offset 256 --length 128
 ```
 
 **Read first page (2KB):**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0 --length 2048
+./scripts/efl_scripts/read_efl.sh --offset 0 --length 2048
 ```
 
 **Read using hex values:**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0x100 --length 0x200
+./scripts/efl_scripts/read_efl.sh --offset 0x100 --length 0x200
 ```
 
 ### Saving to File
 
 **Save entire EFL to binary file:**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup.bin
+./scripts/efl_scripts/read_efl.sh --output efl_backup.bin
 ```
 
 **Save partial region:**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0x100 --length 512 --output partial.bin
+./scripts/efl_scripts/read_efl.sh --offset 0x100 --length 512 --output partial.bin
 ```
 
 ### Output Formats
 
 **Hexdump format (default):**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --format hexdump
+./scripts/efl_scripts/read_efl.sh --format hexdump
 ```
 Output example:
 ```
@@ -120,12 +120,12 @@ Address   | Hex Values                                      | ASCII
 
 **Hex values only:**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --format hex
+./scripts/efl_scripts/read_efl.sh --format hex
 ```
 
 **Raw binary (requires --output):**
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --format raw --output data.bin
+./scripts/efl_scripts/read_efl.sh --format raw --output data.bin
 ```
 
 ## Command Reference
@@ -135,7 +135,7 @@ Address   | Hex Values                                      | ASCII
 Main CLI tool for reading EFL memory.
 
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh [OPTIONS]
+./scripts/efl_scripts/read_efl.sh [OPTIONS]
 ```
 
 #### Options
@@ -152,16 +152,16 @@ Main CLI tool for reading EFL memory.
 
 ```bash
 # Read entire region
-/workspace/scripts/efl_scripts/read_efl.sh
+./scripts/efl_scripts/read_efl.sh
 
 # Read 256 bytes from offset 0x100
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0x100 --length 256
+./scripts/efl_scripts/read_efl.sh --offset 0x100 --length 256
 
 # Save entire region to file
-/workspace/scripts/efl_scripts/read_efl.sh --output backup_$(date +%Y%m%d).bin
+./scripts/efl_scripts/read_efl.sh --output backup_$(date +%Y%m%d).bin
 
 # Read and show hex only
-/workspace/scripts/efl_scripts/read_efl.sh --length 64 --format hex
+./scripts/efl_scripts/read_efl.sh --length 64 --format hex
 ```
 
 ### stflash_read_memory.sh
@@ -169,12 +169,12 @@ Main CLI tool for reading EFL memory.
 Low-level wrapper for st-flash read operations (typically not called directly).
 
 ```bash
-/workspace/scripts/efl_scripts/stflash_read_memory.sh <address> <length> <output_file>
+./scripts/efl_scripts/stflash_read_memory.sh <address> <length> <output_file>
 ```
 
 Example:
 ```bash
-/workspace/scripts/efl_scripts/stflash_read_memory.sh 0x0801E000 8192 /tmp/efl.bin
+./scripts/efl_scripts/stflash_read_memory.sh 0x0801E000 8192 /tmp/efl.bin
 ```
 
 ### format_hexdump.sh
@@ -182,12 +182,12 @@ Example:
 Format binary file as hexadecimal dump (typically not called directly).
 
 ```bash
-/workspace/scripts/efl_scripts/format_hexdump.sh <binary_file> [base_address]
+./scripts/efl_scripts/format_hexdump.sh <binary_file> [base_address]
 ```
 
 Example:
 ```bash
-/workspace/scripts/efl_scripts/format_hexdump.sh /tmp/efl.bin 0x0801E000
+./scripts/efl_scripts/format_hexdump.sh /tmp/efl.bin 0x0801E000
 ```
 
 ## Troubleshooting
@@ -256,25 +256,25 @@ read_efl.sh (Main CLI)
 ### 1. Verify EFL Test Results
 After running the EFL test in firmware, verify data was written correctly:
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --length 64
+./scripts/efl_scripts/read_efl.sh --length 64
 ```
 
 ### 2. Backup EFL Data
 Create a backup before firmware updates:
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup_$(date +%Y%m%d_%H%M%S).bin
+./scripts/efl_scripts/read_efl.sh --output efl_backup_$(date +%Y%m%d_%H%M%S).bin
 ```
 
 ### 3. Debug Storage Issues
 Check specific addresses where data should be stored:
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0x100 --length 256
+./scripts/efl_scripts/read_efl.sh --offset 0x100 --length 256
 ```
 
 ### 4. Verify Erase Operations
 Check if a sector was properly erased (should show 0xFF):
 ```bash
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0 --length 2048
+./scripts/efl_scripts/read_efl.sh --offset 0 --length 2048
 ```
 
 ### 5. Restore EFL Data from Backup
@@ -308,7 +308,7 @@ st-flash write partial_backup.bin 0x0801F800
 **Example workflow - Full backup and restore:**
 ```bash
 # 1. Backup current EFL data
-/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup_before.bin
+./scripts/efl_scripts/read_efl.sh --output efl_backup_before.bin
 
 # 2. Make changes to firmware or EFL data
 # ... (your modifications) ...
@@ -317,6 +317,6 @@ st-flash write partial_backup.bin 0x0801F800
 st-flash write efl_backup_before.bin 0x0801E000
 
 # 4. Verify restore was successful
-/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup_after.bin
+./scripts/efl_scripts/read_efl.sh --output efl_backup_after.bin
 diff efl_backup_before.bin efl_backup_after.bin && echo "Restore successful!"
 ```

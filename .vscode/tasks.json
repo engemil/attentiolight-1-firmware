@@ -213,6 +213,7 @@
         {
             "label": "One-Shot",
             "dependsOn": [
+                "Erase Flash (st-flash)",
                 "Clean Bootloader",
                 "Build Bootloader",
                 "Flash Bootloader (OpenOCD)",
@@ -228,6 +229,7 @@
         {
             "label": "One-Shot (DEBUG)",
             "dependsOn": [
+                "Erase Flash (st-flash)",
                 "Clean Bootloader",
                 "Build Bootloader (DEBUG)",
                 "Flash Bootloader (OpenOCD)",

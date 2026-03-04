@@ -33,14 +33,22 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
   - [Installation (Ubuntu/Debian)](#installation-ubuntudebian)
 - [Setup Repository](#setup-repository)
 - [Quick Start](#quick-start)
-- [Debugging](#debugging)
-- [VSCode Tasks](#vscode-tasks)
 - [Project Structure](#project-structure)
 - [Hardware](#hardware)
 - [Firmware Stack](#firmware-stack)
 - [Memory Map](#memory-map)
 - [Libraries and Drivers](#libraries-and-drivers)
+- [Debugging](#debugging)
+  - [Debug Builds](#debug-builds)
+  - [VS Code Debug Configurations](#vs-code-debug-configurations)
+  - [Hardware Breakpoint Limitation](#hardware-breakpoint-limitation)
+  - [Thread Stack Analysis](#thread-stack-analysis)
+- [VSCode Tasks](#vscode-tasks)
 - [Utility Scripts](#utility-scripts)
+  - [EFL Memory Reader](#efl-memory-reader-workspacescriptsefl_scripts)
+  - [Sign App Header](#sign-app-header-scriptssign_app_headersh)
+  - [System Setup Scripts](#system-setup-scripts-scriptssystem)
+  - [Memory Usage](#memory-usage)
 - [Troubleshooting](#troubleshooting)
 - [Bugs and Issues](#bugs-and-issues)
 - [Additional Sources](#additional-sources)
@@ -169,98 +177,6 @@ sudo dfu-util -a 0 --dfuse-address 0x08004000:leave -D build/fw_al1mb1_signed.bi
 st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 ```
 -->
-
-## Debugging
-
-### Debug Builds
-
-```bash
-cd fw_al1mb1
-
-make                  # Release build (no debug output)
-make debug            # Debug build with all outputs
-make debug LEVEL=5    # Debug build with all outputs
-```
-
-Debug levels (hierarchical):
-- `0` = NONE (release)
-- `1` = ERROR
-- `2` = WARN  
-- `3` = INFO
-- `4` = DEBUG
-- `5` = POWER (verbose + disables Stop mode for debugging) (default for `make debug`)
-
-
-
-
-### VS Code Debug Configurations
-
-Two debug configurations are available in `.vscode/launch.json`:
-
-| Configuration | Description |
-|---------------|-------------|
-| **Rebuild and Debug (Direct)** | Bypasses bootloader — flashes app, sets VTOR/PC/SP directly |
-| **Rebuild and Debug (via Bootloader)** | Flashes signed app, lets bootloader validate and jump |
-
-Both configurations:
-- Run `Rebuild Application (DEBUG)` before debugging
-- Flash the signed binary (`fw_al1mb1_signed.bin`)
-- Use `-Og` optimization (debug-friendly)
-
-### Hardware Breakpoint Limitation
-
-> **Warning:** The STM32C0 (Cortex-M0+) has only **(3-4?) hardware breakpoints**.
-> Software breakpoints do not work in flash memory.
-> 
-> If breakpoints are not being hit, check that you haven't exceeded this limit.
-> Remove unused breakpoints or use conditional breakpoints sparingly.
-
-
-## VSCode Tasks
-
-Build tasks available in `.vscode/tasks.json`. Run via: `Ctrl+Shift+P` → "Tasks: Run Task"
-
-**One-Shot (Full Build & Flash)**
-
-| Task | Description |
-|------|-------------|
-| One-Shot | Clean, build, and flash bootloader + application |
-| One-Shot (DEBUG) | Same as above with debug builds |
-
-**Application Tasks**
-
-| Task | Description |
-|------|-------------|
-| Clean Application | Remove application build files |
-| Build Application | Build application |
-| Build Application (DEBUG) | Build application with debug enabled |
-| Rebuild Application | Clean and build application |
-| Rebuild Application (DEBUG) | Clean and build application with debug |
-| Flash Application (OpenOCD) | Flash application via ST-Link SWD |
-| Flash Application (st-flash) | **BROKEN** - Erases bootloader on STM32C0 before it flashes application |
-| Flash Application (dfu-util) | Flash application via USB DFU |
-
-**Bootloader Tasks**
-
-| Task | Description |
-|------|-------------|
-| Clean Bootloader | Remove bootloader build files |
-| Build Bootloader | Build bootloader |
-| Build Bootloader (DEBUG) | Build debug bootloader |
-| Rebuild Bootloader | Clean and build bootloader |
-| Rebuild Bootloader (DEBUG) | Clean and build debug bootloader |
-| Flash Bootloader (OpenOCD) | Flash bootloader via ST-Link SWD |
-| Flash Bootloader (st-flash) | Flash bootloader via st-flash |
-
-**Utility Tasks**
-
-| Task | Description |
-|------|-------------|
-| Erase Flash (st-flash) | Erase entire flash memory |
-| Serial ACM0 (minicom ttyACM0) | Open minicom on /dev/ttyACM0 |
-| Serial ACM1 (minicom ttyACM1) | Open minicom on /dev/ttyACM1 |
-| Monitor All Serial Comm. | Open minicom on ttyACM0 + ttyACM1 |
-
 
 ## Project Structure
 
@@ -403,17 +319,6 @@ FLASH (128KB)                              RAM (24KB)
 | Application | 0x08004100 | ~104KB | Code, vectors, read-only data |
 | EFL Storage | 0x0801E000 | 8KB | Persistent settings (4 × 2KB pages) |
 
-### Memory Usage
-
-Check usage after building:
-
-```bash
-./scripts/check_memory_usage.sh fw_al1mb1/build/fw_al1mb1.elf
-```
-
-**NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
-
-
 ## Libraries and Drivers
 
 (TO DO: Add info about libraries, when we have worked on libraries implemented?)
@@ -424,22 +329,191 @@ Check usage after building:
     - EngEmil ESP32 Wifi BLE Interface Driver (placeholder, to control enable pin for wireless module)
 
 
+## Debugging
+
+### Debug Builds
+
+```bash
+cd fw_al1mb1
+
+make                  # Release build (no debug output)
+make debug            # Debug build with all outputs
+make debug LEVEL=5    # Debug build with all outputs
+```
+
+Debug levels (hierarchical):
+- `0` = NONE (release)
+- `1` = ERROR
+- `2` = WARN  
+- `3` = INFO
+- `4` = DEBUG
+- `5` = POWER (verbose + disables Stop mode for debugging) (default for `make debug`)
+
+
+
+
+### VS Code Debug Configurations
+
+Two debug configurations are available in `.vscode/launch.json`:
+
+| Configuration | Description |
+|---------------|-------------|
+| **Rebuild and Debug (Direct)** | Bypasses bootloader — flashes app, sets VTOR/PC/SP directly |
+| **Rebuild and Debug (via Bootloader)** | Flashes signed app, lets bootloader validate and jump |
+
+Both configurations:
+- Run `Rebuild Application (DEBUG)` before debugging
+- Flash the signed binary (`fw_al1mb1_signed.bin`)
+- Use `-Og` optimization (debug-friendly)
+
+### Hardware Breakpoint Limitation
+
+> **Warning:** The STM32C0 (Cortex-M0+) has only **(3-4?) hardware breakpoints**.
+> Software breakpoints do not work in flash memory.
+> 
+> If breakpoints are not being hit, check that you haven't exceeded this limit.
+> Remove unused breakpoints or use conditional breakpoints sparingly.
+
+### Thread Stack Analysis
+
+Debug builds (`make debug`) automatically enable thread stack analysis tools
+to help detect and prevent stack overflows. All features below are **disabled
+in release builds** (zero overhead).
+
+#### 1. Runtime Stack Overflow Detection (ChibiOS)
+
+Enabled via `CH_DBG_ENABLE_STACK_CHECK` in `cfg/chconf.h` (auto-enabled in
+debug builds). ChibiOS checks each thread's stack pointer against its working
+area boundary **on every context switch**. If the stack has overflowed, the
+system halts immediately with `"stack overflow"`.
+
+If you hit this halt during debugging, the faulting thread's name is available
+in the debugger. Increase that thread's working area size in `app/rt_config.h`.
+
+#### 2. Runtime Stack Watermark Reporting (Serial Output)
+
+In debug builds (LEVEL >= 4), the main loop prints stack watermarks for all
+threads every 5 seconds over the USB serial port (`/dev/ttyACM0`):
+
+```
+[STACK] === Thread Stack Watermarks ===
+[STACK]  main              320 /  880 bytes (36%)
+[STACK]  button             92 /  760 bytes (12%)
+[STACK]  state_machine     408 /  960 bytes (42%)
+[STACK]  animation_thread  384 /  960 bytes (40%)
+[STACK] ================================
+```
+
+Each line shows `used / total bytes (percent)`. The "used" value is the
+**high-water mark** (peak usage since thread creation), not current usage.
+
+**How to read it:**
+- **< 70%** — Stack size is adequate, some headroom available.
+- **70-85%** — Getting tight, consider increasing the working area.
+- **> 85%** — Dangerous, increase the working area size immediately.
+- **100%** — Stack has overflowed (the stack check above should catch this first).
+
+To monitor, connect to the serial port:
+```bash
+minicom -D /dev/ttyACM0 -b 115200
+```
+
+Thread working area sizes are configured in `app/rt_config.h`:
+- `BTN_THREAD_WA_SIZE` — Button thread
+- `APP_SM_THREAD_WA_SIZE` — State machine thread
+- `APP_SM_ANIM_THREAD_WA_SIZE` — Animation thread
+
+> **Note:** Debug builds automatically add 512 extra bytes to each thread
+> stack (via `_RT_DEBUG_EXTRA` in `rt_config.h`) to accommodate the 256-byte
+> `dbg_printf_timeout()` buffer. The watermark percentages reflect the debug
+> stack sizes, not the release sizes.
+
+#### 3. Static Stack Usage Analysis (GCC `.su` files)
+
+Debug builds compile with `-fstack-usage`, which generates `.su` (stack usage)
+files showing **per-function stack frame sizes**. With LTO enabled, the output
+is a single combined file:
+
+```bash
+# Show the 20 functions with largest stack usage
+sort -t: -k3 -n fw_al1mb1/build/fw_al1mb1.elf.ltrans0.ltrans.su | tail -20
+```
+
+Example output:
+```
+./app/app_debug.h:129:20:dbg_printf_timeout    284    static
+./app/main.c:54:6:init_system                   16    static
+```
+
+Each line: `file:line:col:function_name  stack_bytes  type`
+
+This is useful for identifying which functions consume the most stack, without
+needing to run the firmware. To compute worst-case stack depth for a thread,
+trace the deepest call chain from the thread entry point and sum the frame sizes.
+
+
+## VSCode Tasks
+
+Build tasks available in `.vscode/tasks.json`. Run via: `Ctrl+Shift+P` → "Tasks: Run Task"
+
+**One-Shot (Full Build & Flash)**
+
+| Task | Description |
+|------|-------------|
+| One-Shot | Clean, build, and flash bootloader + application |
+| One-Shot (DEBUG) | Same as above with debug builds |
+
+**Application Tasks**
+
+| Task | Description |
+|------|-------------|
+| Clean Application | Remove application build files |
+| Build Application | Build application |
+| Build Application (DEBUG) | Build application with debug enabled |
+| Rebuild Application | Clean and build application |
+| Rebuild Application (DEBUG) | Clean and build application with debug |
+| Flash Application (OpenOCD) | Flash application via ST-Link SWD |
+| Flash Application (st-flash) | **BROKEN** - Erases bootloader on STM32C0 before it flashes application |
+| Flash Application (dfu-util) | Flash application via USB DFU |
+
+**Bootloader Tasks**
+
+| Task | Description |
+|------|-------------|
+| Clean Bootloader | Remove bootloader build files |
+| Build Bootloader | Build bootloader |
+| Build Bootloader (DEBUG) | Build debug bootloader |
+| Rebuild Bootloader | Clean and build bootloader |
+| Rebuild Bootloader (DEBUG) | Clean and build debug bootloader |
+| Flash Bootloader (OpenOCD) | Flash bootloader via ST-Link SWD |
+| Flash Bootloader (st-flash) | Flash bootloader via st-flash |
+
+**Utility Tasks**
+
+| Task | Description |
+|------|-------------|
+| Erase Flash (st-flash) | Erase entire flash memory |
+| Serial ACM0 (minicom ttyACM0) | Open minicom on /dev/ttyACM0 |
+| Serial ACM1 (minicom ttyACM1) | Open minicom on /dev/ttyACM1 |
+| Monitor All Serial Comm. | Open minicom on ttyACM0 + ttyACM1 |
+
+
 ## Utility Scripts
 
-### EFL Memory Reader (`/workspace/scripts/efl_scripts/`)
+### EFL Memory Reader (`./scripts/efl_scripts/`)
 
 CLI tools for reading the EFL (Embedded Flash) storage region via ST-Link debugger.
 
 **Quick usage:**
 ```bash
 # Read entire 8KB EFL region
-/workspace/scripts/efl_scripts/read_efl.sh
+./scripts/efl_scripts/read_efl.sh
 
 # Read specific range
-/workspace/scripts/efl_scripts/read_efl.sh --offset 0 --length 65
+./scripts/efl_scripts/read_efl.sh --offset 0 --length 65
 
 # Save to file
-/workspace/scripts/efl_scripts/read_efl.sh --output efl_backup.bin
+./scripts/efl_scripts/read_efl.sh --output efl_backup.bin
 ```
 
 **Features:**
@@ -448,7 +522,47 @@ CLI tools for reading the EFL (Embedded Flash) storage region via ST-Link debugg
 - Save to binary file
 - No device halt required
 
-See `/workspace/scripts/efl_scripts/README.md` for complete documentation.
+See `./scripts/efl_scripts/README.md` for complete documentation.
+
+
+### Sign App Header (`scripts/sign_app_header.sh`)
+
+**NB!** Part of **BUILD!**
+
+Signs the application binary with firmware size and CRC32 checksum for bootloader validation. Called automatically by the Makefile during build.
+
+```bash
+./scripts/sign_app_header.sh fw_al1mb1/build/fw_al1mb1.bin fw_al1mb1/build/fw_al1mb1_signed.bin
+```
+
+The script reads the raw binary, calculates the firmware size and CRC32 (from the vector table at offset 0x100 to end), and writes them into the application header at offsets 8 and 12. The signed binary is what gets uploaded via DFU.
+
+
+### System Setup Scripts (`scripts/system/`)
+
+One-time setup scripts for configuring Linux host permissions. Must be run with `sudo`.
+
+| Script | Description |
+|--------|-------------|
+| `dialout_group.sh` | Adds current user to the `dialout` group for serial device access (e.g. `/dev/ttyACM0`) |
+| `udevusb_stlink.sh` | Creates udev rules for ST-LINK debuggers and STM32 DFU mode, allowing non-root USB access |
+
+```bash
+sudo ./scripts/system/udevusb_stlink.sh
+sudo ./scripts/system/dialout_group.sh
+# Log out and back in to apply group changes
+```
+
+
+### Memory Usage
+
+Check usage after building:
+
+```bash
+./scripts/check_memory_usage.sh fw_al1mb1/build/fw_al1mb1.elf
+```
+
+**NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
 
 
 ## Troubleshooting

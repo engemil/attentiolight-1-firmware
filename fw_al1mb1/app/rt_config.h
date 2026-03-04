@@ -83,24 +83,45 @@ SOFTWARE.
 /*===========================================================================*/
 
 /**
+ * @brief   Extra stack space needed for debug builds.
+ * @details When APP_DEBUG_LEVEL >= 1, debug macros call dbg_printf_timeout()
+ *          which allocates a DBG_PRINT_BUF_SIZE (256) byte buffer on the
+ *          stack plus overhead for va_list and formatting. Threads that use
+ *          debug output need additional stack space to avoid overflow.
+ *
+ *          Without this, the default stack sizes (256-512 bytes) are too
+ *          small for the 256-byte printf buffer, causing stack overflow and
+ *          hard faults or silent corruption in debug builds.
+ */
+#ifndef APP_DEBUG_LEVEL
+#define _RT_DEBUG_EXTRA     0
+#else
+#if (APP_DEBUG_LEVEL >= 1)
+#define _RT_DEBUG_EXTRA     512
+#else
+#define _RT_DEBUG_EXTRA     0
+#endif
+#endif
+
+/**
  * @brief   Button thread working area size in bytes.
  */
 #ifndef BTN_THREAD_WA_SIZE
-#define BTN_THREAD_WA_SIZE              256
+#define BTN_THREAD_WA_SIZE              (256 + _RT_DEBUG_EXTRA)
 #endif
 
 /**
  * @brief   State machine thread working area size.
  */
 #ifndef APP_SM_THREAD_WA_SIZE
-#define APP_SM_THREAD_WA_SIZE           512
+#define APP_SM_THREAD_WA_SIZE           (512 + _RT_DEBUG_EXTRA)
 #endif
 
 /**
  * @brief   Animation thread working area size.
  */
 #ifndef APP_SM_ANIM_THREAD_WA_SIZE
-#define APP_SM_ANIM_THREAD_WA_SIZE      512
+#define APP_SM_ANIM_THREAD_WA_SIZE      (512 + _RT_DEBUG_EXTRA)
 #endif
 
 /**

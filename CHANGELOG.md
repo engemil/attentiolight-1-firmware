@@ -13,21 +13,36 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-03-01)
+## [1.1.0] (2026-03-04)
 
 Added
+- **Thread stack analysis tools** for debug builds:
+  - Runtime stack overflow detection (`CH_DBG_ENABLE_STACK_CHECK`, auto-enabled in debug builds).
+  - Runtime stack watermark reporting via `dbg_print_stack_usage()` (opt-in via `DBG_ENABLE_STACK_WATERMARK`).
+  - Static stack usage analysis via GCC `-fstack-usage` flag (generates `.su` files in debug builds).
+- Dynamic debug stack padding (`_RT_DEBUG_EXTRA`): adds 512 bytes to all thread stacks in debug builds to accommodate the 256-byte printf buffer.
+- Auto-enable `CH_DBG_FILL_THREADS` in debug builds for fill-pattern stack analysis.
+- "Erase Flash (st-flash)" step added to One-Shot VSCode tasks.
+- README documentation for `sign_app_header.sh`, system setup scripts, and thread stack analysis.
 - Alternative optimization for debugging.
-- Added warnings about max (3-4?) breakpoints.
+- Warnings about max (3-4?) hardware breakpoints.
 
 Fixed
 - Fixed debugging in VS Code (.vscode/launch.json-file).
 
 Changed
-- VS Code tasks, for task improved usage.
-- README file changes.
+- README restructured: reordered sections, expanded Table of Contents with nested entries.
+- All script paths in README and EFL scripts README changed from absolute to relative paths.
+- Main loop sleep interval changed from 500ms to 5000ms.
+- Removed test/commented-out code from `main.c`.
+- VS Code tasks improved.
 - Makefile comment tweaks.
 - Updated bootloader submodule.
 - Cleanup of vscode files.
+- Updated bootloader submodule.
+
+Removed
+- `scripts/system/udevusb_esp.sh` (ESP-specific udev rules, not used in this project).
 
 ---
 
