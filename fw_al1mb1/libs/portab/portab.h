@@ -37,6 +37,7 @@
 #define PORTAB_USB1                 USBD1
 
 #define PORTAB_SDU1                 SDU1
+#define PORTAB_SDU2                 SDU2
 
 /*===========================================================================*/
 /* Module pre-compile time settings.                                         */

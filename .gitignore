@@ -3,3 +3,4 @@ docs/doxygen/html
 docs/doxygen/latex
 */build
 */.dep
+tmp

@@ -64,20 +64,24 @@ void init_system(void) {
     portab_setup();
 
     /*
-     * Initializes a serial-over-USB CDC driver.
+     * Initializes dual serial-over-USB CDC drivers.
+     * CDC0 (SDU1): Debug print stream
+     * CDC1 (SDU2): Shell command interface
      */
     sduObjectInit(&PORTAB_SDU1);
-    sduStart(&PORTAB_SDU1, &serusbcfg);
+    sduStart(&PORTAB_SDU1, &serusbcfg1);
+    sduObjectInit(&PORTAB_SDU2);
+    sduStart(&PORTAB_SDU2, &serusbcfg2);
 
     /*
      * Activates the USB driver and then the USB bus pull-up on D+.
      * Note, a delay is inserted in order to not have to disconnect the cable
      * after a reset.
      */
-    usbDisconnectBus(serusbcfg.usbp);
+    usbDisconnectBus(serusbcfg1.usbp);
     chThdSleepMilliseconds(1500);
-    usbStart(serusbcfg.usbp, &usbcfg);
-    usbConnectBus(serusbcfg.usbp);
+    usbStart(serusbcfg1.usbp, &usbcfg);
+    usbConnectBus(serusbcfg1.usbp);
 
     /*
      * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.

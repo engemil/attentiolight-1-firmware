@@ -79,7 +79,7 @@ static void prepare_stop_mode(void) {
      * Stop USB peripheral.
      * USB will be restarted after wake-up.
      */
-    usbStop(serusbcfg.usbp);
+    usbStop(serusbcfg1.usbp);
 
     /*
      * Configure button EXTI as wake-up source.
@@ -201,8 +201,8 @@ static void restore_from_stop(void) {
      * Restart USB peripheral.
      * This re-enables USB communication after wake-up.
      */
-    usbStart(serusbcfg.usbp, &usbcfg);
-    usbConnectBus(serusbcfg.usbp);
+    usbStart(serusbcfg1.usbp, &usbcfg);
+    usbConnectBus(serusbcfg1.usbp);
 }
 
 #endif /* !DBG_SKIP_LOW_POWER */

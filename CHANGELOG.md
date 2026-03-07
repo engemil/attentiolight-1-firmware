@@ -13,6 +13,25 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-03-07)
+
+Added
+- **Dual USB CDC/ACM** with IAD (Interface Association Descriptor) support. The device now enumerates two virtual serial ports over a single USB connection:
+  - **CDC0** (`PORTAB_SDU1`): Debug print stream (device to host, read-only).
+  - **CDC1** (`PORTAB_SDU2`): Shell command interface (bidirectional, for future CLI integration).
+- Second `SerialUSBDriver` (`PORTAB_SDU2` / `SDU2`) and corresponding `SerialUSBConfig` (`serusbcfg2`).
+- USB endpoints EP3 (interrupt IN) and EP4 (bulk IN+OUT) for CDC1.
+- `SET_INTERFACE` request handling in USB requests hook (required for composite devices).
+
+Changed
+- USB device descriptor bumped from USB 1.1 (`bcdUSB 0x0110`) to USB 2.0 (`bcdUSB 0x0200`), required for IAD.
+- USB device class changed from CDC (`0x02`) to Miscellaneous (`0xEF`) with Common Class subclass (`0x02`) and IAD protocol (`0x01`).
+- USB configuration descriptor expanded from single CDC (67 bytes, 2 interfaces) to dual CDC with IAD (141 bytes, 4 interfaces).
+- Renamed `serusbcfg` to `serusbcfg1` across all source files (`usbcfg.c`, `usbcfg.h`, `main.c`, `state_off.c`).
+- Updated `portab.h` with `PORTAB_SDU2` definition.
+
+---
+
 ## [1.1.0] (2026-03-04)
 
 Added

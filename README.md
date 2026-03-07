@@ -17,7 +17,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - Persistent data for run-time data storage, with EFL (Embedded Flash) Driver. Including CRC32 integrity checking and factory default restoration.
 - Integration with Bootloader and application header for application firmware updates over USB.
 - Low-power mode with wake-up from user button.
-- USB serial port integration, for debug output (and future external integration over USB).
+- Dual USB CDC/ACM interface with IAD (Interface Association Descriptors): CDC0 for debug output, CDC1 for shell commands and external control.
 
 
 ## Table of Contents
@@ -50,6 +50,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
   - [System Setup Scripts](#system-setup-scripts-scriptssystem)
   - [Memory Usage](#memory-usage)
 - [Troubleshooting](#troubleshooting)
+  - [Identifying CDC Ports](#identifying-cdc-ports)
 - [Bugs and Issues](#bugs-and-issues)
 - [Additional Sources](#additional-sources)
 - [License](#license)
@@ -224,8 +225,8 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 | RAM | 24KB |
 | LED | WS2812B addressable RGB |
 | Button | User button |
-| USB | USB 2.0 Full Speed compliant |
-| Debug | SWD + Virtual COM Port (UART) |
+| USB | USB 2.0 Full Speed, Dual CDC/ACM (IAD) |
+| Debug | SWD + CDC0 debug serial, CDC1 shell interface |
 | Oscillators | 48MHz HSE, 32.768kHz LSE |
 | Wireless Module| ESP32 WiFi/BLE module interface* |
 
@@ -259,7 +260,7 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │                    LIBRARIES (libs/)                         │
 │  ┌──────────────────┐ ┌──────────────────┐ ┌──────────────┐  │
 │  │ hal_efl_stm32c0xx│ │ usbcfg           │ │ portab       │  │
-│  │ (Flash Driver)   │ │ (USB CDC Config) │ │ (Portability)│  │
+│  │ (Flash Driver)   │ │ (Dual CDC/IAD)   │ │ (Portability)│  │
 │  └──────────────────┘ └──────────────────┘ └──────────────┘  │
 │  ┌──────────────────────────────────────────────────────────┐│
 │  │ ee_esp32_wifi_ble_if_driver (WiFi/BLE Module Interface)  ││
@@ -282,7 +283,7 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 - **ChibiOS/RT** — Real-time kernel with threads and event-driven architecture
 - **ChibiOS HAL** — Hardware abstraction for GPIO, SPI, USB, PWR, timers
 - **hal_efl_stm32c0xx** — Custom EFL driver (STM32C0 not in mainline ChibiOS)
-- **USB Stack** — CDC/ACM for debug serial, DFU mode via bootloader
+- **USB Stack** — Dual CDC/ACM with IAD: CDC0 for debug serial, CDC1 for shell commands. DFU mode via bootloader
 - **WS2812B Driver** — SPI-based protocol using DMA for timing-critical LED data
 - **Power Management** — Low-power mode with EXTI wake-up.
 
@@ -321,13 +322,14 @@ FLASH (128KB)                              RAM (24KB)
 
 ## Libraries and Drivers
 
-(TO DO: Add info about libraries, when we have worked on libraries implemented?)
+| Library | Description |
+|---------|-------------|
+| **usbcfg** | USB dual CDC/ACM configuration with IAD descriptors. Defines two virtual serial ports: CDC0 (debug prints) and CDC1 (shell commands). Manages USB device/configuration descriptors, endpoint configs, and driver lifecycle hooks. |
+| **portab** | Board portability abstraction layer. Maps logical driver names (`PORTAB_SDU1`, `PORTAB_SDU2`, `PORTAB_USB1`) to ChibiOS HAL instances. |
+| **hal_efl_stm32c0xx** | Custom Embedded Flash (EFL) driver for STM32C0xx. Required because STM32C0 is not yet supported in mainline ChibiOS EFL. |
+| (Work-in-progress) **ee_esp32_wifi_ble_if_driver** | ESP32 WiFi/BLE module GPIO interface (placeholder). Controls enable and boot pins for ESP32-C3 WROOM module. UART communication protocol not yet implemented. |
 
-**Temporary notes:**
-- usbcfg and portab (temporary USB related files)
-- Project-based Libraries/Drivers
-    - EngEmil ESP32 Wifi BLE Interface Driver (placeholder, to control enable pin for wireless module)
-
+> Note that the driver/library placement structure is a bit messy at the moment. With two approaches, one is simply having the drivers under the `app` folder, the other approach (for these) is the `libs`-folder. It is for subject to change in the future.
 
 ## Debugging
 
@@ -393,7 +395,7 @@ in the debugger. Increase that thread's working area size in `app/rt_config.h`.
 #### 2. Runtime Stack Watermark Reporting (Serial Output)
 
 In debug builds (LEVEL >= 4), the main loop prints stack watermarks for all
-threads every 5 seconds over the USB serial port (`/dev/ttyACM0`):
+threads every 5 seconds over USB serial port **CDC0** (debug print stream):
 
 ```
 [STACK] === Thread Stack Watermarks ===
@@ -413,9 +415,9 @@ Each line shows `used / total bytes (percent)`. The "used" value is the
 - **> 85%** — Dangerous, increase the working area size immediately.
 - **100%** — Stack has overflowed (the stack check above should catch this first).
 
-To monitor, connect to the serial port:
+To monitor, connect to the USB serial CDC0 debug port (see [Identifying CDC Ports](#identifying-cdc-ports)):
 ```bash
-minicom -D /dev/ttyACM0 -b 115200
+minicom -D /dev/ttyACMx -b 115200
 ```
 
 Thread working area sizes are configured in `app/rt_config.h`:
@@ -495,7 +497,7 @@ Build tasks available in `.vscode/tasks.json`. Run via: `Ctrl+Shift+P` → "Task
 | Erase Flash (st-flash) | Erase entire flash memory |
 | Serial ACM0 (minicom ttyACM0) | Open minicom on /dev/ttyACM0 |
 | Serial ACM1 (minicom ttyACM1) | Open minicom on /dev/ttyACM1 |
-| Monitor All Serial Comm. | Open minicom on ttyACM0 + ttyACM1 |
+| Monitor All Serial Comm. | Open minicom on ACM0 and ACM1 in parallel |
 
 
 ## Utility Scripts
@@ -576,17 +578,29 @@ Compile for debug:
 - `make debug LEVEL=5` - for debug info + do not enter low-power Stop mode.
 
 
- Check which mode we are in with: `lsusb`
+### Identifying USB Bootloader/Normal mode
+
+Check which mode we are in with: `lsusb`
 - In normal operation, expect: `Bus 001 Device 051: ID 0483:df11 EngEmil.io AttentioLight-1`
 - In bootloader, expect: `Bus 001 Device 054: ID 0483:df11 EngEmil.io Bootloader DFU Mode`
 
-Useful command to figure out which COM port (E.g. `/dev/ttyACM0` or `/dev/ttyUSB0`) to use: `ls -l /dev/serial/by-id`
+### Identifying USB CDC Ports
 
-Use `minicom` for serial monitoring in terminal.
-- E.g.: `minicom -D /dev/ttyACM0 -b 115200`
+The device exposes two USB CDC/ACM virtual serial ports. The `/dev/ttyACMx` numbers are **not stable** and depend on enumeration order. To identify which port is which:
 
+```bash
+ls -ls /dev/serial/by-id
+```
 
-**NB!** Bootloader doesn't work so good with the debug setup in VS Code (extensions, etc.). 
+| Interface Number | Role | Description |
+|------------------|------|-------------|
+| `IF=00` (`...-if00`) | **CDC0** | Debug print stream (read-only) |
+| `IF=02` (`...-if02`) | **CDC1** | Shell command interface (bidirectional) |
+
+Use `minicom` for serial monitoring in terminal. E.g. for `dev/ttyACM1`
+```bash
+minicom -D /dev/ttyACM1 -b 115200
+```
 
 
 ## Bugs and Issues
