@@ -25,7 +25,7 @@ SOFTWARE.
 #include "ch.h"
 #include "hal.h"
 #include "chprintf.h"
-//#include "shell.h"
+#include "shell.h"
 
 #include "portab.h"
 #include "usbcfg.h"
@@ -36,8 +36,16 @@ SOFTWARE.
 #include "app_state_machine.h"
 #include "app_debug.h"
 
-/* Persisten Data Storage (EFL (Embedded Flash)) */
+/* Persistent Data Storage (EFL (Embedded Flash)) */
 #include "persistent_data.h"
+
+/* Real-time configuration (thread priorities, stack sizes) */
+#include "rt_config.h"
+
+/* Shell Commands */
+#include "cmd_version.h"
+#include "cmd_settings.h"
+#include "cmd_dfu.h"
 
 
 /* Serial Configuration for Virtual COM Port */
@@ -49,6 +57,27 @@ static SerialConfig serial_cfg = {
 };
 
 /*
+ * Shell command table.
+ * Commands registered here are dispatched by the ChibiOS shell module
+ * when received on CDC1 (PORTAB_SDU2).
+ */
+static const ShellCommand shell_commands[] = {
+    {"version",  cmd_version},
+    {"settings", cmd_settings},
+    {"dfu",      cmd_dfu},
+    {NULL, NULL}
+};
+
+/*
+ * Shell configuration.
+ * Binds the shell to CDC1 (PORTAB_SDU2) and registers our command table.
+ */
+static const ShellConfig shell_cfg = {
+    .sc_channel  = (BaseSequentialStream *)&PORTAB_SDU2,
+    .sc_commands = shell_commands
+};
+
+/*
  * System initialization.
 */
 void init_system(void) {
@@ -57,6 +86,11 @@ void init_system(void) {
      */
     halInit();
     chSysInit();
+
+    /*
+     * Initialize shell module (event source for shell termination).
+     */
+    shellInit();
 
     /*
      * Board-dependent initialization.
@@ -185,22 +219,17 @@ int main(void) {
     /* Initialize application threads and subsystems. */
     init_application_systems();
 
-    /* TEST CODE - Print persistent data at startup */
     /*
-    {
-        const pd_data_t *pd = persistent_data_get();
-        if (pd != NULL) {
-            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "=== Persistent Data ===\r\n");
-            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Device: %s\r\n", pd->device_name);
-            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "Serial: %s\r\n", pd->serial_number);
-            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "=======================\r\n");
-        } else {
-            chprintf((BaseSequentialStream*)&PORTAB_SDU1, "ERROR: Persistent data not initialized\r\n");
-        }
-    }
-    */
-
-    /* Main thread */
+     * Main thread: shell respawn loop.
+     *
+     * The ChibiOS shell thread runs on CDC1 (PORTAB_SDU2). When the USB
+     * host connects, the shell thread is created from the heap. When the
+     * shell exits (USB disconnect, 'exit' command, or error), the thread
+     * terminates and is re-spawned after a brief delay.
+     *
+     * This pattern handles USB cable reconnection gracefully — each new
+     * connection gets a fresh shell instance.
+     */
     while (true) {
 
 #if (DBG_ENABLE_STACK_WATERMARK == 1)
@@ -210,8 +239,19 @@ int main(void) {
         dbg_print_stack_usage();
 #endif
 
-        chThdSleepMilliseconds(5000);
+        /* Only spawn shell when USB CDC is active (host connected). */
+        if (PORTAB_SDU2.config->usbp->state == USB_ACTIVE) {
+            thread_t *shelltp = chThdCreateFromHeap(NULL, SHELL_WA_SIZE,
+                                                    "shell",
+                                                    RT_SHELL_THREAD_PRIORITY,
+                                                    shellThread,
+                                                    (void *)&shell_cfg);
+            if (shelltp != NULL) {
+                chThdWait(shelltp);
+            }
+        }
 
+        chThdSleepMilliseconds(1000);
     }
 
 }

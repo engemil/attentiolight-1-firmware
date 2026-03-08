@@ -109,7 +109,7 @@ SOFTWARE.
 /**
  * @brief   Debug print timeout in milliseconds.
  */
-#define DBG_PRINT_TIMEOUT_MS    50
+#define DBG_PRINT_TIMEOUT_MS    200
 #define DBG_PRINT_TIMEOUT       TIME_MS2I(DBG_PRINT_TIMEOUT_MS)
 
 /*===========================================================================*/

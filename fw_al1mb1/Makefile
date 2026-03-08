@@ -123,6 +123,9 @@ include $(CHIBIOS)/tools/mk/autobuild.mk
 # Streams files (optional).
 include $(CHIBIOS)/os/hal/lib/streams/streams.mk
 
+# Shell files.
+include $(CHIBIOS)/os/various/shell/shell.mk
+
 # ChibiOS test files (optional).
 #include $(CHIBIOS)/os/test/test.mk
 #include $(CHIBIOS)/test/rt/rt_test.mk
@@ -184,6 +187,9 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/modes/mode_night_light.c \
        app/app_state_machine/modes/mode_external_control.c \
        app/persistent_data/persistent_data.c \
+       app/shell_commands/cmd_version.c \
+       app/shell_commands/cmd_settings.c \
+       app/shell_commands/cmd_dfu.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -214,7 +220,7 @@ CPPWARN = -Wall -Wextra -Wundef
 #
 
 # List all user C define here, like -D_DEBUG=1
-UDEFS = -DCRT0_VTOR_INIT=1
+UDEFS = -DCRT0_VTOR_INIT=1 -DSHELL_CONFIG_FILE
 
 # Define ASM defines here
 UADEFS = -DCRT0_VTOR_INIT=1
@@ -229,7 +235,8 @@ UINCDIR = ./app_header \
           ./app/app_state_machine/system_states \
           ./app/app_state_machine/modes \
           ./app/app_state_machine/modes/effects \
-          ./app/persistent_data
+          ./app/persistent_data \
+          ./app/shell_commands
 
 # List the user directory to look for the libraries here
 ULIBDIR =

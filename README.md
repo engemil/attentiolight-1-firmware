@@ -18,6 +18,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - Integration with Bootloader and application header for application firmware updates over USB.
 - Low-power mode with wake-up from user button.
 - Dual USB CDC/ACM interface with IAD (Interface Association Descriptors): CDC0 for debug output, CDC1 for shell commands and external control.
+- ChibiOS Shell (on CDC1) with interactive commands.
 
 
 ## Table of Contents
@@ -49,6 +50,10 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
   - [Sign App Header](#sign-app-header-scriptssign_app_headersh)
   - [System Setup Scripts](#system-setup-scripts-scriptssystem)
   - [Memory Usage](#memory-usage)
+- [Shell Commands](#shell-commands)
+  - [Connecting to the Shell](#connecting-to-the-shell)
+  - [ChibiOS Built-in Commands](#chibios-built-in-commands)
+  - [Application Commands](#application-commands)
 - [Troubleshooting](#troubleshooting)
   - [Identifying CDC Ports](#identifying-cdc-ports)
 - [Bugs and Issues](#bugs-and-issues)
@@ -195,6 +200,7 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │   │   │   └── system_states/      # System state handlers
 │   │   ├── button_driver/          # Button input with debouncing
 │   │   ├── persistent_data/        # EFL settings storage
+│   │   ├── shell_commands/         # USB shell command handlers
 │   │   └── ws2812b_led_driver/     # WS2812B SPI protocol
 │   ├── app_header/                 # Bootloader app header
 │   ├── boards/                     # Board support packages
@@ -226,7 +232,7 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 | LED | WS2812B addressable RGB |
 | Button | User button |
 | USB | USB 2.0 Full Speed, Dual CDC/ACM (IAD) |
-| Debug | SWD + CDC0 debug serial, CDC1 shell interface |
+| Debug | SWD + CDC0 debug serial, CDC1 interactive shell |
 | Oscillators | 48MHz HSE, 32.768kHz LSE |
 | Wireless Module| ESP32 WiFi/BLE module interface* |
 
@@ -243,6 +249,12 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │  │   ├── System States                                     │ │
 │  │   ├── Modes                                             │ │
 │  │   └── Animation Engine                                  │ │
+│  └─────────────────────────────────────────────────────────┘ │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Shell / CLI (shell_commands/)                           │ │
+│  │   ├── version — Firmware version query                  │ │
+│  │   ├── settings — Persistent data get/set                │ │
+│  │   └── dfu — Reboot into DFU bootloader                  │ │
 │  └─────────────────────────────────────────────────────────┘ │
 ├──────────────────────────────────────────────────────────────┤
 │                    APPLICATION DRIVERS                       │
@@ -280,11 +292,12 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 
 **Key Components:**
 
-- **ChibiOS/RT** — Real-time kernel with threads and event-driven architecture
-- **ChibiOS HAL** — Hardware abstraction for GPIO, SPI, USB, PWR, timers
-- **hal_efl_stm32c0xx** — Custom EFL driver (STM32C0 not in mainline ChibiOS)
-- **USB Stack** — Dual CDC/ACM with IAD: CDC0 for debug serial, CDC1 for shell commands. DFU mode via bootloader
-- **WS2812B Driver** — SPI-based protocol using DMA for timing-critical LED data
+- **ChibiOS/RT** — Real-time kernel with threads and event-driven architecture.
+- **ChibiOS HAL** — Hardware abstraction for GPIO, SPI, USB, PWR, timers.
+- **hal_efl_stm32c0xx** — Custom EFL driver (STM32C0 not in mainline ChibiOS).
+- **USB Stack** — Dual CDC/ACM with IAD: CDC0 for debug serial, CDC1 for interactive shell. DFU mode via bootloader.
+- **Shell / CLI** — ChibiOS shell on CDC1. Heap-allocated thread respawns on USB reconnection.
+- **WS2812B Driver** — SPI-based protocol using DMA for timing-critical LED data.
 - **Power Management** — Low-power mode with EXTI wake-up.
 
 > **Note:** The goal is to follow this layered abstraction as closely as possible, but in practice some boundaries are crossed for performance or simplicity reasons.
@@ -424,6 +437,7 @@ Thread working area sizes are configured in `app/rt_config.h`:
 - `BTN_THREAD_WA_SIZE` — Button thread
 - `APP_SM_THREAD_WA_SIZE` — State machine thread
 - `APP_SM_ANIM_THREAD_WA_SIZE` — Animation thread
+- `SHELL_WA_SIZE` — Shell thread (heap-allocated, respawns on USB reconnect)
 
 > **Note:** Debug builds automatically add 512 extra bytes to each thread
 > stack (via `_RT_DEBUG_EXTRA` in `rt_config.h`) to accommodate the 256-byte
@@ -565,6 +579,64 @@ Check usage after building:
 ```
 
 **NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
+
+
+## Shell Commands
+
+The firmware includes a ChibiOS shell on **CDC1** providing an interactive command-line interface over USB. The shell thread is dynamically allocated from the heap and respawns automatically when the USB cable is reconnected.
+
+**NOTE**: `attentio-cli` is recommended for interacting with the device in terminal over USB (work-in-progress). Link: https://github.com/engemil/attentio-cli
+
+### Connecting to the Shell
+
+Connect to the CDC1 serial port (see [Identifying CDC Ports](#identifying-cdc-ports) to find the correct `/dev/ttyACMx`). In Linux you can use for example **minicom**:
+
+```bash
+minicom -D /dev/ttyACMx -b 115200
+```
+
+The shell prompt is:
+```
+attentio>
+```
+
+### ChibiOS Built-in Commands
+
+ChibiOS built-in commands are provided by the ChibiOS shell module for general info, debugging, and diagnostics.  Note that they do **not** follow the `OK`/`ERROR` protocol which the application commands does.
+
+| Command | Description |
+|---------|-------------|
+| `help` | Lists all available commands (including the application commands) |
+| `info` | Kernel version, compiler, architecture, board name, build time |
+| `echo "message"` | Echoes back the given string |
+| `systime` | Prints current system tick count |
+| `mem` | Heap and core memory status (fragments, free bytes) |
+| `threads` | Lists all threads with stack pointers, priority, and state |
+| `exit` | Terminates the shell thread (respawns automatically on next USB check) |
+
+
+### Application Commands
+
+**Application commands** follow a consistent response format:
+
+| Result  | Format |
+|---------|--------|
+| Success | `[payload lines...]\r\n` followed by `OK\r\n` |
+| Failure | `ERROR <message>\r\n` |
+
+The list of **application commands**:
+
+| Command | Description | Example |
+|---------|-------------|---------|
+| `version` | Returns firmware version (`<major>.<minor>.<patch>`) from the application header | `version` → `1.1.0\r\n OK\r\n` |
+| `settings get <key>` | Read a persistent data field by name | `settings get serial_number` → `000000000000\r\n OK\r\n` |
+| `settings set <key> <value>` | Write a persistent data field (RW fields only) | `settings set device_name MyLight` → `OK\r\n` |
+| `dfu` | Reboot into DFU bootloader mode. No response — device disconnects immediately | `dfu` → *(device reboots into DFU)* |
+
+**Notes:**
+- `settings set` only works on fields with `PD_ACCESS_RW` access. Read-only fields return `ERROR key is read-only`.
+- `settings get` on an unknown field returns `ERROR unknown key`.
+- The `dfu` command writes magic value `0xDEADBEEF` to RAM (`0x20005FFC`) and triggers `NVIC_SystemReset()`. The host detects the USB disconnection and can proceed with DFU flashing via `dfu-util`.
 
 
 ## Troubleshooting

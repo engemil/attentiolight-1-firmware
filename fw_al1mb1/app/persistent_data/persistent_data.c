@@ -84,7 +84,7 @@ static const pd_field_info_t pd_fields[] = {
         .id     = PD_FIELD_DEVICE_NAME,
         .offset = offsetof(pd_data_t, device_name),
         .size   = PD_DEVICE_NAME_SIZE,
-        .access = PD_ACCESS_RO,
+        .access = PD_ACCESS_RW,
         .name   = "device_name"
     },
     {
@@ -427,6 +427,23 @@ bool persistent_data_find_field(pd_field_id_t id, pd_field_info_t *info) {
     }
 
     return true;
+}
+
+bool persistent_data_find_field_by_name(const char *name, pd_field_info_t *info) {
+    if (name == NULL) {
+        return false;
+    }
+
+    for (size_t i = 0; i < PD_FIELD_COUNT; i++) {
+        if (strcmp(pd_fields[i].name, name) == 0) {
+            if (info != NULL) {
+                *info = pd_fields[i];
+            }
+            return true;
+        }
+    }
+
+    return false;
 }
 
 pd_result_t persistent_data_save(void) {

@@ -76,6 +76,15 @@ SOFTWARE.
 #define RT_ANIMATION_THREAD_PRIORITY        (NORMALPRIO + 1)
 #endif
 
+/**
+ * @brief   Shell thread priority.
+ * @details Same level as animation — responsive to user input without
+ *          starving other threads. Created dynamically from heap.
+ */
+#ifndef RT_SHELL_THREAD_PRIORITY
+#define RT_SHELL_THREAD_PRIORITY            (NORMALPRIO + 1)
+#endif
+
 /** @} */
 
 /*===========================================================================*/
@@ -122,6 +131,16 @@ SOFTWARE.
  */
 #ifndef APP_SM_ANIM_THREAD_WA_SIZE
 #define APP_SM_ANIM_THREAD_WA_SIZE      (512 + _RT_DEBUG_EXTRA)
+#endif
+
+/**
+ * @brief   Shell thread working area size.
+ * @details Allocated from heap via chThdCreateFromHeap(). The shell thread
+ *          is created dynamically to handle USB reconnection gracefully.
+ *          2048 bytes is the ChibiOS standard for shell threads.
+ */
+#ifndef SHELL_WA_SIZE
+#define SHELL_WA_SIZE                   THD_WORKING_AREA_SIZE(2048 + _RT_DEBUG_EXTRA)
 #endif
 
 /**

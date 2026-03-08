@@ -13,9 +13,27 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-03-07)
+## [Development] (2026-03-08)
 
 Added
+- **ChibiOS Shell integration** on CDC1 (PORTAB_SDU2). Shell thread is dynamically allocated from heap and respawns on USB reconnection for graceful cable plug/unplug handling.
+- **Shell command: `version`** — Returns firmware version (`<major>.<minor>.<patch>`) read from the application header struct.
+- **Shell command: `settings get/set`** — Read and write persistent data fields by name string. Uses `persistent_data_find_field_by_name()` for dynamic field lookup. Respects access control (RO/RW per field).
+- **Shell command: `dfu`** — Writes magic value `0xDEADBEEF` to RAM address `0x20005FFC` and triggers `NVIC_SystemReset()` to enter bootloader DFU mode. No response sent (device reboots immediately).
+- **Shell response helper macros** (`shell_helpers.h`): `shell_ok(chp)`, `shell_error(chp, msg)`, `shell_value(chp, val)` for consistent `OK\r\n` / `ERROR ...\r\n` protocol formatting.
+- `persistent_data_find_field_by_name()` function for case-sensitive string-based field lookup in the persistent data registry.
+- Shell thread priority (`RT_SHELL_THREAD_PRIORITY`) and working area size (`SHELL_WA_SIZE`) definitions in `rt_config.h`.
+- `shellconf.h` with custom shell prompt and disabled test command.
+- `extern` declaration for `app_header` in `app_header.h` (used by `cmd_version`).
+
+Changed
+- `device_name` persistent data field access changed from `PD_ACCESS_RO` to `PD_ACCESS_RW` (writable over USB shell).
+- Debug print timeout increased from 50ms to 200ms (`DBG_PRINT_TIMEOUT_MS` in `app_debug.h`).
+- Main thread loop refactored from simple sleep to shell respawn loop: checks USB active state, creates shell thread from heap, waits for termination, then re-spawns.
+- Main loop sleep interval changed from 5000ms to 1000ms (faster shell respawn on reconnect).
+- Makefile updated: added ChibiOS shell module (`shell.mk`), shell command source files, `SHELL_CONFIG_FILE` define, and `shell_commands/` include path.
+
+Added (previous)
 - **Dual USB CDC/ACM** with IAD (Interface Association Descriptor) support. The device now enumerates two virtual serial ports over a single USB connection:
   - **CDC0** (`PORTAB_SDU1`): Debug print stream (device to host, read-only).
   - **CDC1** (`PORTAB_SDU2`): Shell command interface (bidirectional, for future CLI integration).

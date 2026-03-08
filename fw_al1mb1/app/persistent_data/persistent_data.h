@@ -267,6 +267,17 @@ bool persistent_data_get_field_info(size_t index, pd_field_info_t *info);
  */
 bool persistent_data_find_field(pd_field_id_t id, pd_field_info_t *info);
 
+/**
+ * @brief   Find field information by name string.
+ * @note    Performs a case-sensitive string match against the field registry.
+ *
+ * @param[in]  name     Field name string to search for (e.g. "device_name").
+ * @param[out] info     Pointer to store field information (can be NULL).
+ *
+ * @return  true if field found, false otherwise.
+ */
+bool persistent_data_find_field_by_name(const char *name, pd_field_info_t *info);
+
 /** @} */
 
 /**
