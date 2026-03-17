@@ -629,6 +629,7 @@ The list of **application commands**:
 | Command | Description | Example |
 |---------|-------------|---------|
 | `version` | Returns firmware version (`<major>.<minor>.<patch>`) from the application header | `version` → `1.1.0\r\n OK\r\n` |
+| `settings` / `settings list` | List all settings in `key=value` format (only RO/RW fields, skips INTERNAL) | `settings` → `device_name=AttentioLight-1\r\nserial_number=000000000000\r\nOK\r\n` |
 | `settings get <key>` | Read a persistent data field by name | `settings get serial_number` → `000000000000\r\n OK\r\n` |
 | `settings set <key> <value>` | Write a persistent data field (RW fields only) | `settings set device_name MyLight` → `OK\r\n` |
 | `dfu` | Reboot into DFU bootloader mode. No response — device disconnects immediately | `dfu` → *(device reboots into DFU)* |

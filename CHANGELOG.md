@@ -13,7 +13,7 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-03-08)
+## [Development] (2026-03-17)
 
 Added
 - **ChibiOS Shell integration** on CDC1 (PORTAB_SDU2). Shell thread is dynamically allocated from heap and respawns on USB reconnection for graceful cable plug/unplug handling.
@@ -32,6 +32,7 @@ Changed
 - Main thread loop refactored from simple sleep to shell respawn loop: checks USB active state, creates shell thread from heap, waits for termination, then re-spawns.
 - Main loop sleep interval changed from 5000ms to 1000ms (faster shell respawn on reconnect).
 - Makefile updated: added ChibiOS shell module (`shell.mk`), shell command source files, `SHELL_CONFIG_FILE` define, and `shell_commands/` include path.
+- **Shell command `settings` enhanced** — now supports `settings list` (or just `settings` with no arguments) to output all settings in `key=value` format. Skips INTERNAL access fields and only shows user-accessible RO/RW settings. This enables the CLI to retrieve all settings for export/preset functionality.
 
 Added (previous)
 - **Dual USB CDC/ACM** with IAD (Interface Association Descriptor) support. The device now enumerates two virtual serial ports over a single USB connection:

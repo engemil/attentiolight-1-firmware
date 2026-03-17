@@ -26,22 +26,11 @@ SOFTWARE.
  * @file    cmd_settings.c
  * @brief   Shell command: settings.
  *
- * @details Handles "settings get <key>" and "settings set <key> <value>"
- *          commands by interfacing with the persistent data module.
+ * @details Handles settings management commands:
+ *          - "settings" or "settings list" -> list all settings
+ *          - "settings get <key>" -> read single setting
+ *          - "settings set <key> <value>" -> write single setting
  *
- * @example
- *          -> settings get serial_number\r\n
- *          <- 000000000000\r\n
- *          <- OK\r\n
- *
- *          -> settings set device_name "My Light"\r\n
- *          <- OK\r\n
- *
- *          -> settings set serial_number XYZ\r\n
- *          <- ERROR key is read-only\r\n
- *
- *          -> settings get nonexistent\r\n
- *          <- ERROR unknown key\r\n
  */
 
 #include "cmd_settings.h"
@@ -53,6 +42,51 @@ SOFTWARE.
 /*===========================================================================*/
 /* Local helper functions                                                    */
 /*===========================================================================*/
+
+/**
+ * @brief   Handle "settings list" or "settings" (no args).
+ * @note    Returns all settings in simple key=value format:
+ *          device_name=AttentioLight-1
+ *          serial_number=000000000000
+ *          OK
+ */
+static void cmd_settings_list(BaseSequentialStream *chp) {
+    char buf[PD_DEVICE_NAME_SIZE];  /* Use largest field size as buffer */
+
+    /* Iterate through all registered fields */
+    size_t field_count = persistent_data_field_count();
+
+    for (size_t i = 0; i < field_count; i++) {
+        pd_field_info_t info;
+
+        if (!persistent_data_get_field_info(i, &info)) {
+            continue;  /* Skip invalid entries */
+        }
+
+        /* Skip INTERNAL fields (not externally accessible) */
+        if (info.access == PD_ACCESS_INTERNAL) {
+            continue;
+        }
+
+        /* Read field value */
+        size_t size = sizeof(buf);
+        pd_result_t result = persistent_data_read_field(info.id, buf, &size);
+
+        if (result != PD_OK) {
+            /* If read fails, output error marker but continue */
+            chprintf(chp, "%s=ERROR\r\n", info.name);
+            continue;
+        }
+
+        /* Ensure null-termination */
+        buf[sizeof(buf) - 1] = '\0';
+
+        /* Output: key=value */
+        chprintf(chp, "%s=%s\r\n", info.name, buf);
+    }
+
+    shell_ok(chp);
+}
 
 /**
  * @brief   Handle "settings get <key>".
@@ -132,6 +166,12 @@ static void cmd_settings_set(BaseSequentialStream *chp, const char *key,
 /*===========================================================================*/
 
 void cmd_settings(BaseSequentialStream *chp, int argc, char *argv[]) {
+
+    /* No arguments or "list" subcommand -> list all settings */
+    if (argc == 0 || (argc == 1 && strcmp(argv[0], "list") == 0)) {
+        cmd_settings_list(chp);
+        return;
+    }
 
     if (argc < 2) {
         shell_error(chp, "missing arguments");
