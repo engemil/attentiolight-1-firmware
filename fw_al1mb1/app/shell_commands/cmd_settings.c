@@ -26,11 +26,13 @@ SOFTWARE.
  * @file    cmd_settings.c
  * @brief   Shell command: settings.
  *
- * @details Handles settings management commands:
+ * @details Handles user-configurable settings (all read-write):
  *          - "settings" or "settings list" -> list all settings
  *          - "settings get <key>" -> read single setting
  *          - "settings set <key> <value>" -> write single setting
  *
+ *          Read-only device metadata (serial number, firmware version, etc.)
+ *          is handled by the "metadata" command instead.
  */
 
 #include "cmd_settings.h"
@@ -45,45 +47,18 @@ SOFTWARE.
 
 /**
  * @brief   Handle "settings list" or "settings" (no args).
- * @note    Returns all settings in simple key=value format:
- *          device_name=AttentioLight-1
- *          serial_number=000000000000
- *          OK
+ * @note    Outputs all settings in key=value format.
  */
 static void cmd_settings_list(BaseSequentialStream *chp) {
-    char buf[PD_DEVICE_NAME_SIZE];  /* Use largest field size as buffer */
+    const pd_data_t *pd = persistent_data_get();
 
-    /* Iterate through all registered fields */
-    size_t field_count = persistent_data_field_count();
-
-    for (size_t i = 0; i < field_count; i++) {
-        pd_field_info_t info;
-
-        if (!persistent_data_get_field_info(i, &info)) {
-            continue;  /* Skip invalid entries */
-        }
-
-        /* Skip INTERNAL fields (not externally accessible) */
-        if (info.access == PD_ACCESS_INTERNAL) {
-            continue;
-        }
-
-        /* Read field value */
-        size_t size = sizeof(buf);
-        pd_result_t result = persistent_data_read_field(info.id, buf, &size);
-
-        if (result != PD_OK) {
-            /* If read fails, output error marker but continue */
-            chprintf(chp, "%s=ERROR\r\n", info.name);
-            continue;
-        }
-
-        /* Ensure null-termination */
-        buf[sizeof(buf) - 1] = '\0';
-
-        /* Output: key=value */
-        chprintf(chp, "%s=%s\r\n", info.name, buf);
+    if (pd == NULL) {
+        shell_error(chp, "not initialized");
+        return;
     }
+
+    chprintf(chp, "device_name=%s\r\n", pd->device_name);
+    /* Add future settings output here */
 
     shell_ok(chp);
 }
@@ -92,35 +67,21 @@ static void cmd_settings_list(BaseSequentialStream *chp) {
  * @brief   Handle "settings get <key>".
  */
 static void cmd_settings_get(BaseSequentialStream *chp, const char *key) {
-    pd_field_info_t info;
+    const pd_data_t *pd = persistent_data_get();
 
-    /* Look up field by name */
-    if (!persistent_data_find_field_by_name(key, &info)) {
+    if (pd == NULL) {
+        shell_error(chp, "not initialized");
+        return;
+    }
+
+    if (strcmp(key, "device_name") == 0) {
+        shell_value(chp, pd->device_name);
+        shell_ok(chp);
+    }
+    /* Add future settings get handlers here */
+    else {
         shell_error(chp, "unknown key");
-        return;
     }
-
-    /* Check access level (INTERNAL fields cannot be read externally) */
-    if (info.access == PD_ACCESS_INTERNAL) {
-        shell_error(chp, "unknown key");
-        return;
-    }
-
-    /* Read the field value */
-    char buf[PD_DEVICE_NAME_SIZE];  /* Use largest field size as buffer */
-    size_t size = sizeof(buf);
-    pd_result_t result = persistent_data_read_field(info.id, buf, &size);
-
-    if (result != PD_OK) {
-        shell_error(chp, persistent_data_result_str(result));
-        return;
-    }
-
-    /* Ensure null-termination for string fields */
-    buf[sizeof(buf) - 1] = '\0';
-
-    shell_value(chp, buf);
-    shell_ok(chp);
 }
 
 /**
@@ -128,31 +89,22 @@ static void cmd_settings_get(BaseSequentialStream *chp, const char *key) {
  */
 static void cmd_settings_set(BaseSequentialStream *chp, const char *key,
                              const char *value) {
-    pd_field_info_t info;
 
-    /* Look up field by name */
-    if (!persistent_data_find_field_by_name(key, &info)) {
+    if (strcmp(key, "device_name") == 0) {
+        pd_result_t result = persistent_data_set_device_name(value);
+        if (result != PD_OK) {
+            shell_error(chp, persistent_data_result_str(result));
+            return;
+        }
+    }
+    /* Add future settings set handlers here */
+    else {
         shell_error(chp, "unknown key");
         return;
     }
 
-    /* Check access level */
-    if (info.access != PD_ACCESS_RW) {
-        shell_error(chp, "key is read-only");
-        return;
-    }
-
-    /* Write the field value (include null terminator for string fields) */
-    size_t len = strlen(value) + 1;
-    pd_result_t result = persistent_data_write_field(info.id, value, len);
-
-    if (result != PD_OK) {
-        shell_error(chp, persistent_data_result_str(result));
-        return;
-    }
-
     /* Persist to flash */
-    result = persistent_data_save();
+    pd_result_t result = persistent_data_save();
     if (result != PD_OK) {
         shell_error(chp, persistent_data_result_str(result));
         return;

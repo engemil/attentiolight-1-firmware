@@ -37,6 +37,7 @@ SOFTWARE.
 #include "app_debug.h"
 
 /* Persistent Data Storage (EFL (Embedded Flash)) */
+#include "device_metadata.h"
 #include "persistent_data.h"
 
 /* Real-time configuration (thread priorities, stack sizes) */
@@ -44,6 +45,7 @@ SOFTWARE.
 
 /* Shell Commands */
 #include "cmd_version.h"
+#include "cmd_metadata.h"
 #include "cmd_settings.h"
 #include "cmd_dfu.h"
 
@@ -63,6 +65,7 @@ static SerialConfig serial_cfg = {
  */
 static const ShellCommand shell_commands[] = {
     {"version",  cmd_version},
+    {"metadata", cmd_metadata},
     {"settings", cmd_settings},
     {"dfu",      cmd_dfu},
     {NULL, NULL}
@@ -138,8 +141,25 @@ void init_application_systems(void){
     DBG_INFO("MAIN initializing application...");
 
     /*
-     * Initialize persistent data storage.
-     * Loads device configuration from EFL (or defaults on first boot).
+     * Initialize device metadata storage (EFL page 0).
+     * Loads production-programmed metadata (serial number) from flash.
+     */
+    DBG_DEBUG("MAIN device_metadata_init()...");
+    md_result_t md_result = device_metadata_init();
+    if (md_result != MD_OK) {
+        DBG_WARN("MAIN device_metadata_init() returned: %s (using defaults)",
+                 device_metadata_result_str(md_result));
+    } else {
+        DBG_DEBUG("MAIN device_metadata_init() OK");
+        const md_data_t *md = device_metadata_get();
+        if (md != NULL) {
+            DBG_DEBUG("Serial: %s", md->serial_number);
+        }
+    }
+
+    /*
+     * Initialize persistent settings storage (EFL page 1).
+     * Loads user-configurable settings from flash (or defaults on first boot).
      */
     DBG_DEBUG("MAIN persistent_data_init()...");
     pd_result_t pd_result = persistent_data_init();
@@ -150,7 +170,7 @@ void init_application_systems(void){
         DBG_DEBUG("MAIN persistent_data_init() OK");
         const pd_data_t *pd = persistent_data_get();
         if (pd != NULL) {
-            DBG_DEBUG("Device: %s, Serial: %s", pd->device_name, pd->serial_number);
+            DBG_DEBUG("Device name: %s", pd->device_name);
         }
     }
 

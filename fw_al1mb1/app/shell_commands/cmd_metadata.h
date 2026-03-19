@@ -23,30 +23,27 @@ SOFTWARE.
 */
 
 /**
- * @file    persistent_data_defaults.h
- * @brief   Factory default values for persistent settings.
- * @note    Modify these values to change the defaults that are loaded
- *          on first boot or after a factory reset.
- *          Device metadata defaults (serial number) are defined in
- *          device_metadata.h instead.
+ * @file    cmd_metadata.h
+ * @brief   Shell command: metadata.
  *
- * @addtogroup PERSISTENT_DATA
- * @{
+ * @details Returns read-only device metadata: serial number, firmware version,
+ *          device model, hardware revision, build date, and chip UID.
+ *          All values are gathered from their native sources (EFL, app header,
+ *          compile-time macros, silicon registers).
  */
 
-#ifndef PERSISTENT_DATA_DEFAULTS_H
-#define PERSISTENT_DATA_DEFAULTS_H
+#ifndef CMD_METADATA_H
+#define CMD_METADATA_H
 
-/*===========================================================================*/
-/* Factory default values.                                                   */
-/*===========================================================================*/
+#include "hal.h"
 
 /**
- * @brief   Default device name.
- * @note    Maximum length is PD_DEVICE_NAME_SIZE - 1 (31 characters).
+ * @brief   Shell handler for the "metadata" command.
+ *
+ * @param[in] chp   Pointer to the shell output stream.
+ * @param[in] argc  Number of arguments.
+ * @param[in] argv  Argument strings.
  */
-#define PD_DEFAULT_DEVICE_NAME      "AttentioLight-1"
+void cmd_metadata(BaseSequentialStream *chp, int argc, char *argv[]);
 
-#endif /* PERSISTENT_DATA_DEFAULTS_H */
-
-/** @} */
+#endif /* CMD_METADATA_H */

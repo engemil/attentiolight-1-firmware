@@ -38,6 +38,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - [Hardware](#hardware)
 - [Firmware Stack](#firmware-stack)
 - [Memory Map](#memory-map)
+- [Persistent Storage (EFL)](#persistent-storage-efl)
 - [Libraries and Drivers](#libraries-and-drivers)
 - [Debugging](#debugging)
   - [Debug Builds](#debug-builds)
@@ -253,14 +254,15 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │  ┌─────────────────────────────────────────────────────────┐ │
 │  │ Shell / CLI (shell_commands/)                           │ │
 │  │   ├── version — Firmware version query                  │ │
-│  │   ├── settings — Persistent data get/set                │ │
+│  │   ├── metadata — Read-only device identity              │ │
+│  │   ├── settings — User-configurable preferences          │ │
 │  │   └── dfu — Reboot into DFU bootloader                  │ │
 │  └─────────────────────────────────────────────────────────┘ │
 ├──────────────────────────────────────────────────────────────┤
 │                    APPLICATION DRIVERS                       │
 │  ┌──────────────┐ ┌──────────────┐ ┌───────────────────────┐ │
-│  │ WS2812B LED  │ │ Button       │ │ Persistent Data       │ │
-│  │ Driver       │ │ Driver       │ │ (EFL Storage)         │ │
+│  │ WS2812B LED  │ │ Button       │ │ Persistent Data (EFL) │ │
+│  │ Driver       │ │ Driver       │ │ (Metadata + Settings) │ │
 │  └──────────────┘ └──────────────┘ └───────────────────────┘ │
 ├──────────────────────────────────────────────────────────────┤
 │                    APP HEADER (app_header/)                  │
@@ -331,7 +333,57 @@ FLASH (128KB)                              RAM (24KB)
 | Bootloader | 0x08000000 | 16KB | Do not overwrite if you use bootloader (see bootloader submodule for more info) |
 | App Header | 0x08004000 | 32B | Magic, version, size, CRC32, USB VID/PID |
 | Application | 0x08004100 | ~104KB | Code, vectors, read-only data |
-| EFL Storage | 0x0801E000 | 8KB | Persistent settings (4 × 2KB pages) |
+| EFL Storage | 0x0801E000 | 8KB | Persistent data (4 × 2KB pages) |
+
+
+## Persistent Storage (EFL)
+
+The firmware uses Embedded Flash (EFL) to store persistent data that survives power cycles. The 8KB EFL region is divided into two separate storage areas with different purposes:
+
+### Storage Architecture
+
+```
+EFL Region (8KB = 4 pages × 2KB)
+┌─────────────────────────────────┐ 0x0801E000
+│ Page 0: Device Metadata (2KB)   │  ← Production-programmed, read-only
+│   - Header (magic, version)     │
+│   - serial_number               │  ← Only EFL-stored metadata field
+│   - CRC32                       │
+├─────────────────────────────────┤ 0x0801E800
+│ Page 1: User Settings (2KB)     │  ← User-configurable, read-write
+│   - Header (magic, version)     │
+│   - device_name                 │
+│   - CRC32                       │
+├─────────────────────────────────┤ 0x0801F000
+│ Page 2-3: Reserved (4KB)        │  ← Available for future use
+└─────────────────────────────────┘ 0x08020000
+```
+
+> **Note:** The `metadata` command aggregates data from multiple sources:
+> - `serial_number` — EFL page 0 (production-programmed)
+> - `firmware_version` — Application header struct
+> - `device_model`, `hardware_revision`, `build_date` — Compile-time defines
+> - `chip_uid` — STM32 hardware UID register (read-only silicon)
+
+### Metadata vs Settings
+
+| Aspect | Metadata (Page 0) | Settings (Page 1) |
+|--------|-------------------|-------------------|
+| **Purpose** | Production-programmed device identity | User-configurable preferences |
+| **Access** | Read-only (via shell) | Read-write (via shell) |
+| **Shell Command** | `metadata` | `settings` |
+| **Factory Reset** | NOT affected | Reset to defaults |
+| **Programming** | During production/provisioning | During device operation |
+| **Magic** | `0x4D444154` ("MDAT") | `0x50444154` ("PDAT") |
+
+### Factory Reset Behavior
+
+When the firmware detects invalid or missing data (bad CRC, wrong magic):
+- **Metadata**: Defaults are loaded into RAM but NOT written to flash. The flash page remains unchanged, preserving any production-programmed values.
+- **Settings**: Defaults are loaded AND saved to flash immediately.
+
+This ensures that factory resets (triggered by settings corruption or intentional reset) never overwrite production-programmed identity data like serial numbers.
+
 
 ## Libraries and Drivers
 
@@ -628,15 +680,32 @@ The list of **application commands**:
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `version` | Returns firmware version (`<major>.<minor>.<patch>`) from the application header | `version` → `1.1.0\r\n OK\r\n` |
-| `settings` / `settings list` | List all settings in `key=value` format (only RO/RW fields, skips INTERNAL) | `settings` → `device_name=AttentioLight-1\r\nserial_number=000000000000\r\nOK\r\n` |
-| `settings get <key>` | Read a persistent data field by name | `settings get serial_number` → `000000000000\r\n OK\r\n` |
-| `settings set <key> <value>` | Write a persistent data field (RW fields only) | `settings set device_name MyLight` → `OK\r\n` |
+| `version` | Returns firmware version (`<major>.<minor>.<patch>`) from the application header | `version` → `1.1.0\r\nOK\r\n` |
+| `metadata` / `metadata list` | List all metadata fields in `key=value` format (read-only device identity) | `metadata` → `serial_number=...\r\nfirmware_version=1.1.0\r\n...OK\r\n` |
+| `metadata get <key>` | Read a specific metadata field | `metadata get serial_number` → `serial_number=AL1MB1-123\r\nOK\r\n` |
+| `settings` / `settings list` | List all settings in `key=value` format | `settings` → `device_name=AttentioLight-1\r\nOK\r\n` |
+| `settings get <key>` | Read a setting value | `settings get device_name` → `device_name=MyLight\r\nOK\r\n` |
+| `settings set <key> <value>` | Write a setting value | `settings set device_name MyLight` → `OK\r\n` |
 | `dfu` | Reboot into DFU bootloader mode. No response — device disconnects immediately | `dfu` → *(device reboots into DFU)* |
 
+**Metadata fields** (read-only):
+| Field | Source | Description |
+|-------|--------|-------------|
+| `serial_number` | EFL page 0 | Production-programmed device serial number |
+| `firmware_version` | App header | Firmware version (`M.N.P` format) |
+| `device_model` | Compile-time | Device model name ("AttentioLight-1") |
+| `hardware_revision` | Compile-time | Hardware revision ("al1mb1_rev_c") |
+| `build_date` | Compile-time | Build timestamp |
+| `chip_uid` | STM32 UID register | 96-bit unique hardware ID |
+
+**Settings fields** (read-write):
+| Field | Description |
+|-------|-------------|
+| `device_name` | User-assigned device name (default: "AttentioLight-1") |
+
 **Notes:**
-- `settings set` only works on fields with `PD_ACCESS_RW` access. Read-only fields return `ERROR key is read-only`.
-- `settings get` on an unknown field returns `ERROR unknown key`.
+- `metadata` fields are read-only. (More info soon on how we write this info).
+- `settings set` on an unknown field returns `ERROR unknown key`.
 - The `dfu` command writes magic value `0xDEADBEEF` to RAM (`0x20005FFC`) and triggers `NVIC_SystemReset()`. The host detects the USB disconnection and can proceed with DFU flashing via `dfu-util`.
 
 

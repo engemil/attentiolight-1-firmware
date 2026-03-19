@@ -186,8 +186,10 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/modes/mode_traffic_light.c \
        app/app_state_machine/modes/mode_night_light.c \
        app/app_state_machine/modes/mode_external_control.c \
+       app/persistent_data/device_metadata.c \
        app/persistent_data/persistent_data.c \
        app/shell_commands/cmd_version.c \
+       app/shell_commands/cmd_metadata.c \
        app/shell_commands/cmd_settings.c \
        app/shell_commands/cmd_dfu.c \
        app_header/app_header.c

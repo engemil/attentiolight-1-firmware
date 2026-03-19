@@ -13,9 +13,16 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-03-17)
+## [Development] (2026-03-19)
 
 Added
+- **Shell command: `metadata`** — Read-only device identity and build information:
+  - `metadata` or `metadata list` — Lists all metadata fields in `key=value` format
+  - `metadata get <key>` — Reads a specific field value
+  - Fields: `serial_number` (EFL), `firmware_version`, `device_model`, `hardware_revision`, `build_date`, `chip_uid`
+- **Separate EFL storage for metadata and settings** — Device metadata stored in EFL page 0 (production-programmed, preserved on factory reset), user settings in EFL page 1 (user-configurable, reset to defaults on factory reset).
+- **Device metadata module** (`device_metadata.c/h`) — Manages read-only production data with magic `0x4D444154` ("MDAT") and CRC32 validation.
+- **Compile-time defines** `DEVICE_MODEL` ("AttentioLight-1") and `HARDWARE_REVISION` ("1.0") in `app_header.h` for metadata reporting.
 - **ChibiOS Shell integration** on CDC1 (PORTAB_SDU2). Shell thread is dynamically allocated from heap and respawns on USB reconnection for graceful cable plug/unplug handling.
 - **Shell command: `version`** — Returns firmware version (`<major>.<minor>.<patch>`) read from the application header struct.
 - **Shell command: `settings get/set`** — Read and write persistent data fields by name string. Uses `persistent_data_find_field_by_name()` for dynamic field lookup. Respects access control (RO/RW per field).
@@ -27,6 +34,9 @@ Added
 - `extern` declaration for `app_header` in `app_header.h` (used by `cmd_version`).
 
 Changed
+- **`serial_number` moved from settings to metadata** — Now a read-only field queried via `metadata get serial_number` instead of `settings get serial_number`. The `settings` command no longer exposes `serial_number`.
+- **Simplified persistent data API** — Removed generic field registry (`persistent_data_find_field_by_name()`, `pd_field_id_t`, `pd_access_t`, etc.). Only `device_name` remains as a writable setting via direct setter `persistent_data_set_device_name()`.
+- **Settings version bumped to `0x0002`** — Incompatible with v1 format due to `serial_number` removal; existing settings will reset to defaults on firmware upgrade.
 - `device_name` persistent data field access changed from `PD_ACCESS_RO` to `PD_ACCESS_RW` (writable over USB shell).
 - Debug print timeout increased from 50ms to 200ms (`DBG_PRINT_TIMEOUT_MS` in `app_debug.h`).
 - Main thread loop refactored from simple sleep to shell respawn loop: checks USB active state, creates shell thread from heap, waits for termination, then re-spawns.
