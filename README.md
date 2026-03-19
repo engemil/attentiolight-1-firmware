@@ -362,7 +362,9 @@ EFL Region (8KB = 4 pages × 2KB)
 > **Note:** The `metadata` command aggregates data from multiple sources:
 > - `serial_number` — EFL page 0 (production-programmed)
 > - `firmware_version` — Application header struct
-> - `device_model`, `hardware_revision`, `build_date` — Compile-time defines
+> - `device_model`, `hardware_revision`, `board` — Board BSP (`board.h`)
+> - `build_date`, `compiler` — Compile-time defines
+> - `chibios_kernel`, `architecture`, `core_variant`, `platform`, `chibios_port_info` — ChibiOS
 > - `chip_uid` — STM32 hardware UID register (read-only silicon)
 
 ### Metadata vs Settings
@@ -654,12 +656,11 @@ attentio>
 
 ### ChibiOS Built-in Commands
 
-ChibiOS built-in commands are provided by the ChibiOS shell module for general info, debugging, and diagnostics.  Note that they do **not** follow the `OK`/`ERROR` protocol which the application commands does.
+ChibiOS built-in commands are provided by the ChibiOS shell module for general info, debugging, and diagnostics. Note a few of the built-in commands are disabled, as there are similar application commands.
 
 | Command | Description |
 |---------|-------------|
 | `help` | Lists all available commands (including the application commands) |
-| `info` | Kernel version, compiler, architecture, board name, build time |
 | `echo "message"` | Echoes back the given string |
 | `systime` | Prints current system tick count |
 | `mem` | Heap and core memory status (fragments, free bytes) |
@@ -691,12 +692,19 @@ The list of **application commands**:
 **Metadata fields** (read-only):
 | Field | Source | Description |
 |-------|--------|-------------|
+| `device_model` | Board BSP | Device model name ("AttentioLight-1") |
 | `serial_number` | EFL page 0 | Production-programmed device serial number |
 | `firmware_version` | App header | Firmware version (`M.N.P` format) |
-| `device_model` | Compile-time | Device model name ("AttentioLight-1") |
-| `hardware_revision` | Compile-time | Hardware revision ("al1mb1_rev_c") |
 | `build_date` | Compile-time | Build timestamp |
+| `chibios_kernel` | ChibiOS | Kernel version |
+| `chibios_port_info` | ChibiOS port | Port-specific info |
+| `compiler` | ChibiOS port | Compiler name and version |
+| `board` | Board BSP | Board name from BSP |
+| `hardware_revision` | Board BSP | Hardware revision ("Rev C") |
+| `platform` | ChibiOS HAL | MCU platform name |
 | `chip_uid` | STM32 UID register | 96-bit unique hardware ID |
+| `architecture` | ChibiOS port | CPU architecture (e.g., "ARMv6-M") |
+| `core_variant` | ChibiOS port | Core variant (e.g., "Cortex-M0+") |
 
 **Settings fields** (read-write):
 | Field | Description |

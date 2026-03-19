@@ -33,18 +33,27 @@ SOFTWARE.
  *          All metadata is read-only. No "set" subcommand exists.
  *
  *          Data sources:
+ *          - device_model:       DEVICE_MODEL compile-time define
  *          - serial_number:      EFL page 0 (device_metadata module)
  *          - firmware_version:   app_header.version
- *          - device_model:       DEVICE_MODEL compile-time define
- *          - hardware_revision:  HARDWARE_REVISION compile-time define
  *          - build_date:         __DATE__ " " __TIME__
+ *          - chibios_kernel:     ChibiOS kernel version
+ *          - chibios_port_info:  ChibiOS port info
+ *          - compiler:           Compiler name/version
+ *          - board:              Board name
+ *          - hardware_revision:  HARDWARE_REVISION compile-time define
+ *          - platform:           Platform name
  *          - chip_uid:           STM32C0xx UID register (0x1FFF7550)
+ *          - architecture:       CPU architecture
+ *          - core_variant:       Core variant name
  */
 
 #include "cmd_metadata.h"
 #include "shell_helpers.h"
 #include "device_metadata.h"
 #include "app_header.h"
+#include "ch.h"
+#include "hal.h"
 #include "chprintf.h"
 #include <string.h>
 
@@ -66,18 +75,25 @@ SOFTWARE.
 /**
  * @brief   Number of metadata fields.
  */
-#define METADATA_FIELD_COUNT    6U
+#define METADATA_FIELD_COUNT    13U
 
 /**
  * @brief   Metadata field names (must match the order in print_field).
  */
 static const char * const metadata_field_names[METADATA_FIELD_COUNT] = {
+    "device_model",
     "serial_number",
     "firmware_version",
-    "device_model",
-    "hardware_revision",
     "build_date",
+    "chibios_kernel",
+    "chibios_port_info",
+    "compiler",
+    "board",
+    "hardware_revision",
+    "platform",
     "chip_uid",
+    "architecture",
+    "core_variant"
 };
 
 /*===========================================================================*/
@@ -156,6 +172,61 @@ static bool print_field(BaseSequentialStream *chp, const char *name) {
     if (strcmp(name, "chip_uid") == 0) {
         format_chip_uid(buf, sizeof(buf));
         chprintf(chp, "chip_uid=%s\r\n", buf);
+        return true;
+    }
+
+    if (strcmp(name, "chibios_kernel") == 0) {
+        chprintf(chp, "chibios_kernel=%s\r\n", CH_KERNEL_VERSION);
+        return true;
+    }
+
+    if (strcmp(name, "compiler") == 0) {
+#ifdef PORT_COMPILER_NAME
+        chprintf(chp, "compiler=%s\r\n", PORT_COMPILER_NAME);
+#else
+        chprintf(chp, "compiler=N/A\r\n");
+#endif
+        return true;
+    }
+
+    if (strcmp(name, "architecture") == 0) {
+        chprintf(chp, "architecture=%s\r\n", PORT_ARCHITECTURE_NAME);
+        return true;
+    }
+
+    if (strcmp(name, "core_variant") == 0) {
+#ifdef PORT_CORE_VARIANT_NAME
+        chprintf(chp, "core_variant=%s\r\n", PORT_CORE_VARIANT_NAME);
+#else
+        chprintf(chp, "core_variant=N/A\r\n");
+#endif
+        return true;
+    }
+
+    if (strcmp(name, "chibios_port_info") == 0) {
+#ifdef PORT_INFO
+        chprintf(chp, "chibios_port_info=%s\r\n", PORT_INFO);
+#else
+        chprintf(chp, "chibios_port_info=N/A\r\n");
+#endif
+        return true;
+    }
+
+    if (strcmp(name, "platform") == 0) {
+#ifdef PLATFORM_NAME
+        chprintf(chp, "platform=%s\r\n", PLATFORM_NAME);
+#else
+        chprintf(chp, "platform=N/A\r\n");
+#endif
+        return true;
+    }
+
+    if (strcmp(name, "board") == 0) {
+#ifdef BOARD_NAME
+        chprintf(chp, "board=%s\r\n", BOARD_NAME);
+#else
+        chprintf(chp, "board=N/A\r\n");
+#endif
         return true;
     }
 

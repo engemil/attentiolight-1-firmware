@@ -37,6 +37,12 @@
 #define BOARD_NAME                  "AttentioLight-1 Mainboard-1 STM32C071RB"
 
 /*
+ * Device identification.
+ */
+#define DEVICE_MODEL                "AttentioLight-1"
+#define HARDWARE_REVISION           "Rev C"
+
+/*
  * Board oscillators-related settings.
  */
 #if !defined(STM32_LSECLK)

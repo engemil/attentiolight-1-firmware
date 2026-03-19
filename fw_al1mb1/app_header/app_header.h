@@ -49,10 +49,6 @@ typedef struct __attribute__((packed)) {
 #define APP_HEADER_MAGIC    0xDEADBEEF
 #define APP_VERSION         0x00010100  /* Version 1.1.0 */
 
-/* Device identification — used by the metadata shell command */
-#define DEVICE_MODEL        "AttentioLight-1"
-#define HARDWARE_REVISION   "1.0"
-
 /* Application header instance (defined in app_header.c, placed at 0x08004000) */
 extern const app_header_t app_header;
 

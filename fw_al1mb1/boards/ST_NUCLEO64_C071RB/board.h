@@ -37,6 +37,12 @@
 #define BOARD_NAME                  "STMicroelectronics STM32 Nucleo64-C071RB"
 
 /*
+ * Device identification.
+ */
+#define DEVICE_MODEL                "STM32 Nucleo64-C071RB"
+#define HARDWARE_REVISION           "?"
+
+/*
  * Board oscillators-related settings.
  */
 #if !defined(STM32_LSECLK)

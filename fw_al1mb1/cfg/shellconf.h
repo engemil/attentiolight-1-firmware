@@ -46,9 +46,15 @@ SOFTWARE.
 /**
  * @brief   Disable built-in test command.
  * @details Saves significant flash by not pulling in the ChibiOS test
- *          framework. All other built-in commands remain enabled for
- *          debugging convenience.
+ *          framework.
  */
 #define SHELL_CMD_TEST_ENABLED      FALSE
+
+/**
+ * @brief   Disable built-in info command.
+ * @details We provide our own "metadata" command that includes all the
+ *          ChibiOS system info plus device-specific metadata.
+ */
+#define SHELL_CMD_INFO_ENABLED      FALSE
 
 #endif /* SHELLCONF_H */

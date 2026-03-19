@@ -16,13 +16,21 @@ Note: Update `app_header.h` when publishing new version.
 ## [Development] (2026-03-19)
 
 Added
+- **Extended metadata fields** — The `metadata` command now includes ChibiOS system information (previously from the built-in `info` command):
+  - `chibios_kernel` — ChibiOS kernel version
+  - `compiler` — Compiler name and version
+  - `architecture` — CPU architecture (e.g., "ARMv6-M")
+  - `core_variant` — Core variant (e.g., "Cortex-M0+")
+  - `chibios_port_info` — ChibiOS port info
+  - `platform` — MCU platform name
+  - `board` — Board name from BSP
 - **Shell command: `metadata`** — Read-only device identity and build information:
   - `metadata` or `metadata list` — Lists all metadata fields in `key=value` format
   - `metadata get <key>` — Reads a specific field value
   - Fields: `serial_number` (EFL), `firmware_version`, `device_model`, `hardware_revision`, `build_date`, `chip_uid`
 - **Separate EFL storage for metadata and settings** — Device metadata stored in EFL page 0 (production-programmed, preserved on factory reset), user settings in EFL page 1 (user-configurable, reset to defaults on factory reset).
 - **Device metadata module** (`device_metadata.c/h`) — Manages read-only production data with magic `0x4D444154` ("MDAT") and CRC32 validation.
-- **Compile-time defines** `DEVICE_MODEL` ("AttentioLight-1") and `HARDWARE_REVISION` ("1.0") in `app_header.h` for metadata reporting.
+- **Compile-time defines** `DEVICE_MODEL` ("AttentioLight-1") and `HARDWARE_REVISION` ("Rev C") moved from `app_header.h` to `board.h` for better hardware/firmware separation.
 - **ChibiOS Shell integration** on CDC1 (PORTAB_SDU2). Shell thread is dynamically allocated from heap and respawns on USB reconnection for graceful cable plug/unplug handling.
 - **Shell command: `version`** — Returns firmware version (`<major>.<minor>.<patch>`) read from the application header struct.
 - **Shell command: `settings get/set`** — Read and write persistent data fields by name string. Uses `persistent_data_find_field_by_name()` for dynamic field lookup. Respects access control (RO/RW per field).
@@ -30,7 +38,7 @@ Added
 - **Shell response helper macros** (`shell_helpers.h`): `shell_ok(chp)`, `shell_error(chp, msg)`, `shell_value(chp, val)` for consistent `OK\r\n` / `ERROR ...\r\n` protocol formatting.
 - `persistent_data_find_field_by_name()` function for case-sensitive string-based field lookup in the persistent data registry.
 - Shell thread priority (`RT_SHELL_THREAD_PRIORITY`) and working area size (`SHELL_WA_SIZE`) definitions in `rt_config.h`.
-- `shellconf.h` with custom shell prompt and disabled test command.
+- `shellconf.h` with custom shell prompt and disabled `test` and `info` built-in commands (info replaced by extended `metadata` command).
 - `extern` declaration for `app_header` in `app_header.h` (used by `cmd_version`).
 
 Changed
