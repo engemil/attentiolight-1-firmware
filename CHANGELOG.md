@@ -13,9 +13,14 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
-## [Development] (2026-03-19)
+## [Development] (2026-03-29)
 
 Added
+- **USB serial number from chip UID** — The USB iSerialNumber descriptor now
+  reports the STM32C071RB 96-bit hardware unique ID (`UID_BASE` at `0x1FFF7550`)
+  formatted as 24 uppercase hex characters. Both bootloader (DFU) and application
+  (Normal) modes report the same immutable serial, enabling reliable device
+  identity across USB re-enumeration and firmware updates.
 - **Extended metadata fields** — The `metadata` command now includes ChibiOS system information (previously from the built-in `info` command):
   - `chibios_kernel` — ChibiOS kernel version
   - `compiler` — Compiler name and version
@@ -42,6 +47,10 @@ Added
 - `extern` declaration for `app_header` in `app_header.h` (used by `cmd_version`).
 
 Changed
+- **`serial_number` now returns chip UID** — `metadata get serial_number` returns the
+  STM32 96-bit hardware UID (same value as `chip_uid`) instead of reading from EFL.
+  The `serial_number` field in `device_metadata_t` has been replaced with a `_reserved`
+  placeholder to preserve struct layout, but is no longer used.
 - **`serial_number` moved from settings to metadata** — Now a read-only field queried via `metadata get serial_number` instead of `settings get serial_number`. The `settings` command no longer exposes `serial_number`.
 - **Simplified persistent data API** — Removed generic field registry (`persistent_data_find_field_by_name()`, `pd_field_id_t`, `pd_access_t`, etc.). Only `device_name` remains as a writable setting via direct setter `persistent_data_set_device_name()`.
 - **Settings version bumped to `0x0002`** — Incompatible with v1 format due to `serial_number` removal; existing settings will reset to defaults on firmware upgrade.

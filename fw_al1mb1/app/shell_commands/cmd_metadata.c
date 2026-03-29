@@ -34,7 +34,7 @@ SOFTWARE.
  *
  *          Data sources:
  *          - device_model:       DEVICE_MODEL compile-time define
- *          - serial_number:      EFL page 0 (device_metadata module)
+ *          - serial_number:      STM32C0xx UID register (alias for chip_uid)
  *          - firmware_version:   app_header.version
  *          - build_date:         __DATE__ " " __TIME__
  *          - chibios_kernel:     ChibiOS kernel version
@@ -50,7 +50,6 @@ SOFTWARE.
 
 #include "cmd_metadata.h"
 #include "shell_helpers.h"
-#include "device_metadata.h"
 #include "app_header.h"
 #include "ch.h"
 #include "hal.h"
@@ -139,12 +138,8 @@ static bool print_field(BaseSequentialStream *chp, const char *name) {
     char buf[32];
 
     if (strcmp(name, "serial_number") == 0) {
-        const md_data_t *md = device_metadata_get();
-        if (md != NULL) {
-            chprintf(chp, "serial_number=%s\r\n", md->serial_number);
-        } else {
-            chprintf(chp, "serial_number=ERROR\r\n");
-        }
+        format_chip_uid(buf, sizeof(buf));
+        chprintf(chp, "serial_number=%s\r\n", buf);
         return true;
     }
 

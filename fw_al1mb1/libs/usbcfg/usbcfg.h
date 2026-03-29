@@ -28,4 +28,11 @@ extern const SerialUSBConfig serusbcfg2;
 extern SerialUSBDriver PORTAB_SDU1;
 extern SerialUSBDriver PORTAB_SDU2;
 
+/**
+ * @brief   Populate USB serial number descriptor from STM32 chip UID.
+ * @note    Must be called before usbStart() so the host sees the correct
+ *          serial number during enumeration.
+ */
+void usbcfg_set_serial_from_uid(void);
+
 #endif  /* USBCFG_H */

@@ -31,7 +31,7 @@ SOFTWARE.
  *          - "settings get <key>" -> read single setting
  *          - "settings set <key> <value>" -> write single setting
  *
- *          Read-only device metadata (serial number, firmware version, etc.)
+ *          Read-only device metadata
  *          is handled by the "metadata" command instead.
  */
 

@@ -117,6 +117,7 @@ void init_system(void) {
      */
     usbDisconnectBus(serusbcfg1.usbp);
     chThdSleepMilliseconds(1500);
+    usbcfg_set_serial_from_uid();
     usbStart(serusbcfg1.usbp, &usbcfg);
     usbConnectBus(serusbcfg1.usbp);
 
@@ -142,7 +143,7 @@ void init_application_systems(void){
 
     /*
      * Initialize device metadata storage (EFL page 0).
-     * Loads production-programmed metadata (serial number) from flash.
+     * Loads production-programmed metadata from flash.
      */
     DBG_DEBUG("MAIN device_metadata_init()...");
     md_result_t md_result = device_metadata_init();
@@ -151,10 +152,6 @@ void init_application_systems(void){
                  device_metadata_result_str(md_result));
     } else {
         DBG_DEBUG("MAIN device_metadata_init() OK");
-        const md_data_t *md = device_metadata_get();
-        if (md != NULL) {
-            DBG_DEBUG("Serial: %s", md->serial_number);
-        }
     }
 
     /*

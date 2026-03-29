@@ -27,8 +27,8 @@ SOFTWARE.
  * @brief   Factory default values for persistent settings.
  * @note    Modify these values to change the defaults that are loaded
  *          on first boot or after a factory reset.
- *          Device metadata defaults (serial number) are defined in
- *          device_metadata.h instead.
+ *          Device metadata defaults are defined in device_metadata.h
+ *          instead.
  *
  * @addtogroup PERSISTENT_DATA
  * @{

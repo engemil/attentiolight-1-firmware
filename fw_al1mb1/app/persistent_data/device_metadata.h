@@ -25,9 +25,9 @@ SOFTWARE.
 /**
  * @file    device_metadata.h
  * @brief   Read-only device metadata storage module.
- * @note    Stores production-programmed device identity data (e.g. serial
- *          number) in EFL page 0. Separate from user settings to ensure
- *          metadata survives factory resets.
+ * @note    Stores production-programmed device identity data in EFL page 0.
+ *          Separate from user settings to ensure metadata survives factory
+ *          resets.
  *
  * @details Metadata is read-only over the shell interface. Values are
  *          programmed during production and never modified by the user.
@@ -52,7 +52,7 @@ SOFTWARE.
  * @name    Field size definitions
  * @{
  */
-#define MD_SERIAL_NUMBER_SIZE   16U     /**< Serial number field size (bytes) */
+/* Future production-programmed fields will have their sizes defined here. */
 /** @} */
 
 /**
@@ -67,7 +67,7 @@ SOFTWARE.
  * @name    Default values
  * @{
  */
-#define MD_DEFAULT_SERIAL_NUMBER    "000000000000"
+/* Future production-programmed fields will have their defaults defined here. */
 /** @} */
 
 /*===========================================================================*/
@@ -93,10 +93,11 @@ typedef enum {
  * @brief   Metadata data structure.
  * @note    This is the data stored in EFL page 0. Only contains
  *          production-programmed values that must survive firmware updates.
+ *          Currently empty — add future production-programmed fields here.
  */
 typedef struct {
-    char serial_number[MD_SERIAL_NUMBER_SIZE];   /**< Unique serial number    */
     /* Add future production-programmed fields here */
+    uint8_t _reserved;  /**< Placeholder to avoid zero-size struct           */
 } md_data_t;
 
 /*===========================================================================*/

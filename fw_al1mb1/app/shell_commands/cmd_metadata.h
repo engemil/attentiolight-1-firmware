@@ -26,9 +26,8 @@ SOFTWARE.
  * @file    cmd_metadata.h
  * @brief   Shell command: metadata.
  *
- * @details Returns read-only device metadata: serial number, firmware version,
- *          device model, hardware revision, build date, and chip UID.
- *          All values are gathered from their native sources (EFL, app header,
+ * @details Returns read-only device metadata.
+ *          All values are gathered from their native sources (app header,
  *          compile-time macros, silicon registers).
  */
 

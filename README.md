@@ -347,7 +347,7 @@ EFL Region (8KB = 4 pages × 2KB)
 ┌─────────────────────────────────┐ 0x0801E000
 │ Page 0: Device Metadata (2KB)   │  ← Production-programmed, read-only
 │   - Header (magic, version)     │
-│   - serial_number               │  ← Only EFL-stored metadata field
+│   - _reserved                   │  ← (serial_number removed, now from chip UID)
 │   - CRC32                       │
 ├─────────────────────────────────┤ 0x0801E800
 │ Page 1: User Settings (2KB)     │  ← User-configurable, read-write
@@ -360,7 +360,7 @@ EFL Region (8KB = 4 pages × 2KB)
 ```
 
 > **Note:** The `metadata` command aggregates data from multiple sources:
-> - `serial_number` — EFL page 0 (production-programmed)
+> - `serial_number` — STM32 hardware UID register (alias for `chip_uid`)
 > - `firmware_version` — Application header struct
 > - `device_model`, `hardware_revision`, `board` — Board BSP (`board.h`)
 > - `build_date`, `compiler` — Compile-time defines
@@ -377,14 +377,6 @@ EFL Region (8KB = 4 pages × 2KB)
 | **Factory Reset** | NOT affected | Reset to defaults |
 | **Programming** | During production/provisioning | During device operation |
 | **Magic** | `0x4D444154` ("MDAT") | `0x50444154` ("PDAT") |
-
-### Factory Reset Behavior
-
-When the firmware detects invalid or missing data (bad CRC, wrong magic):
-- **Metadata**: Defaults are loaded into RAM but NOT written to flash. The flash page remains unchanged, preserving any production-programmed values.
-- **Settings**: Defaults are loaded AND saved to flash immediately.
-
-This ensures that factory resets (triggered by settings corruption or intentional reset) never overwrite production-programmed identity data like serial numbers.
 
 
 ## Libraries and Drivers
@@ -683,7 +675,7 @@ The list of **application commands**:
 |---------|-------------|---------|
 | `version` | Returns firmware version (`<major>.<minor>.<patch>`) from the application header | `version` → `1.1.0\r\nOK\r\n` |
 | `metadata` / `metadata list` | List all metadata fields in `key=value` format (read-only device identity) | `metadata` → `serial_number=...\r\nfirmware_version=1.1.0\r\n...OK\r\n` |
-| `metadata get <key>` | Read a specific metadata field | `metadata get serial_number` → `serial_number=AL1MB1-123\r\nOK\r\n` |
+| `metadata get <key>` | Read a specific metadata field | `metadata get serial_number` → `serial_number=004F00224E500C20334B3120\r\nOK\r\n` |
 | `settings` / `settings list` | List all settings in `key=value` format | `settings` → `device_name=AttentioLight-1\r\nOK\r\n` |
 | `settings get <key>` | Read a setting value | `settings get device_name` → `device_name=MyLight\r\nOK\r\n` |
 | `settings set <key> <value>` | Write a setting value | `settings set device_name MyLight` → `OK\r\n` |
@@ -693,7 +685,7 @@ The list of **application commands**:
 | Field | Source | Description |
 |-------|--------|-------------|
 | `device_model` | Board BSP | Device model name ("AttentioLight-1") |
-| `serial_number` | EFL page 0 | Production-programmed device serial number |
+| `serial_number` | STM32 UID register | Chip UID (alias for `chip_uid`, 24 hex chars) |
 | `firmware_version` | App header | Firmware version (`M.N.P` format) |
 | `build_date` | Compile-time | Build timestamp |
 | `chibios_kernel` | ChibiOS | Kernel version |

@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * @file    device_metadata.c
  * @brief   Read-only device metadata storage module implementation.
- * @note    Uses EFL page 0 for production-programmed metadata (serial number).
+ * @note    Uses EFL page 0 for production-programmed metadata.
  *          Physically separated from settings (EFL page 1) so that factory
  *          resets never touch metadata.
  *
@@ -136,9 +136,6 @@ static uint32_t md_crc32(const void *data, size_t len) {
  */
 static void md_load_defaults(void) {
     memset(&md_cache, 0, sizeof(md_cache));
-    strncpy(md_cache.serial_number, MD_DEFAULT_SERIAL_NUMBER,
-            MD_SERIAL_NUMBER_SIZE - 1);
-    md_cache.serial_number[MD_SERIAL_NUMBER_SIZE - 1] = '\0';
 }
 
 /**

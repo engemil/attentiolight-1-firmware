@@ -30,8 +30,8 @@ SOFTWARE.
  *          without affecting production-programmed metadata.
  *
  * @details Settings are values the user can change (e.g. device_name).
- *          Read-only device identity data (serial number, etc.) is handled
- *          by the device_metadata module instead.
+ *          Read-only device identity data is handled by the device_metadata
+ *          module instead.
  *
  * @addtogroup PERSISTENT_DATA
  * @{
