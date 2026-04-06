@@ -144,8 +144,8 @@ RUN apt install gdb-multiarch minicom usbutils -y
 ## Setup Repository
 
 ```bash
-git clone https://github.com/engemil/ee_stm32_bootloader.git
-cd ee_stm32_bootloader
+git clone https://github.com/engemil/attentiolight-1-firmware.git
+cd attentiolight-1-firmware
 git submodule update --init --recursive
 ```
 
