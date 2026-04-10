@@ -44,7 +44,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
   - [Debug Builds](#debug-builds)
   - [VS Code Debug Configurations](#vs-code-debug-configurations)
   - [Hardware Breakpoint Limitation](#hardware-breakpoint-limitation)
-  - [Thread Stack Analysis](#thread-stack-analysis)
+  - [Runtime Memory Analysis](#runtime-memory-analysis)
 - [VSCode Tasks](#vscode-tasks)
 - [Utility Scripts](#utility-scripts)
   - [EFL Memory Reader](#efl-memory-reader-workspacescriptsefl_scripts)
@@ -190,7 +190,8 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │   ├── app/                        # Application source code and application drivers
 │   │   ├── main.c                  # Entry point
 │   │   ├── app_log.c/h             # Runtime logging system (LOG_* macros)
-│   │   ├── rt_config.h             # Runtime configuration
+│   │   ├── rt_config.h             # Runtime configuration (priorities, stack sizes)
+│   │   ├── debug_config.h          # Debug diagnostic flags (watermark, heap analysis)
 │   │   ├── app_state_machine/      # Core state machine
 │   │   │   ├── animation/          # LED animation engine
 │   │   │   └── standalone/         # Standalone mode code
@@ -420,7 +421,8 @@ Override at runtime via the `LOG_SET_LEVEL` AP command (no reboot required).
 
 `make debug` adds `-DAPP_DEBUG_BUILD=1` which enables ChibiOS stack overflow
 checks, stack fill patterns for watermark analysis, and disables Stop mode to
-keep the debugger connected.
+keep the debugger connected. It also enables diagnostic output (stack
+watermarks, heap status) controlled by flags in `app/debug_config.h`.
 
 
 
@@ -447,7 +449,7 @@ Both configurations:
 > If breakpoints are not being hit, check that you haven't exceeded this limit.
 > Remove unused breakpoints or use conditional breakpoints sparingly.
 
-### Thread Stack Analysis
+### Runtime Memory Analysis
 
 Debug builds (`make debug`) automatically enable thread stack analysis tools
 to help detect and prevent stack overflows. All features below are **disabled
@@ -465,17 +467,28 @@ in the debugger. Increase that thread's working area size in `app/rt_config.h`.
 
 #### 2. Runtime Stack Watermark Reporting (Serial Output)
 
-In debug builds (LEVEL >= 4), the main loop prints stack watermarks for all
-threads every 5 seconds over USB serial port **CDC0** (debug print stream):
+In debug builds, the main loop prints thread stack watermarks every ~1 second
+over USB serial port **CDC0** (debug print stream):
 
 ```
-[STACK] === Thread Stack Watermarks ===
+[STACK] --- Thread Stack Watermarks ---
 [STACK]  main              320 /  880 bytes (36%)
 [STACK]  button             92 /  760 bytes (12%)
 [STACK]  state_machine     408 /  960 bytes (42%)
 [STACK]  animation_thread  384 /  960 bytes (40%)
-[STACK] ================================
+[STACK] -----------------------------------
 ```
+
+Controlled by the `APP_STACK_WATERMARK` compile-time flag (defined in
+`app/debug_config.h`). Defaults to `1` in debug builds, `0` otherwise. To
+suppress watermark output even in a debug build:
+
+```bash
+make debug UDEFS="-DAPP_STACK_WATERMARK=0"
+```
+
+This flag is **independent of the runtime log level** — setting `LOG_LEVEL_NONE`
+does not suppress watermark output; only `APP_STACK_WATERMARK=0` does.
 
 Each line shows `used / total bytes (percent)`. The "used" value is the
 **high-water mark** (peak usage since thread creation), not current usage.
@@ -502,7 +515,47 @@ Thread working area sizes are configured in `app/rt_config.h`:
 > `log_printf_timeout()` buffer used by the runtime logging system. The
 > watermark percentages reflect these padded stack sizes.
 
-#### 3. Static Stack Usage Analysis (GCC `.su` files)
+#### 3. Runtime Heap Status Reporting (Serial Output)
+
+In debug builds, the main loop also prints ChibiOS heap status every ~1 second
+alongside the stack watermarks:
+
+```
+[HEAP] --- Heap Status ---
+[HEAP]  core free        : 11816 bytes
+[HEAP]  heap free total  : 11816 bytes
+[HEAP]  heap free largest: 11816 bytes
+[HEAP]  heap fragments   :     1
+[HEAP]  integrity        : OK
+[HEAP] -----------------------
+```
+
+Controlled by the `APP_HEAP_ANALYSIS` compile-time flag (defined in
+`app/debug_config.h`). Defaults to `1` in debug builds, `0` otherwise. To
+suppress heap output even in a debug build:
+
+```bash
+make debug UDEFS="-DAPP_HEAP_ANALYSIS=0"
+```
+
+This flag is **independent of the runtime log level** — setting `LOG_LEVEL_NONE`
+does not suppress heap status output; only `APP_HEAP_ANALYSIS=0` does.
+
+**Fields:**
+- **core free** — remaining bytes in the ChibiOS core allocator region (between
+  `__heap_base__` and `__heap_end__` from the linker script).
+- **heap free total** — total free bytes across all heap fragments.
+- **heap free largest** — largest contiguous free block (relevant for allocations).
+- **heap fragments** — number of free fragments (1 = no fragmentation).
+- **integrity** — result of `chHeapIntegrityCheck()`. Should always be `OK`;
+  `CORRUPT` indicates memory corruption (buffer overflow, use-after-free, etc.).
+
+> **Note:** Currently no application code allocates from the heap at runtime —
+> all memory is static. The heap region (~12 KB) acts as a buffer for future
+> fixed-allocation growth. This report will become useful when dynamic
+> allocations are introduced.
+
+#### 4. Static Stack Usage Analysis (GCC `.su` files)
 
 Debug builds compile with `-fstack-usage`, which generates `.su` (stack usage)
 files showing **per-function stack frame sizes**. With LTO enabled, the output
@@ -630,13 +683,19 @@ sudo ./scripts/system/dialout_group.sh
 
 ### Memory Usage
 
-Check usage after building:
+Run the memory analysis report after building:
 
 ```bash
-./scripts/check_memory_usage.sh fw_al1mb1/build/fw_al1mb1.elf
+./scripts/analyse/memory_report.sh fw_al1mb1/build/fw_al1mb1.elf
 ```
 
-**NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
+Generates a comprehensive report covering Flash usage, RAM breakdown (fixed vs heap),
+BSS symbol analysis by category, thread stack headroom, RAM pressure summary, and
+actionable warnings. Use `--no-color` for CI or piped output.
+
+**NB!** The `.heap` section shows all remaining RAM claimed by ChibiOS's core allocator
+by design. Currently no code allocates from the heap at runtime — all memory is fixed
+at link time. See the report's RAM section for details.
 
 
 ## Attentio Protocol (AP)

@@ -293,11 +293,18 @@ int main(void) {
      */
     while (true) {
 
-#if defined(APP_DEBUG_BUILD) && (APP_DEBUG_BUILD == 1)
-        /* Periodically print stack watermarks for all threads.
-         * This helps right-size thread working areas by showing peak usage.
-         * Only active in debug builds (APP_DEBUG_BUILD=1). */
+#if (APP_STACK_WATERMARK == 1)
+        /* Periodically print thread stack watermarks (peak usage).
+         * Helps right-size working areas defined in rt_config.h.
+         * Controlled by APP_STACK_WATERMARK (defaults to 1 in debug builds).
+         * See also: scripts/analyse/memory_report.sh for static analysis. */
         log_print_stack_usage();
+#endif
+
+#if (APP_HEAP_ANALYSIS == 1)
+        /* Periodically print ChibiOS heap status (free memory, fragmentation).
+         * Controlled by APP_HEAP_ANALYSIS (defaults to 1 in debug builds). */
+        log_print_heap_status();
 #endif
 
         chThdSleepMilliseconds(1000);

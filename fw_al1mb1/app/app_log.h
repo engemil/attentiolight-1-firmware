@@ -35,7 +35,11 @@ SOFTWARE.
  *            make           - Release build (log code compiled in, default
  *                             log level loaded from persistent storage)
  *            make debug     - Debug build (-Og, -DAPP_DEBUG_BUILD=1, disables
- *                             Stop mode, enables stack watermark analysis)
+ *                             Stop mode, enables debug diagnostics)
+ *
+ *          Debug diagnostic flags (stack watermarks, heap status) are
+ *          configured in debug_config.h.  They are independent of the
+ *          runtime log level — LOG_LEVEL_NONE does not suppress them.
  *
  *          Log levels (hierarchical):
  *            0 = NONE  - No output
@@ -60,6 +64,7 @@ SOFTWARE.
 #include "chprintf.h"
 #include "portab.h"
 #include "usbcfg.h"
+#include "debug_config.h"
 #include <stdint.h>
 
 /*===========================================================================*/
@@ -237,28 +242,35 @@ uint8_t log_get_level(void);
 /*===========================================================================*/
 
 /**
- * @brief   Prints stack usage watermark for all threads.
- * @details Requires CH_DBG_FILL_THREADS and CH_CFG_USE_REGISTRY (both enabled
- *          automatically in debug builds via APP_DEBUG_BUILD). Iterates all
- *          registered threads and counts how many fill-pattern bytes (0x55)
- *          remain untouched from the bottom of each working area.
+ * @brief   Prints thread stack usage watermarks for all registered threads.
+ * @details Iterates every registered ChibiOS thread and counts how many
+ *          fill-pattern bytes (0x55) remain untouched from the bottom of each
+ *          working area, giving the peak ("high-water-mark") stack usage.
  *
- *          Output format per thread:
- *            [STACK] <name>: <used>/<total> bytes (<percent>%)
+ *          Output format:
+ *            [STACK] --- Thread Stack Watermarks ---
+ *            [STACK]  <name>       <used> / <total> bytes (<pct>%)
+ *            [STACK] ---------------------------------
  *
- * @note    Call from a thread context (not ISR). Typically called from main()
- *          after the system has been running for a while, or periodically.
+ *          Compare these values with the *_WA_SIZE constants in rt_config.h
+ *          to verify that each thread has adequate headroom.  See also
+ *          scripts/analyse/memory_report.sh for static stack analysis from
+ *          the ELF / map file.
  *
- * @note    Only functional in debug builds (APP_DEBUG_BUILD=1) where
- *          CH_DBG_FILL_THREADS is enabled. In release builds this is a no-op.
+ * @note    Call from a thread context (not ISR). Typically called from the
+ *          main idle loop every ~1 s after the system has been running.
+ *
+ * @note    Controlled by the APP_STACK_WATERMARK flag in debug_config.h.
+ *          No-op when the flag is 0 or when CH_DBG_FILL_THREADS /
+ *          CH_CFG_USE_REGISTRY are not enabled.
  */
-#if defined(APP_DEBUG_BUILD) && (APP_DEBUG_BUILD == 1) && \
+#if (APP_STACK_WATERMARK == 1) && \
     (CH_DBG_FILL_THREADS == TRUE) && (CH_CFG_USE_REGISTRY == TRUE)
 static inline void log_print_stack_usage(void) {
     thread_t *tp;
 
     log_printf_timeout(LOG_PRINT_TIMEOUT,
-                       "\r\n[STACK] === Thread Stack Watermarks ===\r\n");
+                       "\r\n[STACK] --- Thread Stack Watermarks ---\r\n");
 
     tp = chRegFirstThread();
     while (tp != NULL) {
@@ -284,10 +296,71 @@ static inline void log_print_stack_usage(void) {
     }
 
     log_printf_timeout(LOG_PRINT_TIMEOUT,
-                       "[STACK] ================================\r\n\r\n");
+                       "[STACK] -----------------------------------\r\n\r\n");
 }
 #else
 static inline void log_print_stack_usage(void) {
+    (void)0;
+}
+#endif
+
+/*===========================================================================*/
+/* Heap Analysis                                                             */
+/*===========================================================================*/
+
+/**
+ * @brief   Prints ChibiOS core allocator and heap status.
+ * @details Queries core free memory via chCoreGetStatusX() and heap
+ *          fragmentation via chHeapStatus(). Also runs chHeapIntegrityCheck()
+ *          to validate the heap structure.
+ *
+ *          Output format:
+ *            [HEAP] --- Heap Status ---
+ *            [HEAP]  core free        : <N> bytes
+ *            [HEAP]  heap free total  : <N> bytes
+ *            [HEAP]  heap free largest: <N> bytes
+ *            [HEAP]  heap fragments   : <N>
+ *            [HEAP]  integrity        : OK / CORRUPT
+ *            [HEAP] ----------------------
+ *
+ * @note    Call from a thread context (not ISR). Typically called from the
+ *          main idle loop alongside log_print_stack_usage().
+ *
+ * @note    Controlled by the APP_HEAP_ANALYSIS flag in debug_config.h.
+ *          No-op when the flag is 0 or when the required ChibiOS subsystems
+ *          are not enabled.
+ */
+#if (APP_HEAP_ANALYSIS == 1) && \
+    (CH_CFG_USE_MEMCORE == TRUE) && (CH_CFG_USE_HEAP == TRUE)
+static inline void log_print_heap_status(void) {
+    memory_area_t area;
+    size_t total, largest, n;
+
+    chCoreGetStatusX(&area);
+    n = chHeapStatus(NULL, &total, &largest);
+
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP] --- Heap Status ---\r\n");
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP]  core free        : %5u bytes\r\n",
+                       (unsigned)area.size);
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP]  heap free total  : %5u bytes\r\n",
+                       (unsigned)total);
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP]  heap free largest: %5u bytes\r\n",
+                       (unsigned)largest);
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP]  heap fragments   : %5u\r\n",
+                       (unsigned)n);
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP]  integrity        : %s\r\n",
+                       chHeapIntegrityCheck(NULL) ? "CORRUPT" : "OK");
+    log_printf_timeout(LOG_PRINT_TIMEOUT,
+                       "[HEAP] -----------------------\r\n\r\n");
+}
+#else
+static inline void log_print_heap_status(void) {
     (void)0;
 }
 #endif

@@ -50,6 +50,35 @@ Fixed
   `__attribute__((noinline))` and using a shared file-scope `md_payload[]` buffer.
   Zero net BSS increase (BSS remains 0x2988 = 10,632 bytes, identical to baseline).
 
+Added
+- **`scripts/analyse/memory_report.sh`** — comprehensive POSIX shell memory analysis
+  tool for the firmware ELF. Generates flash usage with full-chip proportional map
+  (bootloader / header / app / EFL regions), RAM overview (fixed vs heap), BSS
+  breakdown by category, thread stack headroom analysis with LTO warnings, RAM
+  pressure summary, and actionable recommendations. Replaces the old
+  `scripts/check_memory_usage.sh`. Supports `--no-color` for CI and `--map` override.
+- **`APP_STACK_WATERMARK` compile-time flag** — dedicated flag controlling runtime
+  thread stack watermark reporting, replacing the previous `APP_DEBUG_BUILD` guard.
+  Defaults to 1 in debug builds, 0 otherwise. Can be overridden with
+  `-DAPP_STACK_WATERMARK=0` to suppress watermark output even in debug builds.
+- **`APP_HEAP_ANALYSIS` compile-time flag** — periodic ChibiOS heap status reporting
+  (core free memory, heap fragmentation, integrity check). Same pattern as
+  `APP_STACK_WATERMARK`: defaults to 1 in debug builds, suppressible with
+  `-DAPP_HEAP_ANALYSIS=0`. Currently the heap is idle (no runtime allocations);
+  this report is infrastructure for future dynamic allocation monitoring.
+- **`debug_config.h`** — new header centralizing compile-time debug diagnostic
+  flags (`APP_STACK_WATERMARK`, `APP_HEAP_ANALYSIS`). These flags are independent
+  of the runtime log level — `LOG_LEVEL_NONE` does not suppress diagnostic output.
+  Sits alongside `rt_config.h` as a companion configuration header.
+
+Changed
+- **Stack watermark output format** — updated `[STACK]` delimiters from `===` to
+  `---` style. Documentation now correctly describes the feature as reporting every
+  ~1 s (was incorrectly documented as 5 s) and not gated by log level.
+
+Removed
+- **`scripts/check_memory_usage.sh`** — superseded by `scripts/analyse/memory_report.sh`.
+
 - **Attentio Protocol (AP)** interface on CDC1, replacing the ChibiOS
   text-based shell. Framed packet format: `[SYNC 0xA5][LEN][CMD][PAYLOAD][CRC-8/CCITT]`.
   Supports 20+ commands across session, LED control, power, query, settings,
