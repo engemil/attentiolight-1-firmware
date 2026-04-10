@@ -23,40 +23,40 @@ SOFTWARE.
 */
 
 /**
- * @file    mode_blinking.c
- * @brief   Blinking mode implementation.
+ * @file    mode_pulsation.c
+ * @brief   Pulsation/breathing mode implementation.
  *
- * @details Blinks LED on/off. Short press cycles through blink speeds.
+ * @details Pulses LED brightness up and down. Short press cycles through
+ *          pulse speeds.
  */
 
 #include "modes.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "app_log.h"
 
 /*===========================================================================*/
-/* Blink Speeds                                                              */
+/* Pulse Speeds                                                              */
 /*===========================================================================*/
 
 /**
- * @brief   Blink speed names for log output.
+ * @brief   Pulse speed names for log output.
  */
-static const char* const speed_names[6] = {
-    "ULTRA_SLOW", "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
+static const char* const speed_names[5] = {
+    "ULTRA_SLOW", "VERY_SLOW", "SLOW", "MEDIUM", "FAST"
 };
 
 /**
- * @brief   Blink interval options (ms).
+ * @brief   Pulse period options (ms for full cycle).
  */
-#define BLINK_SPEED_COUNT   6
+#define PULSE_SPEED_COUNT   5
 
-static const uint16_t blink_speeds[BLINK_SPEED_COUNT] = {
-    4000,   /* Ultra Slow - 0.25Hz */
-    2000,   /* Very Slow - 0.5Hz */
-    1000,   /* Slow - 1Hz */
-    500,    /* Medium - 2Hz */
-    250,    /* Fast - 4Hz */
-    125     /* Very Fast - 8Hz */
+static const uint16_t pulse_periods[PULSE_SPEED_COUNT] = {
+    8000,   /* Ultra slow - 8s cycle */
+    4000,   /* Very slow - 4s cycle */
+    2000,   /* Slow - 2s cycle */
+    1000,   /* Medium - 1s cycle */
+    500    /* Fast - 0.5s cycle */
 };
 
 /*===========================================================================*/
@@ -65,49 +65,46 @@ static const uint16_t blink_speeds[BLINK_SPEED_COUNT] = {
 
 static uint8_t current_speed_index = 2;  /* Default to Slow */
 
-/* Color and brightness are shared via global_color_index, global_brightness,
- * and shared_color_palette (declared in modes.h) */
-
 /*===========================================================================*/
 /* Mode Functions                                                            */
 /*===========================================================================*/
 
-static void blinking_enter(void) {
-    LOG_DEBUG("MODE Blinking: enter speed=%s (%dms)",
-             speed_names[current_speed_index], blink_speeds[current_speed_index]);
-    /* Start blinking animation with shared color */
-    anim_thread_blink(
-        shared_color_palette[global_color_index][0],
-        shared_color_palette[global_color_index][1],
-        shared_color_palette[global_color_index][2],
-        global_brightness, blink_speeds[current_speed_index]);
+static void pulsation_enter(void) {
+    LOG_DEBUG("MODE Pulsation: enter speed=%s (%dms period)",
+             speed_names[current_speed_index], pulse_periods[current_speed_index]);
+    /* Start pulse animation with shared color */
+    anim_thread_pulse(
+        standalone_color_palette[standalone_color_index][0],
+        standalone_color_palette[standalone_color_index][1],
+        standalone_color_palette[standalone_color_index][2],
+        standalone_brightness, pulse_periods[current_speed_index]);
 }
 
-static void blinking_exit(void) {
-    LOG_DEBUG("MODE Blinking: exit");
+static void pulsation_exit(void) {
+    LOG_DEBUG("MODE Pulsation exit");
     
 }
 
-static void blinking_on_short_press(void) {
+static void pulsation_on_short_press(void) {
     uint8_t old_idx = current_speed_index;
     LOG_UNUSED(old_idx);
-    /* Cycle to next blink speed */
-    current_speed_index = (current_speed_index + 1) % BLINK_SPEED_COUNT;
+    /* Cycle to next pulse speed */
+    current_speed_index = (current_speed_index + 1) % PULSE_SPEED_COUNT;
 
-    LOG_DEBUG("MODE Blinking: speed set from %s to %s (%dms to %dms)",
+    LOG_DEBUG("MODE Pulsation: speed from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
-             blink_speeds[old_idx], blink_speeds[current_speed_index]);
+             pulse_periods[old_idx], pulse_periods[current_speed_index]);
 
-    /* Update blink animation with shared color */
-    anim_thread_blink(
-        shared_color_palette[global_color_index][0],
-        shared_color_palette[global_color_index][1],
-        shared_color_palette[global_color_index][2],
-        global_brightness, blink_speeds[current_speed_index]);
+    /* Update pulse animation with shared color */
+    anim_thread_pulse(
+        standalone_color_palette[standalone_color_index][0],
+        standalone_color_palette[standalone_color_index][1],
+        standalone_color_palette[standalone_color_index][2],
+        standalone_brightness, pulse_periods[current_speed_index]);
 }
 
-static void blinking_on_long_start(void) {
-    LOG_DEBUG("MODE Blinking: long_start");
+static void pulsation_on_long_start(void) {
+    LOG_DEBUG("MODE Pulsation: long_start");
     /* No special action for long press start in this mode */
 }
 
@@ -115,10 +112,10 @@ static void blinking_on_long_start(void) {
 /* Mode Operations Structure                                                 */
 /*===========================================================================*/
 
-const app_sm_mode_ops_t mode_blinking_ops = {
-    .name = "Blinking",
-    .enter = blinking_enter,
-    .exit = blinking_exit,
-    .on_short_press = blinking_on_short_press,
-    .on_long_start = blinking_on_long_start
+const app_sm_mode_ops_t mode_pulsation_ops = {
+    .name = "Pulsation",
+    .enter = pulsation_enter,
+    .exit = pulsation_exit,
+    .on_short_press = pulsation_on_short_press,
+    .on_long_start = pulsation_on_long_start
 };

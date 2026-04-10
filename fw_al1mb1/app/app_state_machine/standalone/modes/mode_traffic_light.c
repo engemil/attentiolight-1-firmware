@@ -33,7 +33,7 @@ SOFTWARE.
 #include "modes.h"
 #include "mode_traffic_light_config.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "app_log.h"
 
 /*===========================================================================*/
@@ -60,7 +60,7 @@ typedef enum {
 static traffic_state_t current_state = TRAFFIC_GREEN;
 
 /* External reference to global brightness */
-//extern uint8_t global_brightness;
+//extern uint8_t standalone_brightness;
 
 /*===========================================================================*/
 /* Local Functions                                                           */
@@ -72,13 +72,13 @@ static traffic_state_t current_state = TRAFFIC_GREEN;
 static void set_traffic_color(traffic_state_t state) {
     switch (state) {
         case TRAFFIC_RED:
-            anim_thread_set_solid(255, 0, 0, global_brightness);
+            anim_thread_set_solid(255, 0, 0, standalone_brightness);
             break;
         case TRAFFIC_YELLOW:
-            anim_thread_set_solid(255, 200, 0, global_brightness);
+            anim_thread_set_solid(255, 200, 0, standalone_brightness);
             break;
         case TRAFFIC_GREEN:
-            anim_thread_set_solid(0, 255, 0, global_brightness);
+            anim_thread_set_solid(0, 255, 0, standalone_brightness);
             break;
     }
 }

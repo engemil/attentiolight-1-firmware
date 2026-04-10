@@ -47,7 +47,7 @@ SOFTWARE.
 #include "hal.h"
 #include <stdbool.h>
 
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "button_driver.h"
 
 /*===========================================================================*/

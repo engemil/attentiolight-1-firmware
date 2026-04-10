@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include "modes.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "app_log.h"
 
 /*===========================================================================*/
@@ -66,8 +66,8 @@ static const uint8_t brightness_levels[APP_SM_BRIGHTNESS_LEVELS] = {
 
 static uint8_t current_level_index = 3;  /* Default to 50% */
 
-/* Global brightness defined in app_state_machine.c */
-//extern uint8_t global_brightness;
+/* Standalone brightness defined in app_state_machine.c */
+//extern uint8_t standalone_brightness;
 
 /*===========================================================================*/
 /* Mode Functions                                                            */
@@ -79,17 +79,17 @@ static void brightness_enter(void) {
              brightness_levels[current_level_index]);
     /* Display current color at current brightness level */
     anim_thread_set_solid(
-        shared_color_palette[global_color_index][0],
-        shared_color_palette[global_color_index][1],
-        shared_color_palette[global_color_index][2],
+        standalone_color_palette[standalone_color_index][0],
+        standalone_color_palette[standalone_color_index][1],
+        standalone_color_palette[standalone_color_index][2],
         brightness_levels[current_level_index]);
 }
 
 static void brightness_exit(void) {
-    LOG_DEBUG("MODE Brightness: exit global_brightness=%d",
+    LOG_DEBUG("MODE Brightness: exit standalone_brightness=%d",
              brightness_levels[current_level_index]);
-    /* Update global brightness for other modes to use */
-    global_brightness = brightness_levels[current_level_index];
+    /* Update standalone brightness for other modes to use */
+    standalone_brightness = brightness_levels[current_level_index];
 }
 
 static void brightness_on_short_press(void) {
@@ -104,13 +104,13 @@ static void brightness_on_short_press(void) {
 
     /* Update display with current color */
     anim_thread_set_solid(
-        shared_color_palette[global_color_index][0],
-        shared_color_palette[global_color_index][1],
-        shared_color_palette[global_color_index][2],
+        standalone_color_palette[standalone_color_index][0],
+        standalone_color_palette[standalone_color_index][1],
+        standalone_color_palette[standalone_color_index][2],
         brightness_levels[current_level_index]);
 
-    /* Update global brightness */
-    global_brightness = brightness_levels[current_level_index];
+    /* Update standalone brightness */
+    standalone_brightness = brightness_levels[current_level_index];
 }
 
 static void brightness_on_long_start(void) {

@@ -31,8 +31,9 @@ SOFTWARE.
  */
 
 #include "app_state_machine.h"
-#include "system_states/system_states.h"
-#include "modes/modes.h"
+#include "system_states.h"
+#include "modes.h"
+#include "standalone_state.h"
 #include "animation_thread.h"
 #include "button_driver.h"
 #include "rt_config.h"
@@ -55,30 +56,7 @@ SOFTWARE.
 /* Global Variables (exported to other modules)                              */
 /*===========================================================================*/
 
-/**
- * @brief   Current operational mode.
- */
-app_sm_mode_t current_mode = APP_SM_DEFAULT_MODE;
-
-/**
- * @brief   External control active flag.
- */
-bool external_control_active = false;
-
-/**
- * @brief   Saved mode before external control.
- */
-app_sm_mode_t saved_mode_before_external = APP_SM_DEFAULT_MODE;
-
-/**
- * @brief   Global brightness level.
- */
-uint8_t global_brightness = APP_SM_DEFAULT_BRIGHTNESS;
-
-/**
- * @brief   Global color index (0-11, indexes into color palette).
- */
-uint8_t global_color_index = APP_SM_DEFAULT_COLOR_INDEX;
+/* Standalone-specific state variables are now in standalone/standalone_state.c */
 
 /*===========================================================================*/
 /* Local Variables                                                           */

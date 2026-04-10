@@ -31,7 +31,7 @@ SOFTWARE.
 #include "animation_helpers.h"
 #include "ws2812b_led_driver.h"
 #include "rt_config.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "modes.h"
 #include "mode_traffic_light_config.h"
 #include "state_powerup_config.h"

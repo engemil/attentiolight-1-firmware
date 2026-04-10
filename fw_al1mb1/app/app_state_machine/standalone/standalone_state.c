@@ -23,35 +23,41 @@ SOFTWARE.
 */
 
 /**
- * @file    effect_color_cycle.c
- * @brief   Color cycle effect implementation.
+ * @file    standalone_state.c
+ * @brief   Standalone mode shared state definitions.
+ *
+ * @details Defines the global variables shared across standalone modes.
+ *          These were previously in app_state_machine.c but are standalone-
+ *          specific and do not belong in the shared SM core.
  */
 
-#include "effect_color_cycle.h"
-#include "animation_helpers.h"
-#include "modes.h"
+#include "standalone_state.h"
 
 /*===========================================================================*/
-/* Effect Implementation                                                     */
+/* Standalone Shared State                                                   */
 /*===========================================================================*/
 
-void process_color_cycle(const anim_state_t *state, uint8_t *last_state) {
-    /* Use pre-computed elapsed_ms from animation thread */
-    uint32_t total_period = state->period_ms * APP_SM_COLOR_COUNT;
-    uint32_t cycle_pos = state->elapsed_ms % total_period;
+/**
+ * @brief   Current operational mode.
+ */
+app_sm_mode_t current_mode = APP_SM_DEFAULT_MODE;
 
-    /* Determine current color index */
-    uint8_t color_idx = (uint8_t)(cycle_pos / state->period_ms);
-    if (color_idx >= APP_SM_COLOR_COUNT) {
-        color_idx = 0;
-    }
+/**
+ * @brief   External control active flag.
+ */
+bool external_control_active = false;
 
-    /* Only render on color transition */
-    if (color_idx != *last_state) {
-        *last_state = color_idx;
-        render_color(shared_color_palette[color_idx][0],
-                     shared_color_palette[color_idx][1],
-                     shared_color_palette[color_idx][2],
-                     state->brightness);
-    }
-}
+/**
+ * @brief   Saved mode before external control.
+ */
+app_sm_mode_t saved_mode_before_external = APP_SM_DEFAULT_MODE;
+
+/**
+ * @brief   Standalone brightness level.
+ */
+uint8_t standalone_brightness = APP_SM_DEFAULT_BRIGHTNESS;
+
+/**
+ * @brief   Standalone color index (0-11, indexes into color palette).
+ */
+uint8_t standalone_color_index = APP_SM_DEFAULT_COLOR_INDEX;

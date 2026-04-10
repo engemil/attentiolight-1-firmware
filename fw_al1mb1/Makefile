@@ -154,35 +154,36 @@ CSRC = $(ALLCSRC) \
        app/button_driver/button_driver.c \
        app/ws2812b_led_driver/ws2812b_led_driver.c \
        app/app_state_machine/app_state_machine.c \
+       app/app_state_machine/standalone/standalone_state.c \
        app/app_state_machine/animation/animation_thread.c \
        app/app_state_machine/animation/animation_helpers.c \
-       app/app_state_machine/modes/effects/effect_breathing.c \
-       app/app_state_machine/modes/effects/effect_candle.c \
-       app/app_state_machine/modes/effects/effect_fire.c \
-       app/app_state_machine/modes/effects/effect_lava_lamp.c \
-       app/app_state_machine/modes/effects/effect_day_night.c \
-       app/app_state_machine/modes/effects/effect_ocean.c \
-       app/app_state_machine/modes/effects/effect_northern_lights.c \
-       app/app_state_machine/modes/effects/effect_thunder_storm.c \
-       app/app_state_machine/modes/effects/effect_police.c \
-       app/app_state_machine/modes/effects/effect_health_pulse.c \
-       app/app_state_machine/modes/effects/effect_memory.c \
-       app/app_state_machine/modes/effects/effect_rainbow.c \
-       app/app_state_machine/modes/effects/effect_color_cycle.c \
-       app/app_state_machine/system_states/state_boot.c \
-       app/app_state_machine/system_states/state_powerup.c \
-       app/app_state_machine/system_states/state_active.c \
-       app/app_state_machine/system_states/state_powerdown.c \
-       app/app_state_machine/system_states/state_off.c \
-       app/app_state_machine/modes/modes.c \
-       app/app_state_machine/modes/mode_solid_color.c \
-       app/app_state_machine/modes/mode_brightness.c \
-       app/app_state_machine/modes/mode_blinking.c \
-       app/app_state_machine/modes/mode_pulsation.c \
-       app/app_state_machine/modes/mode_effects.c \
-       app/app_state_machine/modes/mode_traffic_light.c \
-       app/app_state_machine/modes/mode_night_light.c \
-       app/app_state_machine/modes/mode_external_control.c \
+       app/app_state_machine/standalone/modes/effects/effect_breathing.c \
+       app/app_state_machine/standalone/modes/effects/effect_candle.c \
+       app/app_state_machine/standalone/modes/effects/effect_fire.c \
+       app/app_state_machine/standalone/modes/effects/effect_lava_lamp.c \
+       app/app_state_machine/standalone/modes/effects/effect_day_night.c \
+       app/app_state_machine/standalone/modes/effects/effect_ocean.c \
+       app/app_state_machine/standalone/modes/effects/effect_northern_lights.c \
+       app/app_state_machine/standalone/modes/effects/effect_thunder_storm.c \
+       app/app_state_machine/standalone/modes/effects/effect_police.c \
+       app/app_state_machine/standalone/modes/effects/effect_health_pulse.c \
+       app/app_state_machine/standalone/modes/effects/effect_memory.c \
+       app/app_state_machine/standalone/modes/effects/effect_rainbow.c \
+       app/app_state_machine/standalone/modes/effects/effect_color_cycle.c \
+       app/app_state_machine/standalone/system_states/state_boot.c \
+       app/app_state_machine/standalone/system_states/state_powerup.c \
+       app/app_state_machine/standalone/system_states/state_active.c \
+       app/app_state_machine/standalone/system_states/state_powerdown.c \
+       app/app_state_machine/standalone/system_states/state_off.c \
+       app/app_state_machine/standalone/modes/modes.c \
+       app/app_state_machine/standalone/modes/mode_solid_color.c \
+       app/app_state_machine/standalone/modes/mode_brightness.c \
+       app/app_state_machine/standalone/modes/mode_blinking.c \
+       app/app_state_machine/standalone/modes/mode_pulsation.c \
+       app/app_state_machine/standalone/modes/mode_effects.c \
+       app/app_state_machine/standalone/modes/mode_traffic_light.c \
+       app/app_state_machine/standalone/modes/mode_night_light.c \
+       app/app_state_machine/standalone/modes/mode_external_control.c \
        app/app_log.c \
        app/attentio_protocol/attentio_protocol.c \
        app/micb/micb.c \
@@ -231,9 +232,10 @@ UINCDIR = ./app_header \
           ./app/ws2812b_led_driver \
           ./app/app_state_machine \
           ./app/app_state_machine/animation \
-          ./app/app_state_machine/system_states \
-          ./app/app_state_machine/modes \
-          ./app/app_state_machine/modes/effects \
+          ./app/app_state_machine/standalone \
+          ./app/app_state_machine/standalone/system_states \
+          ./app/app_state_machine/standalone/modes \
+          ./app/app_state_machine/standalone/modes/effects \
           ./app/attentio_protocol \
           ./app/micb \
           ./app/usb_adapter \
@@ -279,8 +281,8 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 	@bash $(SIGN_SCRIPT) $(BUILDDIR)/$(PROJECT).bin $(BUILDDIR)/$(PROJECT)_signed.bin
 	@echo ""
 	@echo "✓ Build and signing complete!"
-	@echo "  Unsigned: $(BUILDDIR)/$(PROJECT).bin (do not upload)"
-	@echo "  Signed:   $(BUILDDIR)/$(PROJECT)_signed.bin (ready to upload)"
+	@echo "  Unsigned: $(BUILDDIR)/$(PROJECT).bin (if you do NOT use bootloader)"
+	@echo "  Signed:   $(BUILDDIR)/$(PROJECT)_signed.bin (if you do use bootloader)"
 	@echo ""
 
 .PHONY: sign_firmware

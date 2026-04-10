@@ -39,7 +39,7 @@ SOFTWARE.
 
 #include "modes.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "app_log.h"
 
 /*===========================================================================*/

@@ -31,7 +31,7 @@ SOFTWARE.
 
 #include "modes.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "app_log.h"
 
 /*===========================================================================*/
@@ -50,7 +50,7 @@ static const char* const color_names[APP_SM_COLOR_COUNT] = {
  * @brief   12-color extended palette.
  * @note    Shared globally - other modes reference this via extern in modes.h
  */
-const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
+const uint8_t standalone_color_palette[APP_SM_COLOR_COUNT][3] = {
     {  0, 128, 255},    /* Azure        */
     {  0,   0, 255},    /* Blue         */
     {128,   0, 255},    /* Purple       */
@@ -69,7 +69,7 @@ const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-/* None - uses global_color_index and global_brightness from modes.h */
+/* None - uses standalone_color_index and standalone_brightness from modes.h */
 
 /*===========================================================================*/
 /* Mode Functions                                                            */
@@ -77,13 +77,13 @@ const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
 
 static void solid_color_enter(void) {
     LOG_DEBUG("MODE SolidColor: enter: color=%s brightness=%d",
-             color_names[global_color_index], global_brightness);
+             color_names[standalone_color_index], standalone_brightness);
     /* Display current color */
     anim_thread_set_solid(
-        shared_color_palette[global_color_index][0],
-        shared_color_palette[global_color_index][1],
-        shared_color_palette[global_color_index][2],
-        global_brightness
+        standalone_color_palette[standalone_color_index][0],
+        standalone_color_palette[standalone_color_index][1],
+        standalone_color_palette[standalone_color_index][2],
+        standalone_brightness
     );
 }
 
@@ -93,20 +93,20 @@ static void solid_color_exit(void) {
 }
 
 static void solid_color_on_short_press(void) {
-    uint8_t old_idx = global_color_index;
+    uint8_t old_idx = standalone_color_index;
     LOG_UNUSED(old_idx);
     /* Cycle to next color */
-    global_color_index = (global_color_index + 1) % APP_SM_COLOR_COUNT;
+    standalone_color_index = (standalone_color_index + 1) % APP_SM_COLOR_COUNT;
 
     LOG_DEBUG("MODE SolidColor: color set from %s to %s",
-             color_names[old_idx], color_names[global_color_index]);
+             color_names[old_idx], color_names[standalone_color_index]);
 
     /* Display new color */
     anim_thread_set_solid(
-        shared_color_palette[global_color_index][0],
-        shared_color_palette[global_color_index][1],
-        shared_color_palette[global_color_index][2],
-        global_brightness
+        standalone_color_palette[standalone_color_index][0],
+        standalone_color_palette[standalone_color_index][1],
+        standalone_color_palette[standalone_color_index][2],
+        standalone_brightness
     );
 }
 

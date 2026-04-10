@@ -64,6 +64,13 @@ Changed
   per-function stack analysis. Also disables Stop mode.
 - Main thread loop simplified from shell respawn logic to idle sleep with
   optional stack watermark reporting (debug builds).
+- **Standalone code separated** — modes, system states, and standalone-specific
+  globals moved into `app_state_machine/standalone/`. Renamed `global_brightness`
+  → `standalone_brightness`, `global_color_index` → `standalone_color_index`,
+  `shared_color_palette` → `standalone_color_palette`. Extracted standalone state
+  variables into `standalone_state.c/h`. Renamed `app_state_machine_config.h` →
+  `standalone_config.h`. Prepares the codebase for clean separation between
+  standalone and remote control paths.
 
 Fixed
 - **Stack overflow causing HardFault in release builds** — several functions

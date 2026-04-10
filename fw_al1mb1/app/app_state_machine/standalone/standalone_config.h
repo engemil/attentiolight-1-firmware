@@ -23,15 +23,15 @@ SOFTWARE.
 */
 
 /**
- * @file    app_state_machine_config.h
- * @brief   Configuration defines for the Application State Machine.
+ * @file    standalone_config.h
+ * @brief   Configuration defines for the standalone state machine.
  *
  * @note    Thread priorities and animation tick rate are centralized in
  *          app/rt_config.h for easier real-time tuning.
  */
 
-#ifndef APP_STATE_MACHINE_CONFIG_H
-#define APP_STATE_MACHINE_CONFIG_H
+#ifndef STANDALONE_CONFIG_H
+#define STANDALONE_CONFIG_H
 
 #include "rt_config.h"
 
@@ -104,7 +104,7 @@ SOFTWARE.
 /**
  * @brief   Default color index for solid color mode.
  * 
- * @details Index into shared_color_palette (see mode_solid_color.c).
+ * @details Index into standalone_color_palette (see mode_solid_color.c).
  *          Set to 0 for first color, or any
  */
 #ifndef APP_SM_DEFAULT_COLOR_INDEX
@@ -143,4 +143,4 @@ SOFTWARE.
 #define APP_SM_PULSE_PERIOD_MS          2000
 #endif
 
-#endif /* APP_STATE_MACHINE_CONFIG_H */
+#endif /* STANDALONE_CONFIG_H */

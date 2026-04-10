@@ -32,18 +32,16 @@ SOFTWARE.
 
 #include "system_states.h"
 #include "modes.h"
+#include "standalone_state.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "button_driver.h"
 
 /*===========================================================================*/
 /* External References                                                       */
 /*===========================================================================*/
 
-/* These are managed by app_state_machine.c */
-extern app_sm_mode_t current_mode;
-extern bool external_control_active;
-extern app_sm_mode_t saved_mode_before_external;
+/* Standalone state variables are in standalone_state.c, declared in standalone_state.h */
 
 /*===========================================================================*/
 /* Local Functions                                                           */

@@ -28,13 +28,14 @@ SOFTWARE.
  */
 
 #include "modes.h"
-#include "app_state_machine_config.h"
+#include "standalone_state.h"
+#include "standalone_config.h"
 
 /*===========================================================================*/
 /* External References                                                       */
 /*===========================================================================*/
 
-extern app_sm_mode_t current_mode;
+/* Standalone state variables are in standalone_state.c, declared in standalone_state.h */
 
 /*===========================================================================*/
 /* Mode Registry                                                             */

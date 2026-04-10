@@ -46,7 +46,7 @@ SOFTWARE.
 
 #include "modes.h"
 #include "animation_thread.h"
-#include "app_state_machine_config.h"
+#include "standalone_config.h"
 #include "app_log.h"
 
 /* Effect configuration includes */
@@ -80,7 +80,7 @@ static const char* const submode_names[APP_SM_EFFECTS_COUNT] = {
 static app_sm_effects_submode_t current_submode = APP_SM_EFFECTS_RAINBOW;
 
 /* External reference to global brightness */
-//extern uint8_t global_brightness;
+//extern uint8_t standalone_brightness;
 
 /*===========================================================================*/
 /* Local Functions                                                           */
@@ -92,65 +92,65 @@ static app_sm_effects_submode_t current_submode = APP_SM_EFFECTS_RAINBOW;
 static void start_current_submode(void) {
     switch (current_submode) {
         case APP_SM_EFFECTS_RAINBOW:
-            anim_thread_rainbow(global_brightness, APP_SM_RAINBOW_PERIOD_MS);
+            anim_thread_rainbow(standalone_brightness, APP_SM_RAINBOW_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_COLOR_CYCLE:
-            anim_thread_color_cycle(global_brightness,
+            anim_thread_color_cycle(standalone_brightness,
                                     APP_SM_COLOR_CYCLE_INTERVAL_MS);
             break;
 
         case APP_SM_EFFECTS_BREATHING:
             anim_thread_breathing(APP_SM_BREATHING_R, APP_SM_BREATHING_G,
-                                  APP_SM_BREATHING_B, global_brightness,
+                                  APP_SM_BREATHING_B, standalone_brightness,
                                   APP_SM_BREATHING_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_CANDLE:
-            anim_thread_candle(global_brightness, APP_SM_CANDLE_PERIOD_MS);
+            anim_thread_candle(standalone_brightness, APP_SM_CANDLE_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_FIRE:
-            anim_thread_fire(global_brightness, APP_SM_FIRE_PERIOD_MS);
+            anim_thread_fire(standalone_brightness, APP_SM_FIRE_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_LAVA_LAMP:
-            anim_thread_lava_lamp(global_brightness, APP_SM_LAVA_LAMP_PERIOD_MS);
+            anim_thread_lava_lamp(standalone_brightness, APP_SM_LAVA_LAMP_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_DAY_NIGHT:
-            anim_thread_day_night(global_brightness, APP_SM_DAY_NIGHT_PERIOD_MS);
+            anim_thread_day_night(standalone_brightness, APP_SM_DAY_NIGHT_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_OCEAN:
-            anim_thread_ocean(global_brightness, APP_SM_OCEAN_PERIOD_MS);
+            anim_thread_ocean(standalone_brightness, APP_SM_OCEAN_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_NORTHERN_LIGHTS:
-            anim_thread_northern_lights(global_brightness,
+            anim_thread_northern_lights(standalone_brightness,
                                         APP_SM_NORTHERN_LIGHTS_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_THUNDER_STORM:
-            anim_thread_thunder_storm(global_brightness,
+            anim_thread_thunder_storm(standalone_brightness,
                                       APP_SM_THUNDER_STORM_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_POLICE:
-            anim_thread_police(global_brightness, APP_SM_POLICE_PERIOD_MS);
+            anim_thread_police(standalone_brightness, APP_SM_POLICE_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_HEALTH_PULSE:
-            anim_thread_health_pulse(global_brightness,
+            anim_thread_health_pulse(standalone_brightness,
                                      APP_SM_HEALTH_PULSE_PERIOD_MS);
             break;
 
         case APP_SM_EFFECTS_MEMORY:
-            anim_thread_memory(global_brightness, APP_SM_MEMORY_PERIOD_MS);
+            anim_thread_memory(standalone_brightness, APP_SM_MEMORY_PERIOD_MS);
             break;
 
         default:
-            anim_thread_rainbow(global_brightness, APP_SM_RAINBOW_PERIOD_MS);
+            anim_thread_rainbow(standalone_brightness, APP_SM_RAINBOW_PERIOD_MS);
             break;
     }
 }

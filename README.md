@@ -193,9 +193,12 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │   │   ├── rt_config.h             # Runtime configuration
 │   │   ├── app_state_machine/      # Core state machine
 │   │   │   ├── animation/          # LED animation engine
-│   │   │   ├── modes/              # User-selectable modes
-│   │   │   │   └── effects/        # effects implementation
-│   │   │   └── system_states/      # System state handlers
+│   │   │   └── standalone/         # Standalone mode code
+│   │   │       ├── standalone_state.c/h  # Standalone globals (brightness, color, mode)
+│   │   │       ├── standalone_config.h   # Standalone tuning constants
+│   │   │       ├── modes/          # User-selectable modes
+│   │   │       │   └── effects/    # Effects implementation
+│   │   │       └── system_states/  # System state handlers
 │   │   ├── attentio_protocol/      # AP packet format and definitions
 │   │   ├── button_driver/          # Button input with debouncing
 │   │   ├── micb/                   # Multi-Interface Control Broker
