@@ -34,20 +34,18 @@ SOFTWARE.
 #include "mode_traffic_light_config.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /*===========================================================================*/
 /* Traffic Light States                                                      */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Traffic state names for debug output.
+ * @brief   Traffic state names for log output.
  */
 static const char* const traffic_state_names[3] = {
     "RED", "YELLOW", "GREEN"
 };
-#endif
 
 typedef enum {
     TRAFFIC_RED = 0,
@@ -90,19 +88,19 @@ static void set_traffic_color(traffic_state_t state) {
 /*===========================================================================*/
 
 static void traffic_light_enter(void) {
-    DBG_DEBUG("MODE TrafficLight: enter state=%s", traffic_state_names[current_state]);
+    LOG_DEBUG("MODE TrafficLight: enter state=%s", traffic_state_names[current_state]);
     set_traffic_color(current_state);
 }
 
 static void traffic_light_exit(void) {
-    DBG_DEBUG("MODE TrafficLight: exit");
+    LOG_DEBUG("MODE TrafficLight: exit");
     
 }
 
 static void traffic_light_on_short_press(void) {
     /* Cycle through colors: GREEN -> YELLOW -> RED -> GREEN */
     traffic_state_t old_state = current_state;
-    DBG_UNUSED(old_state);
+    LOG_UNUSED(old_state);
     
     switch (current_state) {
         case TRAFFIC_GREEN:
@@ -116,13 +114,13 @@ static void traffic_light_on_short_press(void) {
             break;
     }
     
-    DBG_DEBUG("MODE TrafficLight: Set state from %s to %s",
+    LOG_DEBUG("MODE TrafficLight: Set state from %s to %s",
              traffic_state_names[old_state], traffic_state_names[current_state]);
     set_traffic_color(current_state);
 }
 
 static void traffic_light_on_long_start(void) {
-    DBG_DEBUG("MODE TrafficLight: long_start");
+    LOG_DEBUG("MODE TrafficLight: long_start");
     /* No special action for long press start in this mode */
 }
 

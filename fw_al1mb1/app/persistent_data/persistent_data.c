@@ -140,6 +140,7 @@ static void pd_load_defaults(void) {
     strncpy(pd_cache.device_name, PD_DEFAULT_DEVICE_NAME,
             PD_DEVICE_NAME_SIZE - 1);
     pd_cache.device_name[PD_DEVICE_NAME_SIZE - 1] = '\0';
+    pd_cache.log_level = PD_DEFAULT_LOG_LEVEL;
 }
 
 /**
@@ -288,6 +289,20 @@ pd_result_t persistent_data_set_device_name(const char *name) {
 
     memset(pd_cache.device_name, 0, PD_DEVICE_NAME_SIZE);
     memcpy(pd_cache.device_name, name, len + 1);
+
+    return PD_OK;
+}
+
+pd_result_t persistent_data_set_log_level(uint8_t level) {
+    if (!pd_initialized) {
+        return PD_ERROR_NOT_INIT;
+    }
+
+    if (level > 4) {
+        return PD_ERROR_BUFFER_SIZE;
+    }
+
+    pd_cache.log_level = level;
 
     return PD_OK;
 }

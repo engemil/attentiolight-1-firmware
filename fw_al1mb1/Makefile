@@ -123,9 +123,6 @@ include $(CHIBIOS)/tools/mk/autobuild.mk
 # Streams files (optional).
 include $(CHIBIOS)/os/hal/lib/streams/streams.mk
 
-# Shell files.
-include $(CHIBIOS)/os/various/shell/shell.mk
-
 # ChibiOS test files (optional).
 #include $(CHIBIOS)/os/test/test.mk
 #include $(CHIBIOS)/test/rt/rt_test.mk
@@ -186,12 +183,12 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/modes/mode_traffic_light.c \
        app/app_state_machine/modes/mode_night_light.c \
        app/app_state_machine/modes/mode_external_control.c \
+       app/app_log.c \
+       app/attentio_protocol/attentio_protocol.c \
+       app/micb/micb.c \
+       app/usb_adapter/usb_adapter.c \
        app/persistent_data/device_metadata.c \
        app/persistent_data/persistent_data.c \
-       app/shell_commands/cmd_version.c \
-       app/shell_commands/cmd_metadata.c \
-       app/shell_commands/cmd_settings.c \
-       app/shell_commands/cmd_dfu.c \
        app_header/app_header.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -222,7 +219,7 @@ CPPWARN = -Wall -Wextra -Wundef
 #
 
 # List all user C define here, like -D_DEBUG=1
-UDEFS = -DCRT0_VTOR_INIT=1 -DSHELL_CONFIG_FILE
+UDEFS = -DCRT0_VTOR_INIT=1
 
 # Define ASM defines here
 UADEFS = -DCRT0_VTOR_INIT=1
@@ -237,8 +234,10 @@ UINCDIR = ./app_header \
           ./app/app_state_machine/system_states \
           ./app/app_state_machine/modes \
           ./app/app_state_machine/modes/effects \
-          ./app/persistent_data \
-          ./app/shell_commands
+          ./app/attentio_protocol \
+          ./app/micb \
+          ./app/usb_adapter \
+          ./app/persistent_data
 
 # List the user directory to look for the libraries here
 ULIBDIR =
@@ -290,34 +289,17 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 # Debug build targets
 #
 # Usage:
-#   make                  - Normal release build (no debug output)
-#   make debug            - Debug build with INFO level (default LEVEL=3)
-#   make debug LEVEL=1    - Errors only
-#   make debug LEVEL=2    - Errors + warnings
-#   make debug LEVEL=3    - Errors + warnings + info (state/mode changes)
-#   make debug LEVEL=4    - Everything (verbose)
-#   make debug LEVEL=5    - Skips low-power mode (in off state)
-#   make release          - Explicit release build (no debug)
+#   make                  - Release build (-O2, Stop mode enabled)
+#   make debug            - Debug build (-Og, Stop mode disabled, stack checks)
 #
-# Debug levels are hierarchical:
-#   0 = NONE  - No output (release build)
-#   1 = ERROR - Critical errors only
-#   2 = WARN  - Errors + warnings
-#   3 = INFO  - + state/mode changes
-#   4 = DEBUG - + verbose details
 #
 
-.PHONY: debug release clean-build
+.PHONY: debug clean-build
 
 # Debug build - forces clean rebuild with debug flags and -Og optimization
-# Default debug (LEVEL=5) if not specified
 # -fstack-usage generates .su files alongside .o files with per-function stack usage
 debug: clean-build
-	$(MAKE) all USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16 -fstack-usage" UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=$(if $(LEVEL),$(LEVEL),5)"
-
-# Explicit release build (no debug output)
-release: clean-build
-	$(MAKE) all UDEFS="$(UDEFS) -DAPP_DEBUG_LEVEL=0"
+	$(MAKE) all USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16 -fstack-usage" UDEFS="$(UDEFS) -DAPP_DEBUG_BUILD=1"
 
 # Clean build directory for fresh rebuild
 clean-build:

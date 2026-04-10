@@ -47,7 +47,7 @@ SOFTWARE.
 #include "modes.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /* Effect configuration includes */
 #include "effect_breathing.h"
@@ -68,16 +68,14 @@ SOFTWARE.
 /* Local Variables                                                           */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Submode names for debug output.
+ * @brief   Submode names for log output.
  */
 static const char* const submode_names[APP_SM_EFFECTS_COUNT] = {
     "RAINBOW", "COLOR_CYCLE", "BREATHING", "CANDLE", "FIRE", "LAVA_LAMP",
     "DAY_NIGHT", "OCEAN", "NORTHERN_LIGHTS", "THUNDER_STORM", "POLICE",
     "HEALTH_PULSE", "MEMORY"
 };
-#endif
 
 static app_sm_effects_submode_t current_submode = APP_SM_EFFECTS_RAINBOW;
 
@@ -162,24 +160,24 @@ static void start_current_submode(void) {
 /*===========================================================================*/
 
 static void effects_enter(void) {
-    DBG_DEBUG("MODE Effects: enter submode=%s", submode_names[current_submode]);
+    LOG_DEBUG("MODE Effects: enter submode=%s", submode_names[current_submode]);
     /* Start current effects submode */
     start_current_submode();
 }
 
 static void effects_exit(void) {
-    DBG_DEBUG("MODE Effects: exit");
+    LOG_DEBUG("MODE Effects: exit");
     
 }
 
 static void effects_on_short_press(void) {
     app_sm_effects_submode_t old_submode = current_submode;
-    DBG_UNUSED(old_submode);
+    LOG_UNUSED(old_submode);
     /* Cycle to next effects submode */
     current_submode = (app_sm_effects_submode_t)
                       ((current_submode + 1) % APP_SM_EFFECTS_COUNT);
 
-    DBG_DEBUG("MODE Effects: submode %s -> %s",
+    LOG_DEBUG("MODE Effects: submode %s -> %s",
              submode_names[old_submode], submode_names[current_submode]);
 
     /* Start new effect */
@@ -187,7 +185,7 @@ static void effects_on_short_press(void) {
 }
 
 static void effects_on_long_start(void) {
-    DBG_DEBUG("MODE Effects: long_start");
+    LOG_DEBUG("MODE Effects: long_start");
     /* No special action for long press start in this mode */
 }
 

@@ -77,12 +77,12 @@ SOFTWARE.
 #endif
 
 /**
- * @brief   Shell thread priority.
- * @details Same level as animation — responsive to user input without
- *          starving other threads. Created dynamically from heap.
+ * @brief   USB adapter thread priority.
+ * @details Above normal priority for responsive protocol handling.
+ *          Same level as animation — both need timely execution.
  */
-#ifndef RT_SHELL_THREAD_PRIORITY
-#define RT_SHELL_THREAD_PRIORITY            (NORMALPRIO + 1)
+#ifndef RT_USB_ADAPTER_THREAD_PRIORITY
+#define RT_USB_ADAPTER_THREAD_PRIORITY      (NORMALPRIO + 1)
 #endif
 
 /** @} */
@@ -92,25 +92,18 @@ SOFTWARE.
 /*===========================================================================*/
 
 /**
- * @brief   Extra stack space needed for debug builds.
- * @details When APP_DEBUG_LEVEL >= 1, debug macros call dbg_printf_timeout()
- *          which allocates a DBG_PRINT_BUF_SIZE (256) byte buffer on the
- *          stack plus overhead for va_list and formatting. Threads that use
- *          debug output need additional stack space to avoid overflow.
+ * @brief   Extra stack space for LOG_* macros.
+ * @details LOG_* macros are always compiled in (all builds) and call
+ *          log_printf_timeout() which allocates a LOG_PRINT_BUF_SIZE (256)
+ *          byte buffer on the stack plus overhead for va_list and formatting.
+ *          All threads that use log output need additional stack space.
  *
- *          Without this, the default stack sizes (256-512 bytes) are too
- *          small for the 256-byte printf buffer, causing stack overflow and
- *          hard faults or silent corruption in debug builds.
+ *          This is always set to 512 since LOG_* code is present in both
+ *          release and debug builds. Without this, the default stack sizes
+ *          (256-512 bytes) are too small for the 256-byte printf buffer,
+ *          causing stack overflow and hard faults.
  */
-#ifndef APP_DEBUG_LEVEL
-#define _RT_DEBUG_EXTRA     0
-#else
-#if (APP_DEBUG_LEVEL >= 1)
 #define _RT_DEBUG_EXTRA     512
-#else
-#define _RT_DEBUG_EXTRA     0
-#endif
-#endif
 
 /**
  * @brief   Button thread working area size in bytes.
@@ -134,13 +127,16 @@ SOFTWARE.
 #endif
 
 /**
- * @brief   Shell thread working area size.
- * @details Allocated from heap via chThdCreateFromHeap(). The shell thread
- *          is created dynamically to handle USB reconnection gracefully.
- *          2048 bytes is the ChibiOS standard for shell threads.
+ * @brief   USB adapter thread working area size.
+ * @details Needs space for:
+ *          - 64-byte read buffer (stack-local)
+ *          - AP parser context (~260 bytes, static — not on stack)
+ *          - micb_process_command() call chain (uses static resp_buf)
+ *          - LOG_* printf buffer (256 bytes on stack)
+ *          256 base + _RT_DEBUG_EXTRA should be sufficient.
  */
-#ifndef SHELL_WA_SIZE
-#define SHELL_WA_SIZE                   THD_WORKING_AREA_SIZE(2048 + _RT_DEBUG_EXTRA)
+#ifndef RT_USB_ADAPTER_THREAD_WA_SIZE
+#define RT_USB_ADAPTER_THREAD_WA_SIZE   (256 + _RT_DEBUG_EXTRA)
 #endif
 
 /**

@@ -33,20 +33,18 @@ SOFTWARE.
 #include "modes.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /*===========================================================================*/
 /* Pulse Speeds                                                              */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Pulse speed names for debug output.
+ * @brief   Pulse speed names for log output.
  */
 static const char* const speed_names[5] = {
     "ULTRA_SLOW", "VERY_SLOW", "SLOW", "MEDIUM", "FAST"
 };
-#endif
 
 /**
  * @brief   Pulse period options (ms for full cycle).
@@ -72,7 +70,7 @@ static uint8_t current_speed_index = 2;  /* Default to Slow */
 /*===========================================================================*/
 
 static void pulsation_enter(void) {
-    DBG_DEBUG("MODE Pulsation: enter speed=%s (%dms period)",
+    LOG_DEBUG("MODE Pulsation: enter speed=%s (%dms period)",
              speed_names[current_speed_index], pulse_periods[current_speed_index]);
     /* Start pulse animation with shared color */
     anim_thread_pulse(
@@ -83,17 +81,17 @@ static void pulsation_enter(void) {
 }
 
 static void pulsation_exit(void) {
-    DBG_DEBUG("MODE Pulsation exit");
+    LOG_DEBUG("MODE Pulsation exit");
     
 }
 
 static void pulsation_on_short_press(void) {
     uint8_t old_idx = current_speed_index;
-    DBG_UNUSED(old_idx);
+    LOG_UNUSED(old_idx);
     /* Cycle to next pulse speed */
     current_speed_index = (current_speed_index + 1) % PULSE_SPEED_COUNT;
 
-    DBG_DEBUG("MODE Pulsation: speed from %s to %s (%dms to %dms)",
+    LOG_DEBUG("MODE Pulsation: speed from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              pulse_periods[old_idx], pulse_periods[current_speed_index]);
 
@@ -106,7 +104,7 @@ static void pulsation_on_short_press(void) {
 }
 
 static void pulsation_on_long_start(void) {
-    DBG_DEBUG("MODE Pulsation: long_start");
+    LOG_DEBUG("MODE Pulsation: long_start");
     /* No special action for long press start in this mode */
 }
 

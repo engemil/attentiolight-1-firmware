@@ -13,6 +13,77 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-04-10)
+
+Added
+- **Attentio Protocol (AP)** interface on CDC1, replacing the ChibiOS
+  text-based shell. Framed packet format: `[SYNC 0xA5][LEN][CMD][PAYLOAD][CRC-8/CCITT]`.
+  Supports 20+ commands across session, LED control, power, query, settings,
+  log control, and DFU categories.
+- **Multi-Interface Control Broker (MICB)** (`micb.c/h`) — session-based access
+  control with STANDALONE and REMOTE modes. Routes AP commands to handlers,
+  enforces claim-based access control, and coordinates mode transitions with
+  the animation engine and state machine. Supports claim/release/takeover
+  semantics for multi-interface (USB, future BLE/WiFi) control.
+- **USB adapter** (`usb_adapter.c/h`) — AP packet parser thread on CDC1 that
+  bridges USB serial to MICB command processing. Replaces the ChibiOS shell
+  thread.
+- **Runtime logging system** (`app_log.c/h`) — replaces compile-time `DBG_*`
+  macros (`app_debug.h`, removed) with runtime `LOG_*` macros (ERROR, WARN,
+  INFO, DEBUG). All log code is always compiled in; filtering happens at
+  runtime via a global log level variable. Boot default loaded from persistent
+  storage, overridable at runtime via AP command without reboot.
+- **AP commands**: `CLAIM`, `RELEASE`, `PING`, `POWER_ON`, `POWER_OFF`,
+  `LED_OFF`, `SET_RGB`, `SET_HSV`, `SET_BRIGHTNESS`, `SET_EFFECT`,
+  `GET_STATE`, `GET_CAPS`, `GET_SESSION`, `GET_METADATA`, `SETTINGS_LIST`,
+  `SETTINGS_GET`, `SETTINGS_SET`, `LOG_GET_LEVEL`, `LOG_SET_LEVEL`,
+  `DFU_ENTER`.
+- **Button event forwarding in REMOTE mode** — when a remote host has
+  claimed control, physical button presses are forwarded as `EVT_BUTTON`
+  (0x80) AP packets to the controlling host.
+- `log_level` field in persistent data (`pd_data_t`), saved to EFL and
+  restored on boot.
+- `_RT_DEBUG_EXTRA` (512 bytes) now applied unconditionally to all thread
+  stacks (both release and debug builds) to accommodate the 256-byte
+  `log_printf_timeout()` stack buffer.
+
+Changed
+- **ChibiOS shell removed** — all `cmd_*.c/h` files deleted, `shellconf.h`
+  deleted, `shell.mk` removed from Makefile. CDC1 is now exclusively used
+  by the AP binary protocol via the USB adapter thread.
+- **Logging refactored** — `app_debug.h` (compile-time `DBG_*` macros)
+  replaced by `app_log.h` (runtime `LOG_*` macros). All source files updated
+  to use `LOG_ERROR`/`LOG_WARN`/`LOG_INFO`/`LOG_DEBUG` instead of
+  `DBG_ERROR`/`DBG_WARN`/`DBG_INFO`/`DBG_DEBUG`.
+- **Persistent data version bumped to `0x0003`** — new `log_level` field
+  added. EFL storage page changed from page 0 to page 1. Existing settings
+  will reset to defaults on firmware upgrade.
+- **Debug build** (`make debug`): now adds `-DAPP_DEBUG_BUILD=1` which
+  enables ChibiOS stack checks (`CH_DBG_ENABLE_STACK_CHECK`), stack fill
+  patterns (`CH_DBG_FILL_THREADS`), and generates `.su` files for
+  per-function stack analysis. Also disables Stop mode.
+- Main thread loop simplified from shell respawn logic to idle sleep with
+  optional stack watermark reporting (debug builds).
+
+Fixed
+- **Stack overflow causing HardFault in release builds** — several functions
+  in `micb.c` allocated 252-256 byte arrays (`payload[AP_MAX_PAYLOAD_SIZE]`,
+  `evt_buf[AP_MAX_PACKET_SIZE]`) on the stack. Combined with the 256-byte
+  buffer from `log_printf_timeout()` and thread frame overhead, the USB
+  adapter thread's 768-byte stack overflowed under `-O2` optimization,
+  corrupting ChibiOS kernel data structures. Fixed by making 5 large
+  stack-local buffers `static` in `micb.c` (moved ~1268 bytes from stack
+  to BSS).
+- **Race condition in `app_sm_start()`** — `driver_state` was set to
+  `APP_SM_RUNNING` after `chThdCreateStatic()`, meaning the new thread
+  could run and check `driver_state` before it was updated. Fixed by
+  setting `driver_state` before thread creation.
+- **`input_names[]` array missing `MODE_TRANSITION_COMPLETE` entry** —
+  caused out-of-bounds read when logging that input event.
+- **`cmd_power_off()` sent wrong event** — sent `APP_SM_INPUT_BTN_EXTENDED_RELEASE`
+  instead of `APP_SM_INPUT_BTN_EXTENDED_START`, preventing power off from
+  working via AP command.
+
 ## [Development] (2026-03-29)
 
 Added

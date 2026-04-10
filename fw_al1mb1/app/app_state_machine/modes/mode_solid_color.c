@@ -32,21 +32,19 @@ SOFTWARE.
 #include "modes.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /*===========================================================================*/
 /* Color Palette                                                             */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Color names for debug output.
+ * @brief   Color names for log output.
  */
 static const char* const color_names[APP_SM_COLOR_COUNT] = {
     "AZURE", "BLUE", "PURPLE", "MAGENTA", "PINK", "RED", 
     "ORANGE", "YELLOW", "LIME", "GREEN", "SPRING", "CYAN" 
 };
-#endif
 
 /**
  * @brief   12-color extended palette.
@@ -78,7 +76,7 @@ const uint8_t shared_color_palette[APP_SM_COLOR_COUNT][3] = {
 /*===========================================================================*/
 
 static void solid_color_enter(void) {
-    DBG_DEBUG("MODE SolidColor: enter: color=%s brightness=%d",
+    LOG_DEBUG("MODE SolidColor: enter: color=%s brightness=%d",
              color_names[global_color_index], global_brightness);
     /* Display current color */
     anim_thread_set_solid(
@@ -90,17 +88,17 @@ static void solid_color_enter(void) {
 }
 
 static void solid_color_exit(void) {
-    DBG_DEBUG("MODE SolidColor: exit");
+    LOG_DEBUG("MODE SolidColor: exit");
     
 }
 
 static void solid_color_on_short_press(void) {
     uint8_t old_idx = global_color_index;
-    DBG_UNUSED(old_idx);
+    LOG_UNUSED(old_idx);
     /* Cycle to next color */
     global_color_index = (global_color_index + 1) % APP_SM_COLOR_COUNT;
 
-    DBG_DEBUG("MODE SolidColor: color set from %s to %s",
+    LOG_DEBUG("MODE SolidColor: color set from %s to %s",
              color_names[old_idx], color_names[global_color_index]);
 
     /* Display new color */
@@ -113,7 +111,7 @@ static void solid_color_on_short_press(void) {
 }
 
 static void solid_color_on_long_start(void) {
-    DBG_DEBUG("MODE SolidColor: long_start");
+    LOG_DEBUG("MODE SolidColor: long_start");
     /* No special action for long press start in this mode */
 }
 

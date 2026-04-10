@@ -32,7 +32,7 @@ SOFTWARE.
 
 #include "system_states.h"
 #include "animation_thread.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 
 /*===========================================================================*/
@@ -40,16 +40,16 @@ SOFTWARE.
 /*===========================================================================*/
 
 void state_boot_enter(void) {
-    DBG_DEBUG("state_boot_enter()");
+    LOG_DEBUG("state_boot_enter()");
 
     /*
      * Boot state just signals the transition to powerup.
      */
 
     /* Boot is instant - signal transition to powerup */
-    DBG_DEBUG("posting BOOT_COMPLETE input...");
+    LOG_DEBUG("posting BOOT_COMPLETE input...");
     app_sm_process_input(APP_SM_INPUT_BOOT_COMPLETE);
-    DBG_DEBUG("state_boot_enter() done");
+    LOG_DEBUG("state_boot_enter() done");
 }
 
 void state_boot_process(app_sm_input_t input) {

@@ -39,15 +39,15 @@ SOFTWARE.
  *          - Button press (PC11 via EXTI)
  *          - USB activity (TODO: not yet implemented)
  *
- * @note    Stop mode can be disabled for debugging by setting APP_DEBUG_LEVEL
- *          to 5 (DBG_LEVEL_POWER). This keeps the debugger connected but
- *          increases power consumption.
+ * @note    Stop mode can be disabled for debugging by building with
+ *          `make debug` which defines APP_DEBUG_BUILD=1. This keeps the
+ *          debugger connected but increases power consumption.
  */
 
 #include "system_states.h"
 #include "animation_thread.h"
 #include "button_driver.h"
-#include "app_debug.h"
+#include "app_log.h"
 #include "portab.h"
 #include "usbcfg.h"
 
@@ -65,7 +65,7 @@ SOFTWARE.
 /* Low-Power Mode Helper Functions                                           */
 /*===========================================================================*/
 
-#if !DBG_SKIP_LOW_POWER
+#if !defined(APP_DEBUG_BUILD) || (APP_DEBUG_BUILD != 1)
 
 /**
  * @brief   Prepares the system for entering Stop mode.
@@ -205,7 +205,7 @@ static void restore_from_stop(void) {
     usbConnectBus(serusbcfg1.usbp);
 }
 
-#endif /* !DBG_SKIP_LOW_POWER */
+#endif /* !APP_DEBUG_BUILD */
 
 /*===========================================================================*/
 /* Off State Implementation                                                  */
@@ -218,8 +218,8 @@ void state_off_enter(void) {
     /* Ensure LEDs are off */
     anim_thread_off();
 
-#if !DBG_SKIP_LOW_POWER
-    DBG_DEBUG("Entering Stop mode (low-power)...");
+#if !defined(APP_DEBUG_BUILD) || (APP_DEBUG_BUILD != 1)
+    LOG_DEBUG("Entering Stop mode (low-power)...");
     
     /* Prepare peripherals for Stop mode */
     prepare_stop_mode();
@@ -230,9 +230,9 @@ void state_off_enter(void) {
     /* Wake-up occurred - restore system */
     restore_from_stop();
 
-    DBG_DEBUG("Woke up from Stop mode");
+    LOG_DEBUG("Woke up from Stop mode");
 #else
-    DBG_DEBUG("Stop mode disabled (debug level %d), staying in run mode", APP_DEBUG_LEVEL);
+    LOG_DEBUG("Stop mode disabled (debug build), staying in run mode");
 #endif
 }
 

@@ -23,40 +23,46 @@ SOFTWARE.
 */
 
 /**
- * @file    cmd_version.c
- * @brief   Shell command: version.
+ * @file    usb_adapter.h
+ * @brief   USB CDC1 adapter for Attentio Protocol (AP).
  *
- * @details Reads the firmware version from the application header and
- *          responds with the version string in <major>.<minor>.<patch>
- *          format followed by the OK terminator.
+ * @details The USB adapter runs a dedicated thread that reads bytes from
+ *          CDC1 (PORTAB_SDU2), feeds them to the AP byte-by-byte parser,
+ *          and dispatches complete packets to the MICB for processing.
  *
- *          The version is encoded as a 32-bit value in the app header:
- *          bits [23:16] = major, bits [15:8] = minor, bits [7:0] = patch.
- *
- * @example
- *          -> version\r\n
- *          <- 1.1.0\r\n
- *          <- OK\r\n
+ *          Responses and unsolicited events are sent back on CDC1 via the
+ *          registered send callback.
  */
 
-#include "cmd_version.h"
-#include "shell_helpers.h"
-#include "app_header.h"
-#include "chprintf.h"
+#ifndef USB_ADAPTER_H
+#define USB_ADAPTER_H
+
+#include <stdint.h>
 
 /*===========================================================================*/
-/* Command handler                                                           */
+/* Public API                                                                */
 /*===========================================================================*/
 
-void cmd_version(BaseSequentialStream *chp, int argc, char *argv[]) {
-    (void)argc;
-    (void)argv;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    uint32_t ver = app_header.version;
-    uint8_t major = (uint8_t)((ver >> 16) & 0xFFU);
-    uint8_t minor = (uint8_t)((ver >> 8) & 0xFFU);
-    uint8_t patch = (uint8_t)(ver & 0xFFU);
+/**
+ * @brief   Initialize the USB adapter module.
+ * @details Initializes the AP parser and prepares the adapter thread.
+ *          Must be called after USB and MICB are initialized.
+ */
+void usb_adapter_init(void);
 
-    chprintf(chp, "%u.%u.%u\r\n", major, minor, patch);
-    shell_ok(chp);
+/**
+ * @brief   Start the USB adapter thread.
+ * @details Creates and starts the dedicated reader thread that processes
+ *          incoming AP packets from CDC1.
+ */
+void usb_adapter_start(void);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* USB_ADAPTER_H */

@@ -34,20 +34,18 @@ SOFTWARE.
 #include "mode_night_light_config.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /*===========================================================================*/
 /* Night Light Brightness Levels                                             */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Night light level names for debug output.
+ * @brief   Night light level names for log output.
  */
 static const char* const level_names[4] = {
     "BARELY_VISIBLE", "VERY_DIM", "DIM", "LOW"
 };
-#endif
 
 /**
  * @brief   Night light brightness levels (very dim).
@@ -72,7 +70,7 @@ static uint8_t current_level_index = 2;  /* Default to dim */
 /*===========================================================================*/
 
 static void night_light_enter(void) {
-    DBG_DEBUG("MODE NightLight: enter level=%s (%d)",
+    LOG_DEBUG("MODE NightLight: enter level=%s (%d)",
              level_names[current_level_index],
              night_brightness_levels[current_level_index]);
     /* Display warm color at current night light brightness */
@@ -85,17 +83,17 @@ static void night_light_enter(void) {
 }
 
 static void night_light_exit(void) {
-    DBG_DEBUG("MODE NightLight: exit");
+    LOG_DEBUG("MODE NightLight: exit");
     
 }
 
 static void night_light_on_short_press(void) {
     uint8_t old_idx = current_level_index;
-    DBG_UNUSED(old_idx);
+    LOG_UNUSED(old_idx);
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % NIGHT_LIGHT_LEVELS;
 
-    DBG_DEBUG("MODE NightLight: level set from %s to %s (%d to %d)",
+    LOG_DEBUG("MODE NightLight: level set from %s to %s (%d to %d)",
              level_names[old_idx], level_names[current_level_index],
              night_brightness_levels[old_idx],
              night_brightness_levels[current_level_index]);
@@ -110,7 +108,7 @@ static void night_light_on_short_press(void) {
 }
 
 static void night_light_on_long_start(void) {
-    DBG_DEBUG("MODE NightLight: long_start");
+    LOG_DEBUG("MODE NightLight: long_start");
     /* No special action for long press start in this mode */
 }
 

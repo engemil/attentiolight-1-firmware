@@ -17,8 +17,8 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - Persistent data for run-time data storage, with EFL (Embedded Flash) Driver. Including CRC32 integrity checking and factory default restoration.
 - Integration with Bootloader and application header for application firmware updates over USB.
 - Low-power mode with wake-up from user button.
-- Dual USB CDC/ACM interface with IAD (Interface Association Descriptors): CDC0 for debug output, CDC1 for shell commands and external control.
-- ChibiOS Shell (on CDC1) with interactive commands.
+- Dual USB CDC/ACM interface with IAD (Interface Association Descriptors): CDC0 for debug output, CDC1 for Attentio Protocol (AP) interface and external control.
+- Attentio Protocol (AP) on CDC1 with binary packet framing for session-based device control.
 
 
 ## Table of Contents
@@ -51,10 +51,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
   - [Sign App Header](#sign-app-header-scriptssign_app_headersh)
   - [System Setup Scripts](#system-setup-scripts-scriptssystem)
   - [Memory Usage](#memory-usage)
-- [Shell Commands](#shell-commands)
-  - [Connecting to the Shell](#connecting-to-the-shell)
-  - [ChibiOS Built-in Commands](#chibios-built-in-commands)
-  - [Application Commands](#application-commands)
+- [Attentio Protocol (AP)](#attentio-protocol-ap)
 - [Troubleshooting](#troubleshooting)
   - [Identifying CDC Ports](#identifying-cdc-ports)
 - [Bugs and Issues](#bugs-and-issues)
@@ -192,16 +189,18 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 ├── fw_al1mb1/                      # Application firmware
 │   ├── app/                        # Application source code and application drivers
 │   │   ├── main.c                  # Entry point
-│   │   ├── app_debug.h             # Debug macros & levels
+│   │   ├── app_log.c/h             # Runtime logging system (LOG_* macros)
 │   │   ├── rt_config.h             # Runtime configuration
 │   │   ├── app_state_machine/      # Core state machine
 │   │   │   ├── animation/          # LED animation engine
 │   │   │   ├── modes/              # User-selectable modes
 │   │   │   │   └── effects/        # effects implementation
 │   │   │   └── system_states/      # System state handlers
+│   │   ├── attentio_protocol/      # AP packet format and definitions
 │   │   ├── button_driver/          # Button input with debouncing
+│   │   ├── micb/                   # Multi-Interface Control Broker
 │   │   ├── persistent_data/        # EFL settings storage
-│   │   ├── shell_commands/         # USB shell command handlers
+│   │   ├── usb_adapter/            # AP packet parser on CDC1
 │   │   └── ws2812b_led_driver/     # WS2812B SPI protocol
 │   ├── app_header/                 # Bootloader app header
 │   ├── boards/                     # Board support packages
@@ -233,7 +232,7 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 | LED | WS2812B addressable RGB |
 | Button | User button |
 | USB | USB 2.0 Full Speed, Dual CDC/ACM (IAD) |
-| Debug | SWD + CDC0 debug serial, CDC1 interactive shell |
+| Debug | SWD + CDC0 debug serial, CDC1 Attentio Protocol (AP) |
 | Oscillators | 48MHz HSE, 32.768kHz LSE |
 | Wireless Module| ESP32 WiFi/BLE module interface* |
 
@@ -252,11 +251,13 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 │  │   └── Animation Engine                                  │ │
 │  └─────────────────────────────────────────────────────────┘ │
 │  ┌─────────────────────────────────────────────────────────┐ │
-│  │ Shell / CLI (shell_commands/)                           │ │
-│  │   ├── version — Firmware version query                  │ │
-│  │   ├── metadata — Read-only device identity              │ │
-│  │   ├── settings — User-configurable preferences          │ │
-│  │   └── dfu — Reboot into DFU bootloader                  │ │
+│  │ Attentio Protocol / MICB (micb/, attentio_protocol/)  │ │
+│  │   ├── Session management (claim/release/takeover)     │ │
+│  │   ├── LED control (RGB, HSV, brightness, effects)     │ │
+│  │   ├── Power management (on/off)                       │ │
+│  │   ├── Device queries (state, caps, metadata)          │ │
+│  │   ├── Settings (list/get/set) and log level control   │ │
+│  │   └── DFU enter                                       │ │
 │  └─────────────────────────────────────────────────────────┘ │
 ├──────────────────────────────────────────────────────────────┤
 │                    APPLICATION DRIVERS                       │
@@ -297,8 +298,8 @@ st-flash --reset write build/fw_al1mb1_signed.bin 0x08004000
 - **ChibiOS/RT** — Real-time kernel with threads and event-driven architecture.
 - **ChibiOS HAL** — Hardware abstraction for GPIO, SPI, USB, PWR, timers.
 - **hal_efl_stm32c0xx** — Custom EFL driver (STM32C0 not in mainline ChibiOS).
-- **USB Stack** — Dual CDC/ACM with IAD: CDC0 for debug serial, CDC1 for interactive shell. DFU mode via bootloader.
-- **Shell / CLI** — ChibiOS shell on CDC1. Heap-allocated thread respawns on USB reconnection.
+- **USB Stack** — Dual CDC/ACM with IAD: CDC0 for debug serial, CDC1 for Attentio Protocol interface. DFU mode via bootloader.
+- **Attentio Protocol / MICB** — Binary protocol on CDC1 with session-based access control. USB adapter thread parses AP packets and routes commands to the Multi-Interface Control Broker.
 - **WS2812B Driver** — SPI-based protocol using DMA for timing-critical LED data.
 - **Power Management** — Low-power mode with EXTI wake-up.
 
@@ -353,13 +354,14 @@ EFL Region (8KB = 4 pages × 2KB)
 │ Page 1: User Settings (2KB)     │  ← User-configurable, read-write
 │   - Header (magic, version)     │
 │   - device_name                 │
+│   - log_level                   │  ← Runtime log level (persisted across reboots)
 │   - CRC32                       │
 ├─────────────────────────────────┤ 0x0801F000
 │ Page 2-3: Reserved (4KB)        │  ← Available for future use
 └─────────────────────────────────┘ 0x08020000
 ```
 
-> **Note:** The `metadata` command aggregates data from multiple sources:
+> **Note:** The `GET_METADATA` AP command aggregates data from multiple sources:
 > - `serial_number` — STM32 hardware UID register (alias for `chip_uid`)
 > - `firmware_version` — Application header struct
 > - `device_model`, `hardware_revision`, `board` — Board BSP (`board.h`)
@@ -372,8 +374,8 @@ EFL Region (8KB = 4 pages × 2KB)
 | Aspect | Metadata (Page 0) | Settings (Page 1) |
 |--------|-------------------|-------------------|
 | **Purpose** | Production-programmed device identity | User-configurable preferences |
-| **Access** | Read-only (via shell) | Read-write (via shell) |
-| **Shell Command** | `metadata` | `settings` |
+| **Access** | Read-only (via AP protocol) | Read-write (via AP protocol) |
+| **AP Command** | `GET_METADATA` | `SETTINGS_LIST` / `SETTINGS_GET` / `SETTINGS_SET` |
 | **Factory Reset** | NOT affected | Reset to defaults |
 | **Programming** | During production/provisioning | During device operation |
 | **Magic** | `0x4D444154` ("MDAT") | `0x50444154` ("PDAT") |
@@ -383,7 +385,7 @@ EFL Region (8KB = 4 pages × 2KB)
 
 | Library | Description |
 |---------|-------------|
-| **usbcfg** | USB dual CDC/ACM configuration with IAD descriptors. Defines two virtual serial ports: CDC0 (debug prints) and CDC1 (shell commands). Manages USB device/configuration descriptors, endpoint configs, and driver lifecycle hooks. |
+| **usbcfg** | USB dual CDC/ACM configuration with IAD descriptors. Defines two virtual serial ports: CDC0 (debug prints) and CDC1 (Attentio Protocol interface). Manages USB device/configuration descriptors, endpoint configs, and driver lifecycle hooks. |
 | **portab** | Board portability abstraction layer. Maps logical driver names (`PORTAB_SDU1`, `PORTAB_SDU2`, `PORTAB_USB1`) to ChibiOS HAL instances. |
 | **hal_efl_stm32c0xx** | Custom Embedded Flash (EFL) driver for STM32C0xx. Required because STM32C0 is not yet supported in mainline ChibiOS EFL. |
 | (Work-in-progress) **ee_esp32_wifi_ble_if_driver** | ESP32 WiFi/BLE module GPIO interface (placeholder). Controls enable and boot pins for ESP32-C3 WROOM module. UART communication protocol not yet implemented. |
@@ -397,18 +399,23 @@ EFL Region (8KB = 4 pages × 2KB)
 ```bash
 cd fw_al1mb1
 
-make                  # Release build (no debug output)
-make debug            # Debug build with all outputs
-make debug LEVEL=5    # Debug build with all outputs
+make                  # Release build (-O2, Stop mode enabled)
+make debug            # Debug build (-Og, Stop mode disabled, stack checks enabled)
 ```
 
-Debug levels (hierarchical):
-- `0` = NONE (release)
-- `1` = ERROR
-- `2` = WARN  
-- `3` = INFO
-- `4` = DEBUG
-- `5` = POWER (verbose + disables Stop mode for debugging) (default for `make debug`)
+Log levels are now **runtime-configurable** (all log code is always compiled in):
+- `0` = NONE — no output
+- `1` = ERROR — critical errors only
+- `2` = WARN — errors + warnings
+- `3` = INFO — + state/mode changes (default boot level)
+- `4` = DEBUG — everything (verbose)
+
+The boot default is loaded from persistent storage (`log_level` setting).
+Override at runtime via the `LOG_SET_LEVEL` AP command (no reboot required).
+
+`make debug` adds `-DAPP_DEBUG_BUILD=1` which enables ChibiOS stack overflow
+checks, stack fill patterns for watermark analysis, and disables Stop mode to
+keep the debugger connected.
 
 
 
@@ -483,12 +490,12 @@ Thread working area sizes are configured in `app/rt_config.h`:
 - `BTN_THREAD_WA_SIZE` — Button thread
 - `APP_SM_THREAD_WA_SIZE` — State machine thread
 - `APP_SM_ANIM_THREAD_WA_SIZE` — Animation thread
-- `SHELL_WA_SIZE` — Shell thread (heap-allocated, respawns on USB reconnect)
+- `USB_ADAPTER_WA_SIZE` — USB adapter / AP protocol thread (= `RT_USB_ADAPTER_THREAD_WA_SIZE`)
 
-> **Note:** Debug builds automatically add 512 extra bytes to each thread
+> **Note:** All builds (release and debug) add 512 extra bytes to each thread
 > stack (via `_RT_DEBUG_EXTRA` in `rt_config.h`) to accommodate the 256-byte
-> `dbg_printf_timeout()` buffer. The watermark percentages reflect the debug
-> stack sizes, not the release sizes.
+> `log_printf_timeout()` buffer used by the runtime logging system. The
+> watermark percentages reflect these padded stack sizes.
 
 #### 3. Static Stack Usage Analysis (GCC `.su` files)
 
@@ -503,7 +510,7 @@ sort -t: -k3 -n fw_al1mb1/build/fw_al1mb1.elf.ltrans0.ltrans.su | tail -20
 
 Example output:
 ```
-./app/app_debug.h:129:20:dbg_printf_timeout    284    static
+./app/app_log.c:42:20:log_printf_timeout    284    static
 ./app/main.c:54:6:init_system                   16    static
 ```
 
@@ -627,86 +634,84 @@ Check usage after building:
 **NB!** The `.heap` section by default shows 100% usage of the remaining RAM by design - ChibiOS allocates all remaining RAM to the heap. Hence the dedicated script to check memory usage.
 
 
-## Shell Commands
+## Attentio Protocol (AP)
 
-The firmware includes a ChibiOS shell on **CDC1** providing an interactive command-line interface over USB. The shell thread is dynamically allocated from the heap and respawns automatically when the USB cable is reconnected.
+The firmware communicates over **CDC1** using the Attentio Protocol (AP), a packet-based interface. The protocol replaces the previous ChibiOS text shell.
 
-**NOTE**: `attentio-cli` is recommended for interacting with the device in terminal over USB (work-in-progress). Link: https://github.com/engemil/attentio-cli
+**NOTE**: `attentio-cli` is the recommended tool for interacting with the device over USB. Link: https://github.com/engemil/attentio-cli
 
-### Connecting to the Shell
+### Packet Format
 
-Connect to the CDC1 serial port (see [Identifying CDC Ports](#identifying-cdc-ports) to find the correct `/dev/ttyACMx`). In Linux you can use for example **minicom**:
-
-```bash
-minicom -D /dev/ttyACMx -b 115200
+```
+[SYNC 0xA5] [LEN] [CMD] [PAYLOAD 0-252 bytes] [CRC-8/CCITT]
 ```
 
-The shell prompt is:
-```
-attentio>
-```
+| Field | Size | Description |
+|-------|------|-------------|
+| SYNC | 1 byte | Always `0xA5` |
+| LEN | 1 byte | Length of CMD + PAYLOAD (1-253) |
+| CMD | 1 byte | Command ID |
+| PAYLOAD | 0-252 bytes | Command-specific data |
+| CRC-8 | 1 byte | CRC-8/CCITT (poly 0x07, init 0x00) over LEN+CMD+PAYLOAD |
 
-### ChibiOS Built-in Commands
+### Commands
 
-ChibiOS built-in commands are provided by the ChibiOS shell module for general info, debugging, and diagnostics. Note a few of the built-in commands are disabled, as there are similar application commands.
+**Host -> Device:**
 
-| Command | Description |
-|---------|-------------|
-| `help` | Lists all available commands (including the application commands) |
-| `echo "message"` | Echoes back the given string |
-| `systime` | Prints current system tick count |
-| `mem` | Heap and core memory status (fragments, free bytes) |
-| `threads` | Lists all threads with stack pointers, priority, and state |
-| `exit` | Terminates the shell thread (respawns automatically on next USB check) |
+| Command | ID | Category | Description |
+|---------|-----|----------|-------------|
+| `CLAIM` | 0x01 | Session | Claim device control session |
+| `RELEASE` | 0x02 | Session | Release control session |
+| `PING` | 0x03 | Session | Heartbeat / connectivity check |
+| `POWER_ON` | 0x10 | Power | Power on the device |
+| `POWER_OFF` | 0x11 | Power | Power off the device |
+| `LED_OFF` | 0x20 | LED | Turn off LED |
+| `SET_RGB` | 0x21 | LED | Set LED color (RGB) `[R,G,B]` |
+| `SET_HSV` | 0x22 | LED | Set LED color (HSV) `[H:2,S,V]` |
+| `SET_BRIGHTNESS` | 0x23 | LED | Set LED brightness `[0-100]` |
+| `SET_EFFECT` | 0x30 | Effects | Set LED effect mode (placeholder) |
+| `GET_STATE` | 0x40 | Query | Query device state |
+| `GET_CAPS` | 0x41 | Query | Query device capabilities |
+| `GET_SESSION` | 0x42 | Query | Query session info |
+| `GET_METADATA` | 0x43 | Query | Query device metadata |
+| `SETTINGS_LIST` | 0x50 | Settings | List all settings |
+| `SETTINGS_GET` | 0x51 | Settings | Read a setting value |
+| `SETTINGS_SET` | 0x52 | Settings | Write a setting value |
+| `LOG_GET_LEVEL` | 0x60 | Log | Query current log level |
+| `LOG_SET_LEVEL` | 0x61 | Log | Set runtime log level |
+| `DFU_ENTER` | 0x70 | DFU | Reboot into DFU bootloader |
 
+**Device -> Host (Events & Responses):**
 
-### Application Commands
+| Command | ID | Description |
+|---------|-----|-------------|
+| `EVT_BUTTON` | 0x80 | Button event (short/long/extended press) |
+| `EVT_STATE_CHANGE` | 0x81 | Device state change notification |
+| `EVT_SESSION_END` | 0x82 | Session ended (released, takeover, or power off) |
+| `OK` | 0xF0 | Success response (optional data payload) |
+| `ERROR` | 0xF1 | Error response (1-byte error code) |
 
-**Application commands** follow a consistent response format:
+**Error Codes** (sent as payload of `ERROR` response):
 
-| Result  | Format |
-|---------|--------|
-| Success | `[payload lines...]\r\n` followed by `OK\r\n` |
-| Failure | `ERROR <message>\r\n` |
+| Code | Value | Description |
+|------|-------|-------------|
+| `NONE` | 0x00 | No error |
+| `NOT_CONTROLLER` | 0x01 | Sender does not have an active session |
+| `INVALID_CMD` | 0x02 | Unknown command ID |
+| `INVALID_PARAM` | 0x03 | Invalid parameter value |
+| `INVALID_STATE` | 0x04 | Command not valid in current device state |
+| `CRC_FAIL` | 0x05 | CRC-8 check failed |
 
-The list of **application commands**:
+### Session Management (MICB)
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `version` | Returns firmware version (`<major>.<minor>.<patch>`) from the application header | `version` → `1.1.0\r\nOK\r\n` |
-| `metadata` / `metadata list` | List all metadata fields in `key=value` format (read-only device identity) | `metadata` → `serial_number=...\r\nfirmware_version=1.1.0\r\n...OK\r\n` |
-| `metadata get <key>` | Read a specific metadata field | `metadata get serial_number` → `serial_number=004F00224E500C20334B3120\r\nOK\r\n` |
-| `settings` / `settings list` | List all settings in `key=value` format | `settings` → `device_name=AttentioLight-1\r\nOK\r\n` |
-| `settings get <key>` | Read a setting value | `settings get device_name` → `device_name=MyLight\r\nOK\r\n` |
-| `settings set <key> <value>` | Write a setting value | `settings set device_name MyLight` → `OK\r\n` |
-| `dfu` | Reboot into DFU bootloader mode. No response — device disconnects immediately | `dfu` → *(device reboots into DFU)* |
+The Multi-Interface Control Broker (MICB) provides session-based access control:
 
-**Metadata fields** (read-only):
-| Field | Source | Description |
-|-------|--------|-------------|
-| `device_model` | Board BSP | Device model name ("AttentioLight-1") |
-| `serial_number` | STM32 UID register | Chip UID (alias for `chip_uid`, 24 hex chars) |
-| `firmware_version` | App header | Firmware version (`M.N.P` format) |
-| `build_date` | Compile-time | Build timestamp |
-| `chibios_kernel` | ChibiOS | Kernel version |
-| `chibios_port_info` | ChibiOS port | Port-specific info |
-| `compiler` | ChibiOS port | Compiler name and version |
-| `board` | Board BSP | Board name from BSP |
-| `hardware_revision` | Board BSP | Hardware revision ("Rev C") |
-| `platform` | ChibiOS HAL | MCU platform name |
-| `chip_uid` | STM32 UID register | 96-bit unique hardware ID |
-| `architecture` | ChibiOS port | CPU architecture (e.g., "ARMv6-M") |
-| `core_variant` | ChibiOS port | Core variant (e.g., "Cortex-M0+") |
-
-**Settings fields** (read-write):
-| Field | Description |
-|-------|-------------|
-| `device_name` | User-assigned device name (default: "AttentioLight-1") |
-
-**Notes:**
-- `metadata` fields are read-only. (More info soon on how we write this info).
-- `settings set` on an unknown field returns `ERROR unknown key`.
-- The `dfu` command writes magic value `0xDEADBEEF` to RAM (`0x20005FFC`) and triggers `NVIC_SystemReset()`. The host detects the USB disconnection and can proceed with DFU flashing via `dfu-util`.
+- **STANDALONE** mode — device operates autonomously (button-driven state machine)
+- **REMOTE** mode — a host has claimed control via `CLAIM` command
+- Commands that modify device state (LED, power) require an active session
+- Query commands (`GET_*`, `SETTINGS_LIST/GET`) work without a session
+- `CLAIM` / `RELEASE` / takeover semantics support future multi-interface control (USB, BLE, WiFi)
+- **Button event forwarding** — when in REMOTE mode, physical button presses are forwarded to the controlling host as `EVT_BUTTON` (0x80) packets
 
 
 ## Troubleshooting
@@ -716,8 +721,10 @@ Useful CLI tools for debugging/troubleshooting: `minicom`,  `multiarch-gdb`, `us
 As well as the already mentioned tools `st-flash`/`st-erase`, `dfu-util`, `openocd`
 
 Compile for debug:
-- `make debug` or `make debug LEVEL=4` - for debug info over serial communication.
-- `make debug LEVEL=5` - for debug info + do not enter low-power Stop mode.
+- `make debug` — debug build (`-Og`, disables Stop mode, enables stack checks)
+
+Runtime log level can be changed without recompiling via the `LOG_SET_LEVEL`
+AP command (using `attentio-cli` or direct packet).
 
 
 ### Identifying USB Bootloader/Normal mode
@@ -737,7 +744,7 @@ ls -ls /dev/serial/by-id
 | Interface Number | Role | Description |
 |------------------|------|-------------|
 | `IF=00` (`...-if00`) | **CDC0** | Debug print stream (read-only) |
-| `IF=02` (`...-if02`) | **CDC1** | Shell command interface (bidirectional) |
+| `IF=02` (`...-if02`) | **CDC1** | Attentio Protocol interface (bidirectional) |
 
 Use `minicom` for serial monitoring in terminal. E.g. for `dev/ttyACM1`
 ```bash

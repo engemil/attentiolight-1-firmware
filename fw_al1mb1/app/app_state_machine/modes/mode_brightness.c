@@ -33,20 +33,18 @@ SOFTWARE.
 #include "modes.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /*===========================================================================*/
 /* Brightness Levels                                                         */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Brightness level names for debug output.
+ * @brief   Brightness level names for log output.
  */
 static const char* const brightness_names[APP_SM_BRIGHTNESS_LEVELS] = {
     "12%", "25%", "37%", "50%", "62%", "75%", "87%", "100%"
 };
-#endif
 
 /**
  * @brief   8 brightness levels (12% to 100%).
@@ -76,7 +74,7 @@ static uint8_t current_level_index = 3;  /* Default to 50% */
 /*===========================================================================*/
 
 static void brightness_enter(void) {
-    DBG_DEBUG("MODE Brightness: enter level=%s (%d)",
+    LOG_DEBUG("MODE Brightness: enter level=%s (%d)",
              brightness_names[current_level_index],
              brightness_levels[current_level_index]);
     /* Display current color at current brightness level */
@@ -88,7 +86,7 @@ static void brightness_enter(void) {
 }
 
 static void brightness_exit(void) {
-    DBG_DEBUG("MODE Brightness: exit global_brightness=%d",
+    LOG_DEBUG("MODE Brightness: exit global_brightness=%d",
              brightness_levels[current_level_index]);
     /* Update global brightness for other modes to use */
     global_brightness = brightness_levels[current_level_index];
@@ -96,11 +94,11 @@ static void brightness_exit(void) {
 
 static void brightness_on_short_press(void) {
     uint8_t old_idx = current_level_index;
-    DBG_UNUSED(old_idx);
+    LOG_UNUSED(old_idx);
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % APP_SM_BRIGHTNESS_LEVELS;
 
-    DBG_DEBUG("MODE Brightness: level set from %s to %s (%d to %d)",
+    LOG_DEBUG("MODE Brightness: level set from %s to %s (%d to %d)",
              brightness_names[old_idx], brightness_names[current_level_index],
              brightness_levels[old_idx], brightness_levels[current_level_index]);
 
@@ -116,7 +114,7 @@ static void brightness_on_short_press(void) {
 }
 
 static void brightness_on_long_start(void) {
-    DBG_DEBUG("MODE Brightness: long_start");
+    LOG_DEBUG("MODE Brightness: long_start");
     /* No special action for long press start in this mode */
 }
 

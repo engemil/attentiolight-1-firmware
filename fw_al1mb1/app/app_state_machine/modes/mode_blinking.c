@@ -32,20 +32,18 @@ SOFTWARE.
 #include "modes.h"
 #include "animation_thread.h"
 #include "app_state_machine_config.h"
-#include "app_debug.h"
+#include "app_log.h"
 
 /*===========================================================================*/
 /* Blink Speeds                                                              */
 /*===========================================================================*/
 
-#if (APP_DEBUG_LEVEL >= DBG_LEVEL_DEBUG)
 /**
- * @brief   Blink speed names for debug output.
+ * @brief   Blink speed names for log output.
  */
 static const char* const speed_names[6] = {
     "ULTRA_SLOW", "VERY_SLOW", "SLOW", "MEDIUM", "FAST", "VERY_FAST"
 };
-#endif
 
 /**
  * @brief   Blink interval options (ms).
@@ -75,7 +73,7 @@ static uint8_t current_speed_index = 2;  /* Default to Slow */
 /*===========================================================================*/
 
 static void blinking_enter(void) {
-    DBG_DEBUG("MODE Blinking: enter speed=%s (%dms)",
+    LOG_DEBUG("MODE Blinking: enter speed=%s (%dms)",
              speed_names[current_speed_index], blink_speeds[current_speed_index]);
     /* Start blinking animation with shared color */
     anim_thread_blink(
@@ -86,17 +84,17 @@ static void blinking_enter(void) {
 }
 
 static void blinking_exit(void) {
-    DBG_DEBUG("MODE Blinking: exit");
+    LOG_DEBUG("MODE Blinking: exit");
     
 }
 
 static void blinking_on_short_press(void) {
     uint8_t old_idx = current_speed_index;
-    DBG_UNUSED(old_idx);
+    LOG_UNUSED(old_idx);
     /* Cycle to next blink speed */
     current_speed_index = (current_speed_index + 1) % BLINK_SPEED_COUNT;
 
-    DBG_DEBUG("MODE Blinking: speed set from %s to %s (%dms to %dms)",
+    LOG_DEBUG("MODE Blinking: speed set from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              blink_speeds[old_idx], blink_speeds[current_speed_index]);
 
@@ -109,7 +107,7 @@ static void blinking_on_short_press(void) {
 }
 
 static void blinking_on_long_start(void) {
-    DBG_DEBUG("MODE Blinking: long_start");
+    LOG_DEBUG("MODE Blinking: long_start");
     /* No special action for long press start in this mode */
 }
 

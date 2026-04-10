@@ -25,7 +25,6 @@ SOFTWARE.
 #include "ch.h"
 #include "hal.h"
 #include "chprintf.h"
-#include "shell.h"
 
 #include "portab.h"
 #include "usbcfg.h"
@@ -34,7 +33,9 @@ SOFTWARE.
 #include "button_driver.h"
 #include "animation_thread.h"
 #include "app_state_machine.h"
-#include "app_debug.h"
+#include "app_log.h"
+#include "micb.h"
+#include "usb_adapter.h"
 
 /* Persistent Data Storage (EFL (Embedded Flash)) */
 #include "device_metadata.h"
@@ -43,11 +44,50 @@ SOFTWARE.
 /* Real-time configuration (thread priorities, stack sizes) */
 #include "rt_config.h"
 
-/* Shell Commands */
-#include "cmd_version.h"
-#include "cmd_metadata.h"
-#include "cmd_settings.h"
-#include "cmd_dfu.h"
+
+/*===========================================================================*/
+/* Button event routing                                                      */
+/*===========================================================================*/
+
+/**
+ * @brief   Map button_driver event to AP button event type.
+ */
+static ap_button_event_t map_button_event(button_event_t event) {
+    switch (event) {
+    case BTN_EVT_SHORT_PRESS:           return AP_BTN_EVT_SHORT_PRESS;
+    case BTN_EVT_LONG_PRESS_START:      return AP_BTN_EVT_LONG_PRESS_START;
+    case BTN_EVT_LONG_PRESS_RELEASE:    return AP_BTN_EVT_LONG_PRESS_RELEASE;
+    case BTN_EVT_EXTENDED_PRESS_START:  return AP_BTN_EVT_EXTENDED_PRESS_START;
+    case BTN_EVT_EXTENDED_PRESS_RELEASE:return AP_BTN_EVT_EXTENDED_PRESS_RELEASE;
+    default:                            return AP_BTN_EVT_SHORT_PRESS;
+    }
+}
+
+/**
+ * @brief   Cached reference to the state machine button callback.
+ * @details Set during init, before the wrapper callback is registered.
+ */
+static button_callback_t sm_button_callback = NULL;
+
+/**
+ * @brief   Button event wrapper callback.
+ * @details Routes button events to:
+ *          1. The state machine (always — handles power off, mode changes).
+ *          2. The MICB (when in REMOTE mode — forwards as AP event to host).
+ *
+ * @param[in] event     Button event from the button driver.
+ */
+static void button_event_wrapper(button_event_t event) {
+    /* Always route to state machine for standalone behavior. */
+    if (sm_button_callback != NULL) {
+        sm_button_callback(event);
+    }
+
+    /* Additionally forward to MICB if in REMOTE mode. */
+    if (micb_get_mode() == MICB_MODE_REMOTE) {
+        micb_forward_button_event(map_button_event(event));
+    }
+}
 
 
 /* Serial Configuration for Virtual COM Port */
@@ -56,28 +96,6 @@ static SerialConfig serial_cfg = {
     .cr1    = 0,                // No parity, 8-bit data (default)
     .cr2    = 0,                // No specific control settings
     .cr3    = 0                 // No hardware flow control
-};
-
-/*
- * Shell command table.
- * Commands registered here are dispatched by the ChibiOS shell module
- * when received on CDC1 (PORTAB_SDU2).
- */
-static const ShellCommand shell_commands[] = {
-    {"version",  cmd_version},
-    {"metadata", cmd_metadata},
-    {"settings", cmd_settings},
-    {"dfu",      cmd_dfu},
-    {NULL, NULL}
-};
-
-/*
- * Shell configuration.
- * Binds the shell to CDC1 (PORTAB_SDU2) and registers our command table.
- */
-static const ShellConfig shell_cfg = {
-    .sc_channel  = (BaseSequentialStream *)&PORTAB_SDU2,
-    .sc_commands = shell_commands
 };
 
 /*
@@ -91,19 +109,14 @@ void init_system(void) {
     chSysInit();
 
     /*
-     * Initialize shell module (event source for shell termination).
-     */
-    shellInit();
-
-    /*
      * Board-dependent initialization.
      */
     portab_setup();
 
     /*
      * Initializes dual serial-over-USB CDC drivers.
-     * CDC0 (SDU1): Debug print stream
-     * CDC1 (SDU2): Shell command interface
+     * CDC0 (SDU1): Serial log output stream
+     * CDC1 (SDU2): Attentio Protocol (AP) interface
      */
     sduObjectInit(&PORTAB_SDU1);
     sduStart(&PORTAB_SDU1, &serusbcfg1);
@@ -139,90 +152,123 @@ void init_system(void) {
 */
 void init_application_systems(void){
 
-    DBG_INFO("MAIN initializing application...");
+    LOG_INFO("MAIN initializing application...");
 
     /*
      * Initialize device metadata storage (EFL page 0).
      * Loads production-programmed metadata from flash.
      */
-    DBG_DEBUG("MAIN device_metadata_init()...");
+    LOG_DEBUG("MAIN device_metadata_init()...");
     md_result_t md_result = device_metadata_init();
     if (md_result != MD_OK) {
-        DBG_WARN("MAIN device_metadata_init() returned: %s (using defaults)",
+        LOG_WARN("MAIN device_metadata_init() returned: %s (using defaults)",
                  device_metadata_result_str(md_result));
     } else {
-        DBG_DEBUG("MAIN device_metadata_init() OK");
+        LOG_DEBUG("MAIN device_metadata_init() OK");
     }
 
     /*
      * Initialize persistent settings storage (EFL page 1).
      * Loads user-configurable settings from flash (or defaults on first boot).
      */
-    DBG_DEBUG("MAIN persistent_data_init()...");
+    LOG_DEBUG("MAIN persistent_data_init()...");
     pd_result_t pd_result = persistent_data_init();
     if (pd_result != PD_OK) {
-        DBG_WARN("MAIN persistent_data_init() returned: %s (using defaults)",
+        LOG_WARN("MAIN persistent_data_init() returned: %s (using defaults)",
                  persistent_data_result_str(pd_result));
     } else {
-        DBG_DEBUG("MAIN persistent_data_init() OK");
-        const pd_data_t *pd = persistent_data_get();
-        if (pd != NULL) {
-            DBG_DEBUG("Device name: %s", pd->device_name);
-        }
+        LOG_DEBUG("MAIN persistent_data_init() OK");
     }
+
+    /*
+     * Initialize logging system.
+     * Loads boot log level from persistent storage.
+     */
+    log_init();
+
+    const pd_data_t *pd = persistent_data_get();
+    if (pd != NULL) {
+        LOG_DEBUG("Device name: %s", pd->device_name);
+        LOG_DEBUG("Log level: %d", pd->log_level);
+    }
+
+    /*
+     * Initialize MICB (Multi-Interface Control Broker).
+     * Must be after persistent_data and log_init so settings are available.
+     */
+    LOG_DEBUG("MAIN micb_init()...");
+    micb_init();
+    LOG_DEBUG("MAIN micb_init() OK");
+
+    /*
+     * Initialize USB adapter for AP protocol on CDC1.
+     * Registers send callback with MICB.
+     */
+    LOG_DEBUG("MAIN usb_adapter_init()...");
+    usb_adapter_init();
+    LOG_DEBUG("MAIN usb_adapter_init() OK");
 
     /*
      * Initialize button driver.
      * Creates button thread in STOPPED state (started later by state machine).
      */
-    DBG_DEBUG("MAIN button_init()...");
+    LOG_DEBUG("MAIN button_init()...");
     if (button_init(LINE_USER_BUTTON, PAL_LOW) != 0) {
-        DBG_ERROR("MAIN button_init() FAILED");
+        LOG_ERROR("MAIN button_init() FAILED");
     }
-    DBG_DEBUG("MAIN button_init() OK");
+    LOG_DEBUG("MAIN button_init() OK");
 
     /*
      * Initialize animation subsystem.
      * Creates animation thread and initializes LED driver.
      */
-    DBG_DEBUG("MAIN anim_thread_init()...");
+    LOG_DEBUG("MAIN anim_thread_init()...");
     if (anim_thread_init() != 0) {
-        DBG_ERROR("MAIN anim_thread_init() FAILED");
+        LOG_ERROR("MAIN anim_thread_init() FAILED");
     }
-    DBG_DEBUG("MAIN anim_thread_init() OK");
+    LOG_DEBUG("MAIN anim_thread_init() OK");
 
-    DBG_DEBUG("MAIN anim_thread_start()...");
+    LOG_DEBUG("MAIN anim_thread_start()...");
     if (anim_thread_start() != 0) {
-        DBG_ERROR("MAIN anim_thread_start() FAILED");
+        LOG_ERROR("MAIN anim_thread_start() FAILED");
     }
-    DBG_DEBUG("MAIN anim_thread_start() OK");
+    LOG_DEBUG("MAIN anim_thread_start() OK");
 
     /*
      * Initialize Application State Machine.
      */
-    DBG_DEBUG("MAIN app_sm_init()...");
+    LOG_DEBUG("MAIN app_sm_init()...");
     if (app_sm_init() != 0) {
-        DBG_ERROR("MAIN app_sm_init() FAILED");
+        LOG_ERROR("MAIN app_sm_init() FAILED");
     }
-    DBG_DEBUG("MAIN app_sm_init() OK");
+    LOG_DEBUG("MAIN app_sm_init() OK");
 
     /*
-     * Register button callback with state machine.
+     * Register button callback with wrapper that routes to both
+     * the state machine and MICB (when in REMOTE mode).
      */
-    DBG_DEBUG("MAIN registering button callback...");
-    button_register_callback(app_sm_get_button_event_callback());
-    DBG_DEBUG("MAIN button callback registered");
+    LOG_DEBUG("MAIN registering button callback...");
+    sm_button_callback = app_sm_get_button_event_callback();
+    button_register_callback(button_event_wrapper);
+    LOG_DEBUG("MAIN button callback registered");
 
     /*
      * Start Application State Machine.
      */
-    DBG_DEBUG("MAIN app_sm_start()...");
+    LOG_DEBUG("MAIN app_sm_start()...");
     if (app_sm_start() != 0) {
-        DBG_ERROR("MAIN app_sm_start() FAILED");
+        LOG_ERROR("MAIN app_sm_start() FAILED");
     }
-    DBG_DEBUG("MAIN state machine started");
+    LOG_DEBUG("MAIN state machine started");
 
-    DBG_INFO("Initialized AttentioLight-1 by EngEmil.io");
+    /*
+     * Start USB adapter thread (reads AP packets from CDC1).
+     */
+    LOG_DEBUG("MAIN usb_adapter_start()...");
+    usb_adapter_start();
+    LOG_DEBUG("MAIN usb_adapter_start() OK");
+
+    LOG_INFO("Initialized AttentioLight-1 by EngEmil.io");
 }
 
 int main(void) {
@@ -237,36 +283,22 @@ int main(void) {
     init_application_systems();
 
     /*
-     * Main thread: shell respawn loop.
+     * Main thread: idle loop.
      *
-     * The ChibiOS shell thread runs on CDC1 (PORTAB_SDU2). When the USB
-     * host connects, the shell thread is created from the heap. When the
-     * shell exits (USB disconnect, 'exit' command, or error), the thread
-     * terminates and is re-spawned after a brief delay.
-     *
-     * This pattern handles USB cable reconnection gracefully — each new
-     * connection gets a fresh shell instance.
+     * Application work is handled by dedicated threads:
+     * - Button driver thread (input)
+     * - State machine thread (standalone logic)
+     * - Animation thread (LED rendering)
+     * - USB adapter thread (AP protocol handling)
      */
     while (true) {
 
-#if (DBG_ENABLE_STACK_WATERMARK == 1)
+#if defined(APP_DEBUG_BUILD) && (APP_DEBUG_BUILD == 1)
         /* Periodically print stack watermarks for all threads.
          * This helps right-size thread working areas by showing peak usage.
-         * Enable by setting DBG_ENABLE_STACK_WATERMARK to 1 in app_debug.h */
-        dbg_print_stack_usage();
+         * Only active in debug builds (APP_DEBUG_BUILD=1). */
+        log_print_stack_usage();
 #endif
-
-        /* Only spawn shell when USB CDC is active (host connected). */
-        if (PORTAB_SDU2.config->usbp->state == USB_ACTIVE) {
-            thread_t *shelltp = chThdCreateFromHeap(NULL, SHELL_WA_SIZE,
-                                                    "shell",
-                                                    RT_SHELL_THREAD_PRIORITY,
-                                                    shellThread,
-                                                    (void *)&shell_cfg);
-            if (shelltp != NULL) {
-                chThdWait(shelltp);
-            }
-        }
 
         chThdSleepMilliseconds(1000);
     }

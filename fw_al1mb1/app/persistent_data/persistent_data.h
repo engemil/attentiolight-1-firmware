@@ -60,7 +60,7 @@ SOFTWARE.
  * @{
  */
 #define PD_MAGIC                0x50444154U /**< Magic number "PDAT"          */
-#define PD_VERSION              0x0002U     /**< Data format version          */
+#define PD_VERSION              0x0003U     /**< Data format version          */
 /** @} */
 
 /*===========================================================================*/
@@ -90,7 +90,8 @@ typedef enum {
  */
 typedef struct {
     char device_name[PD_DEVICE_NAME_SIZE];      /**< User-assigned name       */
-    /* Add future settings fields here */
+    uint8_t log_level;                          /**< Persistent log level     */
+    uint8_t _reserved[3];                       /**< Alignment padding        */
 } pd_data_t;
 
 /*===========================================================================*/
@@ -141,6 +142,20 @@ const pd_data_t *persistent_data_get(void);
  * @retval  PD_ERROR_BUFFER_SIZE  Name too long (max PD_DEVICE_NAME_SIZE - 1).
  */
 pd_result_t persistent_data_set_device_name(const char *name);
+
+/**
+ * @brief   Set the persistent log level.
+ * @note    Updates the RAM cache. Call persistent_data_save() to persist.
+ * @pre     persistent_data_init() must have been called.
+ *
+ * @param[in] level  New log level (0-4).
+ *
+ * @return  Result code.
+ * @retval  PD_OK               Write to RAM cache successful.
+ * @retval  PD_ERROR_NOT_INIT   Module not initialized.
+ * @retval  PD_ERROR_BUFFER_SIZE  Level out of range.
+ */
+pd_result_t persistent_data_set_log_level(uint8_t level);
 
 /** @} */
 

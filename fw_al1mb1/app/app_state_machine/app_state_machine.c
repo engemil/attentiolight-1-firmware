@@ -37,8 +37,8 @@ SOFTWARE.
 #include "button_driver.h"
 #include "rt_config.h"
 
-/* Debug support */
-#include "app_debug.h"
+/* Log support */
+#include "app_log.h"
 
 /*===========================================================================*/
 /* App State Machine Macros                                                  */
@@ -148,7 +148,8 @@ static const char* input_names[] = {
     "EXT_COMMAND",
     "BOOT_COMPLETE",
     "POWERUP_COMPLETE",
-    "POWERDOWN_COMPLETE"
+    "POWERDOWN_COMPLETE",
+    "MODE_TRANSITION_COMPLETE"
 };
 
 /*===========================================================================*/
@@ -162,7 +163,7 @@ static const char* input_names[] = {
  */
 static void on_button_event(button_event_t event) {
     
-    DBG_DEBUG("BTN EVENT: %s", button_event_name(event));
+    LOG_DEBUG("BTN EVENT: %s", button_event_name(event));
 
     switch (event) {
     case BTN_EVT_SHORT_PRESS:
@@ -201,9 +202,9 @@ button_callback_t app_sm_get_button_event_callback(void) {
  */
 static void transition_to_state(app_sm_system_state_t new_state) {
     app_sm_system_state_t old_state = system_state;
-    DBG_UNUSED(old_state);
+    LOG_UNUSED(old_state);
 
-    DBG_DEBUG("SM EXIT state: %s", system_state_names[old_state]);
+    LOG_DEBUG("SM EXIT state: %s", system_state_names[old_state]);
 
     /* Exit current state */
     switch (system_state) {
@@ -224,12 +225,12 @@ static void transition_to_state(app_sm_system_state_t new_state) {
             break;
     }
 
-    DBG_DEBUG("SM %s -> %s", system_state_names[old_state], system_state_names[new_state]);
+    LOG_DEBUG("SM %s -> %s", system_state_names[old_state], system_state_names[new_state]);
 
     /* Update state */
     system_state = new_state;
 
-    DBG_DEBUG("SM ENTER state: %s", system_state_names[new_state]);
+    LOG_DEBUG("SM ENTER state: %s", system_state_names[new_state]);
 
     /* Enter new state */
     switch (new_state) {
@@ -303,7 +304,7 @@ static THD_FUNCTION(sm_thread_func, arg) {
     (void)arg;
     chRegSetThreadName("state_machine_thread");
 
-    DBG_DEBUG("SM thread started");
+    LOG_DEBUG("SM thread started");
 
     /* Enter boot state */
     transition_to_state(APP_SM_SYS_BOOT);
@@ -314,11 +315,11 @@ static THD_FUNCTION(sm_thread_func, arg) {
         /* Wait for input event */
         if (chMBFetchTimeout(&input_mailbox, &msg, TIME_MS2I(100)) == MSG_OK) {
             app_sm_input_t input = (app_sm_input_t)msg;
-            DBG_DEBUG("SM INPUT: %s (state=%s)", input_names[input], system_state_names[system_state]);
+            LOG_DEBUG("SM INPUT: %s (state=%s)", input_names[input], system_state_names[system_state]);
             process_input_internal(input);
         }
     }
-    DBG_DEBUG("SM thread terminating");
+    LOG_DEBUG("SM thread terminating");
 }
 
 /*===========================================================================*/
@@ -327,7 +328,7 @@ static THD_FUNCTION(sm_thread_func, arg) {
 
 uint8_t app_sm_init(void) {
     if (driver_state != APP_SM_STATE_UNINIT) {
-        DBG_ERROR("SM init failed - already initialized");
+        LOG_ERROR("SM init failed - already initialized");
         return 1;
     }
 
@@ -338,27 +339,33 @@ uint8_t app_sm_init(void) {
     modes_init();
 
     driver_state = APP_SM_STATE_STOPPED;
-    DBG_DEBUG("SM init OK");
+    LOG_DEBUG("SM init OK");
     return 0;
 }
 
 uint8_t app_sm_start(void) {
     if (driver_state == APP_SM_STATE_UNINIT) {
-        DBG_ERROR("SM start failed - not initialized");
+        LOG_ERROR("SM start failed - not initialized");
         return 1;
     }
     if (driver_state == APP_SM_STATE_RUNNING) {
-        DBG_WARN("SM start - already running");
+        LOG_WARN("SM start - already running");
         return 2;
     }
+
+    /* Set running state BEFORE creating the thread to avoid a race:
+     * The SM thread immediately calls state_boot_enter() which posts
+     * BOOT_COMPLETE via app_sm_process_input(). That function checks
+     * driver_state — if it's still STOPPED the input is silently dropped
+     * and the state machine never leaves the boot state. */
+    driver_state = APP_SM_STATE_RUNNING;
 
     /* Create state machine thread */
     sm_thread_ref = chThdCreateStatic(wa_sm_thread, sizeof(wa_sm_thread),
                                       RT_STATE_MACHINE_THREAD_PRIORITY,
                                       sm_thread_func, NULL);
 
-    driver_state = APP_SM_STATE_RUNNING;
-    DBG_DEBUG("SM started");
+    LOG_DEBUG("SM started");
     return 0;
 }
 
@@ -433,8 +440,7 @@ const char* app_sm_mode_name(app_sm_mode_t mode) {
 }
 
 const char* app_sm_input_name(app_sm_input_t input) {
-    /* Note that APP_SM_INPUT_POWERDOWN_COMPLETE is the last element in app_sm_input_t */
-    if (input <= APP_SM_INPUT_POWERDOWN_COMPLETE) {
+    if (input <= APP_SM_INPUT_MODE_TRANSITION_COMPLETE) {
         return input_names[input];
     }
     return APP_SM_UNKNOWN;

@@ -47,6 +47,13 @@ SOFTWARE.
  */
 #define PD_DEFAULT_DEVICE_NAME      "AttentioLight-1"
 
+/**
+ * @brief   Default log level.
+ * @note    3 = INFO (errors + warnings + state/mode changes).
+ *          See LOG_LEVEL_* definitions in app_log.h.
+ */
+#define PD_DEFAULT_LOG_LEVEL        3
+
 #endif /* PERSISTENT_DATA_DEFAULTS_H */
 
 /** @} */

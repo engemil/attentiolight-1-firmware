@@ -651,11 +651,11 @@
  * @note    The default failure mode is to halt the system with the global
  *          @p panic_msg variable set to @p NULL.
  *
- * @note    Automatically enabled in debug builds (APP_DEBUG_LEVEL >= 1)
+ * @note    Automatically enabled in debug builds (APP_DEBUG_BUILD == 1)
  *          to catch stack overflows on context switch.
  */
 #if !defined(CH_DBG_ENABLE_STACK_CHECK)
-#if defined(APP_DEBUG_LEVEL) && (APP_DEBUG_LEVEL >= 1)
+#if defined(APP_DEBUG_BUILD) && (APP_DEBUG_BUILD == 1)
 #define CH_DBG_ENABLE_STACK_CHECK           TRUE
 #else
 #define CH_DBG_ENABLE_STACK_CHECK           FALSE
@@ -670,11 +670,11 @@
  *
  * @note    The default is @p FALSE.
  *
- * @note    Automatically enabled in debug builds (APP_DEBUG_LEVEL >= 1)
+ * @note    Automatically enabled in debug builds (APP_DEBUG_BUILD == 1)
  *          to allow stack watermark analysis via fill-pattern counting.
  */
 #if !defined(CH_DBG_FILL_THREADS)
-#if defined(APP_DEBUG_LEVEL) && (APP_DEBUG_LEVEL >= 1)
+#if defined(APP_DEBUG_BUILD) && (APP_DEBUG_BUILD == 1)
 #define CH_DBG_FILL_THREADS                 TRUE
 #else
 #define CH_DBG_FILL_THREADS                 FALSE

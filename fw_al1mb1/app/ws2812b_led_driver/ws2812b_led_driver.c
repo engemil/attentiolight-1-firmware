@@ -37,7 +37,7 @@ SOFTWARE.
  */
 
 #include "ws2812b_led_driver.h"
-#include "app_debug.h"
+#include "app_log.h"
 #include "rt_config.h"
 
 /* Driver status tracking (non-blocking, safe to query anytime) */
@@ -118,18 +118,18 @@ static void dma_callback(void *p, uint32_t flags) {
 }
 
 uint8_t ws2812b_led_driver_init(void){
-    DBG_DEBUG("WS2812B: init");
+    LOG_DEBUG("WS2812B: init");
     driver_status.initialized = true;
     ws2812b_led_driver_start();
     return 0;
 }
 
 uint8_t ws2812b_led_driver_start(void){
-    DBG_DEBUG("WS2812B: start");
+    LOG_DEBUG("WS2812B: start");
 
     /* Prevent double initialization */
     if (driver_status.started) {
-        DBG_WARN("WS2812B: start skipped - already started");
+        LOG_WARN("WS2812B: start skipped - already started");
         return 0;
     }
 
@@ -140,7 +140,7 @@ uint8_t ws2812b_led_driver_start(void){
     dma_stream = dmaStreamAlloc(STM32_DMA_STREAM_ID(DMA_DRIVER, DMA_CHANNEL),
                                     RT_WS2812B_DMA_PRIORITY, (stm32_dmaisr_t)dma_callback, NULL);
     if (dma_stream == NULL) {
-        DBG_ERROR("WS2812B: DMA alloc failed!");
+        LOG_ERROR("WS2812B: DMA alloc failed!");
         return 1;
     }
 
@@ -148,15 +148,15 @@ uint8_t ws2812b_led_driver_start(void){
     dmaStreamSetPeripheral(dma_stream, DMA_PERIPHERAL);
 
     driver_status.started = true;
-    DBG_DEBUG("WS2812B: started OK");
+    LOG_DEBUG("WS2812B: started OK");
     return 0;
 }
 
 uint8_t ws2812b_led_driver_stop(void){
-    DBG_DEBUG("WS2812B: stop");
+    LOG_DEBUG("WS2812B: stop");
 
     if (!driver_status.started) {
-        DBG_DEBUG("WS2812B: stop skipped - not started");
+        LOG_DEBUG("WS2812B: stop skipped - not started");
         return 0;
     }
 
