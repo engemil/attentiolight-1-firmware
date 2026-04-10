@@ -366,11 +366,13 @@ EFL Region (8KB = 4 pages × 2KB)
 
 > **Note:** The `GET_METADATA` AP command aggregates data from multiple sources:
 > - `serial_number` — STM32 hardware UID register (alias for `chip_uid`)
+> - `chip_uid` — STM32 hardware UID register (read-only silicon, 24 hex chars)
 > - `firmware_version` — Application header struct
 > - `device_model`, `hardware_revision`, `board` — Board BSP (`board.h`)
-> - `build_date`, `compiler` — Compile-time defines
+> - `build_date`, `build_time`, `compiler` — Compile-time defines
 > - `chibios_kernel`, `architecture`, `core_variant`, `platform`, `chibios_port_info` — ChibiOS
-> - `chip_uid` — STM32 hardware UID register (read-only silicon)
+> - `protocol_version` — AP protocol version string
+> - `uptime` — Device uptime in seconds
 
 ### Metadata vs Settings
 
@@ -676,7 +678,8 @@ The firmware communicates over **CDC1** using the Attentio Protocol (AP), a pack
 | `GET_STATE` | 0x40 | Query | Query device state |
 | `GET_CAPS` | 0x41 | Query | Query device capabilities |
 | `GET_SESSION` | 0x42 | Query | Query session info |
-| `GET_METADATA` | 0x43 | Query | Query device metadata |
+| `GET_METADATA` | 0x43 | Query | Query device metadata (paginated) |
+| `METADATA_GET` | 0x44 | Query | Query single metadata field by key |
 | `SETTINGS_LIST` | 0x50 | Settings | List all settings |
 | `SETTINGS_GET` | 0x51 | Settings | Read a setting value |
 | `SETTINGS_SET` | 0x52 | Settings | Write a setting value |

@@ -445,82 +445,390 @@ static void cmd_get_session(micb_interface_id_t iface) {
     micb_respond_ok(iface, payload, sizeof(payload));
 }
 
-static void cmd_get_metadata(micb_interface_id_t iface) {
+/*===========================================================================*/
+/* Metadata helpers                                                          */
+/*===========================================================================*/
+
+/**
+ * @brief   STM32C0xx unique device ID register base address.
+ *          96-bit UID stored as 3 x 32-bit words.
+ */
+#define MICB_STM32_UID_BASE     0x1FFF7550U
+
+/**
+ * @brief   Single metadata key-value entry (string pointers, not owned).
+ */
+typedef struct {
+    const char *key;
+    const char *val;
+    uint8_t     val_len;
+} md_entry_t;
+
+/**
+ * @brief   Format a uint8 as a 1-3 digit decimal string.
+ * @return  Number of characters written (no NUL terminator).
+ */
+__attribute__((noinline))
+static uint8_t u8_to_dec(char *buf, uint8_t v) {
+    uint8_t n = 0;
+    if (v >= 100) { buf[n++] = '0' + (v / 100); v %= 100; }
+    if (n > 0 || v >= 10) { buf[n++] = '0' + (v / 10); v %= 10; }
+    buf[n++] = '0' + v;
+    return n;
+}
+
+/**
+ * @brief   Format a uint32 as a decimal string.
+ * @return  Number of characters written (no NUL terminator).
+ */
+__attribute__((noinline))
+static uint8_t u32_to_dec(char *buf, uint32_t v) {
+    char tmp[10];   /* max 10 digits for uint32 */
+    uint8_t n = 0;
+
+    if (v == 0) {
+        buf[0] = '0';
+        return 1;
+    }
+    while (v > 0) {
+        tmp[n++] = '0' + (char)(v % 10);
+        v /= 10;
+    }
+    /* Reverse into output buffer. */
+    for (uint8_t i = 0; i < n; i++) {
+        buf[i] = tmp[n - 1 - i];
+    }
+    return n;
+}
+
+/**
+ * @brief   Build the full metadata table.
+ *
+ * @param[out] entries  Array to fill (must be at least METADATA_MAX_ENTRIES).
+ * @param[out] scratch  Scratch buffer for formatted strings.
+ * @param[in]  scratch_sz Size of scratch buffer.
+ * @return  Number of entries written.
+ *
+ * @note    Entries point into static strings, board.h defines, and the
+ *          scratch buffer.  Caller must consume entries before scratch is
+ *          reused.
+ */
+#define METADATA_MAX_ENTRIES    15
+
+__attribute__((noinline))
+static uint8_t metadata_build_table(md_entry_t *entries,
+                                    char *scratch, size_t scratch_sz) {
+    uint8_t n = 0;
+    size_t  spos = 0;   /* current position in scratch */
+
+    /* Helper: reserve space in scratch, return pointer. */
+    #define SCRATCH_ALLOC(need) (                                       \
+        ((spos + (need)) <= scratch_sz) ? &scratch[(spos += (need)) - (need)] : NULL \
+    )
+
+    /* --- Device identity --- */
+
+    entries[n].key = "device_model";
+    entries[n].val = DEVICE_MODEL;
+    entries[n].val_len = (uint8_t)strlen(DEVICE_MODEL);
+    n++;
+
+    entries[n].key = "hardware_revision";
+    entries[n].val = HARDWARE_REVISION;
+    entries[n].val_len = (uint8_t)strlen(HARDWARE_REVISION);
+    n++;
+
+    /* Chip UID as 24 uppercase hex characters. */
+    {
+        static const char hex_chars[] = "0123456789ABCDEF";
+        const uint32_t *uid = (const uint32_t *)MICB_STM32_UID_BASE;
+        char *uid_str = SCRATCH_ALLOC(24);
+        if (uid_str != NULL) {
+            for (unsigned i = 0; i < 3; i++) {
+                uint32_t w = uid[i];
+                uid_str[i * 8 + 0] = hex_chars[(w >> 28) & 0xFU];
+                uid_str[i * 8 + 1] = hex_chars[(w >> 24) & 0xFU];
+                uid_str[i * 8 + 2] = hex_chars[(w >> 20) & 0xFU];
+                uid_str[i * 8 + 3] = hex_chars[(w >> 16) & 0xFU];
+                uid_str[i * 8 + 4] = hex_chars[(w >> 12) & 0xFU];
+                uid_str[i * 8 + 5] = hex_chars[(w >>  8) & 0xFU];
+                uid_str[i * 8 + 6] = hex_chars[(w >>  4) & 0xFU];
+                uid_str[i * 8 + 7] = hex_chars[(w >>  0) & 0xFU];
+            }
+
+            entries[n].key = "serial_number";
+            entries[n].val = uid_str;
+            entries[n].val_len = 24;
+            n++;
+
+            entries[n].key = "chip_uid";
+            entries[n].val = uid_str;   /* same value */
+            entries[n].val_len = 24;
+            n++;
+        }
+    }
+
+    /* --- Firmware build --- */
+
+    /* Firmware version "M.m.p". */
+    {
+        uint8_t fw_major = (uint8_t)((app_header.version >> 16) & 0xFF);
+        uint8_t fw_minor = (uint8_t)((app_header.version >> 8)  & 0xFF);
+        uint8_t fw_patch = (uint8_t)((app_header.version >> 0)  & 0xFF);
+
+        char *vbuf = SCRATCH_ALLOC(12);
+        if (vbuf != NULL) {
+            uint8_t vlen = 0;
+            vlen += u8_to_dec(&vbuf[vlen], fw_major);
+            vbuf[vlen++] = '.';
+            vlen += u8_to_dec(&vbuf[vlen], fw_minor);
+            vbuf[vlen++] = '.';
+            vlen += u8_to_dec(&vbuf[vlen], fw_patch);
+
+            entries[n].key = "firmware_version";
+            entries[n].val = vbuf;
+            entries[n].val_len = vlen;
+            n++;
+        }
+    }
+
+    entries[n].key = "build_date";
+    entries[n].val = __DATE__;
+    entries[n].val_len = (uint8_t)strlen(__DATE__);
+    n++;
+
+    entries[n].key = "build_time";
+    entries[n].val = __TIME__;
+    entries[n].val_len = (uint8_t)strlen(__TIME__);
+    n++;
+
+    entries[n].key = "compiler";
+    entries[n].val = __VERSION__;
+    entries[n].val_len = (uint8_t)strlen(__VERSION__);
+    n++;
+
+    /* Protocol version as decimal string. */
+    {
+        char *pvbuf = SCRATCH_ALLOC(4);
+        if (pvbuf != NULL) {
+            uint8_t pvlen = u8_to_dec(pvbuf, AP_PROTOCOL_VERSION);
+            entries[n].key = "protocol_version";
+            entries[n].val = pvbuf;
+            entries[n].val_len = pvlen;
+            n++;
+        }
+    }
+
+    /* --- Platform --- */
+
+    entries[n].key = "platform";
+    entries[n].val = "STM32C071";
+    entries[n].val_len = 9;
+    n++;
+
+    entries[n].key = "architecture";
+    entries[n].val = "ARMv6-M";
+    entries[n].val_len = 7;
+    n++;
+
+    entries[n].key = "core_variant";
+    entries[n].val = "Cortex-M0+";
+    entries[n].val_len = 10;
+    n++;
+
+    {
+        const char *ker = CH_KERNEL_VERSION;
+        entries[n].key = "chibios_kernel";
+        entries[n].val = ker;
+        entries[n].val_len = (uint8_t)strlen(ker);
+        n++;
+    }
+
+    {
+        const char *pi = PORT_INFO;
+        entries[n].key = "chibios_port_info";
+        entries[n].val = pi;
+        entries[n].val_len = (uint8_t)strlen(pi);
+        n++;
+    }
+
+    /* --- Runtime --- */
+
+    /* Uptime in seconds. */
+    {
+        systime_t now = chVTGetSystemTimeX();
+        uint32_t secs = (uint32_t)(now / (systime_t)CH_CFG_ST_FREQUENCY);
+        char *ubuf = SCRATCH_ALLOC(10);
+        if (ubuf != NULL) {
+            uint8_t ulen = u32_to_dec(ubuf, secs);
+            entries[n].key = "uptime";
+            entries[n].val = ubuf;
+            entries[n].val_len = ulen;
+            n++;
+        }
+    }
+
+    #undef SCRATCH_ALLOC
+    return n;
+}
+
+/**
+ * @brief   Find a metadata entry by key name.
+ *
+ * @param[in]  entries      Metadata table.
+ * @param[in]  count        Number of entries.
+ * @param[in]  key          Key string to match (not NUL-terminated).
+ * @param[in]  key_len      Length of key.
+ * @return     Pointer to matching entry, or NULL if not found.
+ */
+__attribute__((noinline))
+static const md_entry_t *metadata_find(const md_entry_t *entries,
+                                       uint8_t count,
+                                       const char *key, uint8_t key_len) {
+    for (uint8_t i = 0; i < count; i++) {
+        if (strlen(entries[i].key) == key_len &&
+            memcmp(entries[i].key, key, key_len) == 0) {
+            return &entries[i];
+        }
+    }
+    return NULL;
+}
+
+/**
+ * @brief   Shared response payload for metadata command handlers.
+ * @note    Safe because micb_process_command is single-threaded dispatch.
+ */
+static uint8_t md_payload[AP_MAX_PAYLOAD_SIZE];
+
+/**
+ * @brief   Handle GET_METADATA (0x43) — paginated list of all metadata.
+ *
+ * @details Request payload: empty or [page:1] (0-based page number).
+ *          Response payload:
+ *            [total_count:1][page:1][page_count:1]
+ *            { [key_len:1][key:N][val_len:1][val:M] } * page_count
+ *
+ *          The firmware fills as many KV pairs as fit within
+ *          AP_MAX_PAYLOAD_SIZE for the requested page.  The client
+ *          requests successive pages until all entries are received.
+ */
+__attribute__((noinline))
+static void cmd_get_metadata(micb_interface_id_t iface,
+                              const ap_packet_t *pkt) {
+    /* Build the full metadata table. */
+    md_entry_t entries[METADATA_MAX_ENTRIES];
+    char scratch[128];
+    uint8_t total = metadata_build_table(entries, scratch, sizeof(scratch));
+
+    /* Determine requested page. */
+    uint8_t req_page = 0;
+    if (pkt->payload_len >= 1) {
+        req_page = pkt->payload[0];
+    }
+
     /*
-     * Build metadata response with key-value pairs.
-     * Format: [count:1] then for each: [key_len:1][key:N][val_len:1][val:M]
-     * We use the same format as SETTINGS_LIST for consistency.
+     * Walk through entries, skipping those belonging to earlier pages,
+     * to find the starting index for the requested page.
      */
-    static uint8_t payload[AP_MAX_PAYLOAD_SIZE];
+    const size_t header_sz = 3;     /* total_count + page + page_count */
+    size_t idx = header_sz;
+    uint8_t page_count = 0;
+    uint8_t current_page = 0;
+    uint8_t entry_i = 0;
+
+    /* Simulate earlier pages to find the start of req_page. */
+    while (current_page < req_page && entry_i < total) {
+        size_t sim_idx = header_sz;
+        while (entry_i < total) {
+            uint8_t kl = (uint8_t)strlen(entries[entry_i].key);
+            uint8_t vl = entries[entry_i].val_len;
+            size_t need = 1 + kl + 1 + vl;
+            if ((sim_idx + need) > AP_MAX_PAYLOAD_SIZE) {
+                break;  /* this entry starts a new page */
+            }
+            sim_idx += need;
+            entry_i++;
+        }
+        current_page++;
+    }
+
+    if (current_page != req_page) {
+        /* Requested page is beyond available data. */
+        micb_respond_error(iface, AP_ERR_INVALID_PARAM);
+        return;
+    }
+
+    /* Fill payload with entries for this page. */
+    while (entry_i < total) {
+        uint8_t kl = (uint8_t)strlen(entries[entry_i].key);
+        uint8_t vl = entries[entry_i].val_len;
+        size_t need = 1 + kl + 1 + vl;
+        if ((idx + need) > AP_MAX_PAYLOAD_SIZE) {
+            break;  /* no more room on this page */
+        }
+        md_payload[idx++] = kl;
+        memcpy(&md_payload[idx], entries[entry_i].key, kl);
+        idx += kl;
+        md_payload[idx++] = vl;
+        memcpy(&md_payload[idx], entries[entry_i].val, vl);
+        idx += vl;
+        page_count++;
+        entry_i++;
+    }
+
+    /* Fill in the 3-byte header. */
+    md_payload[0] = total;
+    md_payload[1] = req_page;
+    md_payload[2] = page_count;
+
+    micb_respond_ok(iface, md_payload, (uint8_t)idx);
+}
+
+/**
+ * @brief   Handle METADATA_GET (0x44) — get a single metadata field by key.
+ *
+ * @details Request payload: [key_len:1][key:N]
+ *          Response payload: [key_len:1][key:N][val_len:1][val:M]
+ *          Same single-pair format as SETTINGS_GET (0x51).
+ */
+__attribute__((noinline))
+static void cmd_metadata_get(micb_interface_id_t iface,
+                              const ap_packet_t *pkt) {
+    if (pkt->payload_len < 2) {
+        micb_respond_error(iface, AP_ERR_INVALID_PARAM);
+        return;
+    }
+
+    uint8_t key_len = pkt->payload[0];
+    if (key_len == 0 || key_len > pkt->payload_len - 1) {
+        micb_respond_error(iface, AP_ERR_INVALID_PARAM);
+        return;
+    }
+
+    const char *key = (const char *)&pkt->payload[1];
+
+    /* Build full table, then look up the requested key. */
+    md_entry_t entries[METADATA_MAX_ENTRIES];
+    char scratch[128];
+    uint8_t total = metadata_build_table(entries, scratch, sizeof(scratch));
+
+    const md_entry_t *found = metadata_find(entries, total, key, key_len);
+    if (found == NULL) {
+        micb_respond_error(iface, AP_ERR_INVALID_PARAM);
+        return;
+    }
+
+    /* Build response: [key_len][key][val_len][val] */
     size_t idx = 0;
 
-    /* Firmware version string. */
-    uint8_t fw_major = (uint8_t)((app_header.version >> 16) & 0xFF);
-    uint8_t fw_minor = (uint8_t)((app_header.version >> 8)  & 0xFF);
-    uint8_t fw_patch = (uint8_t)((app_header.version >> 0)  & 0xFF);
+    md_payload[idx++] = key_len;
+    memcpy(&md_payload[idx], key, key_len);
+    idx += key_len;
+    md_payload[idx++] = found->val_len;
+    memcpy(&md_payload[idx], found->val, found->val_len);
+    idx += found->val_len;
 
-    char ver_str[16];
-    int ver_len = 0;
-    /* Simple itoa for version: "M.m.p" */
-    ver_str[ver_len++] = '0' + (fw_major / 10);
-    if (fw_major >= 10) {
-        ver_str[0] = '0' + (fw_major / 10);
-        ver_str[1] = '0' + (fw_major % 10);
-        ver_len = 2;
-    } else {
-        ver_str[0] = '0' + fw_major;
-        ver_len = 1;
-    }
-    ver_str[ver_len++] = '.';
-    if (fw_minor >= 10) {
-        ver_str[ver_len++] = '0' + (fw_minor / 10);
-        ver_str[ver_len++] = '0' + (fw_minor % 10);
-    } else {
-        ver_str[ver_len++] = '0' + fw_minor;
-    }
-    ver_str[ver_len++] = '.';
-    if (fw_patch >= 10) {
-        ver_str[ver_len++] = '0' + (fw_patch / 10);
-        ver_str[ver_len++] = '0' + (fw_patch % 10);
-    } else {
-        ver_str[ver_len++] = '0' + fw_patch;
-    }
-
-    /* Helper macro to add a key-value pair. */
-    #define ADD_KV(key_str, val_ptr, val_sz) do {                           \
-        uint8_t kl = (uint8_t)strlen(key_str);                             \
-        if ((idx + 1 + kl + 1 + (val_sz)) <= AP_MAX_PAYLOAD_SIZE) {       \
-            payload[idx++] = kl;                                            \
-            memcpy(&payload[idx], (key_str), kl);                          \
-            idx += kl;                                                      \
-            payload[idx++] = (uint8_t)(val_sz);                            \
-            memcpy(&payload[idx], (val_ptr), (val_sz));                    \
-            idx += (val_sz);                                                \
-            count++;                                                        \
-        }                                                                   \
-    } while (0)
-
-    /* Reserve byte 0 for count, fill in later. */
-    idx = 1;
-    uint8_t count = 0;
-
-    ADD_KV("device_model", DEVICE_MODEL, strlen(DEVICE_MODEL));
-    ADD_KV("firmware_version", ver_str, (size_t)ver_len);
-    ADD_KV("build_date", __DATE__, strlen(__DATE__));
-    ADD_KV("platform", "STM32C071", 9);
-    ADD_KV("architecture", "ARMv6-M", 7);
-    ADD_KV("core_variant", "Cortex-M0+", 10);
-
-    /* ChibiOS kernel version. */
-    const char *ker = CH_KERNEL_VERSION;
-    ADD_KV("chibios_kernel", ker, strlen(ker));
-
-    #undef ADD_KV
-
-    /* Fill in count at byte 0. */
-    payload[0] = count;
-
-    micb_respond_ok(iface, payload, (uint8_t)idx);
+    micb_respond_ok(iface, md_payload, (uint8_t)idx);
 }
 
 /* --- Settings commands --- */
@@ -810,7 +1118,8 @@ void micb_process_command(micb_interface_id_t iface, const ap_packet_t *pkt) {
     case AP_CMD_GET_STATE:      cmd_get_state(iface);           break;
     case AP_CMD_GET_CAPS:       cmd_get_caps(iface);            break;
     case AP_CMD_GET_SESSION:    cmd_get_session(iface);         break;
-    case AP_CMD_GET_METADATA:   cmd_get_metadata(iface);        break;
+    case AP_CMD_GET_METADATA:   cmd_get_metadata(iface, pkt);   break;
+    case AP_CMD_METADATA_GET:   cmd_metadata_get(iface, pkt);   break;
 
     /* Settings */
     case AP_CMD_SETTINGS_LIST:  cmd_settings_list(iface);       break;

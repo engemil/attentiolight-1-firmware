@@ -16,6 +16,40 @@ Note: Update `app_header.h` when publishing new version.
 ## [Development] (2026-04-10)
 
 Added
+- **Expanded `GET_METADATA` (0x43) with pagination and new fields** — metadata
+  response now uses paginated wire format: `[total_count][page][page_count][KV pairs]`.
+  Request payload `[page:1]` selects page number; empty payload defaults to page 0
+  (backwards-compatible intent). Total metadata fields expanded from 7 to 15:
+  - `protocol_version` — AP protocol version string
+  - `uptime` — device uptime in seconds (string)
+  - `build_time` — firmware build time (HH:MM:SS)
+  - `hardware_revision` — board hardware revision from BSP
+  - `compiler` — compiler name and version
+  - `chibios_port_info` — ChibiOS port info string
+  - `chip_uid` — STM32 96-bit unique ID (24 hex chars)
+  - `serial_number` — alias for `chip_uid` (same value)
+- **New AP command `METADATA_GET` (0x44)** — single-field metadata query, mirroring
+  the `SETTINGS_GET` (0x51) pattern. Request: `[key_len:1][key:N]`, response:
+  `[key_len:1][key:N][val_len:1][val:N]`. Returns `ERR_INVALID_PARAM` for unknown keys.
+- **Metadata helper functions** — `md_entry_t` type, `metadata_build_table()`,
+  `metadata_find()`, `u8_to_dec()`, `u32_to_dec()` utilities in `micb.c`. All marked
+  `__attribute__((noinline))` to prevent LTO stack inflation (see Fixed below).
+
+Changed
+- **`GET_METADATA` wire format breaking change** — response format changed from
+  `[count][KV pairs]` to `[total_count][page][page_count][KV pairs]`. Both firmware
+  and CLI repos are updated together.
+
+Fixed
+- **LTO-induced HardFault from metadata functions** — with `-O2` and LTO enabled,
+  the new metadata functions (allocating `md_entry_t entries[15]` + `char scratch[128]`
+  on stack) were inlined into the USB adapter thread's call chain via
+  `micb_process_command()`, pushing the 768-byte stack past its limit. The overflow
+  corrupted an adjacent thread's saved context, causing `__port_switch` to restore
+  PC=0x00000000 and HardFault on every boot. Fixed by marking all metadata functions
+  `__attribute__((noinline))` and using a shared file-scope `md_payload[]` buffer.
+  Zero net BSS increase (BSS remains 0x2988 = 10,632 bytes, identical to baseline).
+
 - **Attentio Protocol (AP)** interface on CDC1, replacing the ChibiOS
   text-based shell. Framed packet format: `[SYNC 0xA5][LEN][CMD][PAYLOAD][CRC-8/CCITT]`.
   Supports 20+ commands across session, LED control, power, query, settings,

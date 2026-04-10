@@ -98,6 +98,7 @@ SOFTWARE.
 #define AP_CMD_GET_CAPS             0x41    /**< Request capabilities.     */
 #define AP_CMD_GET_SESSION          0x42    /**< Request session info.     */
 #define AP_CMD_GET_METADATA         0x43    /**< Request device metadata.  */
+#define AP_CMD_METADATA_GET         0x44    /**< Get single metadata field. */
 
 /* Settings (0x50-0x5F) — Bidirectional */
 #define AP_CMD_SETTINGS_LIST        0x50    /**< List all settings.        */
