@@ -2,5 +2,6 @@
 docs/doxygen/html
 docs/doxygen/latex
 */build
+!scripts/build/
 */.dep
 tmp

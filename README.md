@@ -48,7 +48,7 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - [VSCode Tasks](#vscode-tasks)
 - [Utility Scripts](#utility-scripts)
   - [EFL Memory Reader](#efl-memory-reader-workspacescriptsefl_scripts)
-  - [Sign App Header](#sign-app-header-scriptssign_app_headersh)
+  - [Sign App Header](#sign-app-header-scriptsbuildsign_app_headersh)
   - [System Setup Scripts](#system-setup-scripts-scriptssystem)
   - [Memory Usage](#memory-usage)
 - [Attentio Protocol (AP)](#attentio-protocol-ap)
@@ -653,14 +653,14 @@ CLI tools for reading the EFL (Embedded Flash) storage region via ST-Link debugg
 See `./scripts/efl_scripts/README.md` for complete documentation.
 
 
-### Sign App Header (`scripts/sign_app_header.sh`)
+### Sign App Header (`scripts/build/sign_app_header.sh`)
 
 **NB!** Part of **BUILD!**
 
 Signs the application binary with firmware size and CRC32 checksum for bootloader validation. Called automatically by the Makefile during build.
 
 ```bash
-./scripts/sign_app_header.sh fw_al1mb1/build/fw_al1mb1.bin fw_al1mb1/build/fw_al1mb1_signed.bin
+./scripts/build/sign_app_header.sh fw_al1mb1/build/fw_al1mb1.bin fw_al1mb1/build/fw_al1mb1_signed.bin
 ```
 
 The script reads the raw binary, calculates the firmware size and CRC32 (from the vector table at offset 0x100 to end), and writes them into the application header at offsets 8 and 12. The signed binary is what gets uploaded via DFU.

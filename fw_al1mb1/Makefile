@@ -271,7 +271,7 @@ include $(RULESPATH)/rules.mk
 #
 
 # Path to signing script
-SIGN_SCRIPT = ../scripts/sign_app_header.sh
+SIGN_SCRIPT = ../scripts/build/sign_app_header.sh
 
 # Sign binary with size and CRC32 (runs automatically after build)
 POST_MAKE_ALL_RULE_HOOK: sign_firmware
