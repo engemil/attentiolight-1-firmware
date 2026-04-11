@@ -13,6 +13,21 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-04-11)
+
+Changed
+- **Separate debug and release build artifacts** — `make debug` now produces
+  `fw_al1mb1_debug.elf` / `fw_al1mb1_debug_signed.bin` instead of overwriting
+  the release filenames. Makefile appends `_debug` to `PROJECT` when
+  `DEBUG_BUILD=1` is set. VS Code launch and settings configs updated to
+  reference the debug filenames.
+- **Disable extended debug diagnostics by default** —
+  `APP_DEBUG_BUILD_PLUS_PLUS_ACTIVE` in `debug_config.h` now defaults to `0`
+  in debug builds. Set to `1` manually to re-enable stack watermark and heap
+  analysis output.
+
+---
+
 ## [Development] (2026-04-10)
 
 Added

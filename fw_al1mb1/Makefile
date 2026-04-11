@@ -84,6 +84,9 @@ endif
 
 # Define project name here
 PROJECT = fw_al1mb1
+ifdef DEBUG_BUILD
+PROJECT := $(PROJECT)_debug
+endif
 
 # Target settings.
 MCU  = cortex-m0plus
@@ -301,7 +304,7 @@ sign_firmware: $(BUILDDIR)/$(PROJECT).bin
 # Debug build - forces clean rebuild with debug flags and -Og optimization
 # -fstack-usage generates .su files alongside .o files with per-function stack usage
 debug: clean-build
-	$(MAKE) all USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16 -fstack-usage" UDEFS="$(UDEFS) -DAPP_DEBUG_BUILD=1"
+	$(MAKE) all DEBUG_BUILD=1 USE_OPT="-Og -ggdb -fno-omit-frame-pointer -falign-functions=16 -fstack-usage" UDEFS="$(UDEFS) -DAPP_DEBUG_BUILD=1"
 
 # Clean build directory for fresh rebuild
 clean-build:

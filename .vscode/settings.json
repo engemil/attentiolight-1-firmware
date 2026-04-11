@@ -4,7 +4,7 @@
     "settings.project.folder": "${workspaceFolder}/fw_al1mb1", // The path to your project folder (e.g. "/workspace/fw/fw_al1mb1")
     
     // Debugging
-    "settings.project.compiledElfFile": "${workspaceFolder}/fw_al1mb1/build/fw_al1mb1.elf", // The path to the compiled .elf file for your project (e.g. "/workspace/project/build/ch.elf")
+    "settings.project.compiledElfFile": "${workspaceFolder}/fw_al1mb1/build/fw_al1mb1_debug.elf", // The path to the compiled .elf file for your project (e.g. "/workspace/project/build/ch.elf")
     "settings.project.svdFile": "${workspaceFolder}/fw_al1mb1/STM32C071.svd", // .svd file (e.g. "/workspace/project/STM32F401.svd")
     "settings.project.device": "STM32C071RB", // Chip name (e.g. "STM32C071RB")
 
