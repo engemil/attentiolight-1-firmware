@@ -3,8 +3,10 @@
     "settings.project.name": "fw_al1mb1", // The name of your project (e.g. "fw_al1mb1")
     "settings.project.folder": "${workspaceFolder}/fw_al1mb1", // The path to your project folder (e.g. "/workspace/fw/fw_al1mb1")
     
-    // Debugging
-    "settings.project.compiledElfFile": "${workspaceFolder}/fw_al1mb1/build/fw_al1mb1_debug.elf", // The path to the compiled .elf file for your project (e.g. "/workspace/project/build/ch.elf")
+    // Build Output Files
+    "settings.project.signedBinFile": "${workspaceFolder}/fw_al1mb1/build/fw_al1mb1_signed.bin", // Release signed binary
+    "settings.project.debugSignedBinFile": "${workspaceFolder}/fw_al1mb1/build/fw_al1mb1_debug_signed.bin", // Debug signed binary
+    "settings.project.compiledElfFile": "${workspaceFolder}/fw_al1mb1/build/fw_al1mb1_debug.elf", // Debug ELF (symbols for debugger)
     "settings.project.svdFile": "${workspaceFolder}/fw_al1mb1/STM32C071.svd", // .svd file (e.g. "/workspace/project/STM32F401.svd")
     "settings.project.device": "STM32C071RB", // Chip name (e.g. "STM32C071RB")
 

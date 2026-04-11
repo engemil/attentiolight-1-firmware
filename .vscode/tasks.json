@@ -64,7 +64,7 @@
         {
             "label": "Flash Application (OpenOCD)",
             "type": "shell",
-            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program build/${config:settings.project.name}_signed.bin ${config:settings.flash.appAddress} verify reset exit\"",
+            "command": "pkill -9 openocd || true; openocd -f ${config:settings.openocd.interface} -f ${config:settings.openocd.board} -c \"program ${config:settings.project.signedBinFile} ${config:settings.flash.appAddress} verify reset exit\"",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },
@@ -86,7 +86,7 @@
         {
             "label": "Flash Application (dfu-util)",
             "type": "shell",
-            "command": "sudo dfu-util -a 0 --dfuse-address ${config:settings.flash.appAddress}:leave -D build/${config:settings.project.name}_signed.bin",
+            "command": "sudo dfu-util -a 0 --dfuse-address ${config:settings.flash.appAddress}:leave -D ${config:settings.project.signedBinFile}",
             "options": {
                 "cwd": "${config:settings.project.folder}"
             },

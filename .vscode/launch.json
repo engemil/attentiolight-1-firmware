@@ -26,7 +26,7 @@
             "runToEntryPoint": "main",
             "loadFiles": [],
             "openOCDLaunchCommands": [
-                "program ${config:settings.project.folder}/build/${config:settings.project.name}_debug_signed.bin ${config:settings.flash.appAddress} verify"
+                "program ${config:settings.project.debugSignedBinFile} ${config:settings.flash.appAddress} verify"
             ],
             "postLaunchCommands": [
                 "monitor reset halt",
@@ -54,7 +54,7 @@
             "runToEntryPoint": "main",
             "loadFiles": [],
             "openOCDLaunchCommands": [
-                "program ${config:settings.project.folder}/build/${config:settings.project.name}_debug_signed.bin ${config:settings.flash.appAddress} verify"
+                "program ${config:settings.project.debugSignedBinFile} ${config:settings.flash.appAddress} verify"
             ],
             "showDevDebugOutput": "none"
         }

@@ -19,8 +19,12 @@ Changed
 - **Separate debug and release build artifacts** — `make debug` now produces
   `fw_al1mb1_debug.elf` / `fw_al1mb1_debug_signed.bin` instead of overwriting
   the release filenames. Makefile appends `_debug` to `PROJECT` when
-  `DEBUG_BUILD=1` is set. VS Code launch and settings configs updated to
-  reference the debug filenames.
+  `DEBUG_BUILD=1` is set.
+- **Centralize build output paths in VS Code settings** — added
+  `settings.project.signedBinFile` and `settings.project.debugSignedBinFile`
+  to `settings.json`. Launch and task configs now reference these settings
+  instead of assembling filenames from fragments, so all binary paths are
+  defined in one place.
 - **Disable extended debug diagnostics by default** —
   `APP_DEBUG_BUILD_PLUS_PLUS_ACTIVE` in `debug_config.h` now defaults to `0`
   in debug builds. Set to `1` manually to re-enable stack watermark and heap
