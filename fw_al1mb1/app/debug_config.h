@@ -59,7 +59,7 @@ SOFTWARE.
  * @brief   Resolves APP_DEBUG_BUILD into a simple 0/1 for use below.
  */
 #ifdef APP_DEBUG_BUILD
-#define APP_DEBUG_BUILD_PLUS_PLUS_ACTIVE          0 // Set to 1 if you want active in debug build
+#define APP_DEBUG_BUILD_PLUS_PLUS_ACTIVE          1 // Set to 1 if you want active in debug build
 
 #else
 #define APP_DEBUG_BUILD_PLUS_PLUS_ACTIVE          0

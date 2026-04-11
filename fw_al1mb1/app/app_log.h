@@ -247,6 +247,12 @@ uint8_t log_get_level(void);
  *          fill-pattern bytes (0x55) remain untouched from the bottom of each
  *          working area, giving the peak ("high-water-mark") stack usage.
  *
+ *          Uses tp->wabase / tp->waend to determine the working area bounds.
+ *          This works correctly for all thread types: application threads
+ *          (where thread_t is embedded at the top of the WA buffer), the
+ *          main thread (whose WA is the linker-defined process stack), and
+ *          the ChibiOS idle thread.
+ *
  *          Output format:
  *            [STACK] --- Thread Stack Watermarks ---
  *            [STACK]  <name>       <used> / <total> bytes (<pct>%)
@@ -274,12 +280,14 @@ static inline void log_print_stack_usage(void) {
 
     tp = chRegFirstThread();
     while (tp != NULL) {
-        /* Count untouched fill bytes (0x55) from the bottom of the WA */
+        /* Use wabase/waend — correct for all threads including main/idle
+         * whose thread_t lives outside the working area (in os_instance_t). */
         uint8_t *base = (uint8_t *)tp->wabase;
-        uint8_t *end  = (uint8_t *)(tp + 1);  /* thread_t sits at top of WA */
+        uint8_t *end  = (uint8_t *)tp->waend;
         size_t total  = (size_t)(end - base);
         size_t free   = 0;
 
+        /* Count untouched fill bytes (0x55) from the bottom of the WA */
         while ((base + free) < end && base[free] == CH_DBG_STACK_FILL_VALUE) {
             free++;
         }
@@ -314,12 +322,15 @@ static inline void log_print_stack_usage(void) {
  *          fragmentation via chHeapStatus(). Also runs chHeapIntegrityCheck()
  *          to validate the heap structure.
  *
+ *          The "available" line shows the core allocator free region — this
+ *          is the actual remaining RAM budget.  The "heap free" line shows
+ *          free blocks within the heap's own free-list, which is only
+ *          populated after chHeapAlloc() calls (currently none).
+ *
  *          Output format:
  *            [HEAP] --- Heap Status ---
- *            [HEAP]  core free        : <N> bytes
- *            [HEAP]  heap free total  : <N> bytes
- *            [HEAP]  heap free largest: <N> bytes
- *            [HEAP]  heap fragments   : <N>
+ *            [HEAP]  available        : <N> bytes  (core allocator)
+ *            [HEAP]  heap free total  : <N> bytes  (<N> fragments)
  *            [HEAP]  integrity        : OK / CORRUPT
  *            [HEAP] ----------------------
  *
@@ -334,25 +345,19 @@ static inline void log_print_stack_usage(void) {
     (CH_CFG_USE_MEMCORE == TRUE) && (CH_CFG_USE_HEAP == TRUE)
 static inline void log_print_heap_status(void) {
     memory_area_t area;
-    size_t total, largest, n;
+    size_t total, n;
 
     chCoreGetStatusX(&area);
-    n = chHeapStatus(NULL, &total, &largest);
+    n = chHeapStatus(NULL, &total, NULL);
 
     log_printf_timeout(LOG_PRINT_TIMEOUT,
                        "[HEAP] --- Heap Status ---\r\n");
     log_printf_timeout(LOG_PRINT_TIMEOUT,
-                       "[HEAP]  core free        : %5u bytes\r\n",
+                       "[HEAP]  available        : %5u bytes  (core allocator)\r\n",
                        (unsigned)area.size);
     log_printf_timeout(LOG_PRINT_TIMEOUT,
-                       "[HEAP]  heap free total  : %5u bytes\r\n",
-                       (unsigned)total);
-    log_printf_timeout(LOG_PRINT_TIMEOUT,
-                       "[HEAP]  heap free largest: %5u bytes\r\n",
-                       (unsigned)largest);
-    log_printf_timeout(LOG_PRINT_TIMEOUT,
-                       "[HEAP]  heap fragments   : %5u\r\n",
-                       (unsigned)n);
+                       "[HEAP]  heap free total  : %5u bytes  (%u fragments)\r\n",
+                       (unsigned)total, (unsigned)n);
     log_printf_timeout(LOG_PRINT_TIMEOUT,
                        "[HEAP]  integrity        : %s\r\n",
                        chHeapIntegrityCheck(NULL) ? "CORRUPT" : "OK");

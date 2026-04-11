@@ -67,14 +67,27 @@ Added
   `-DAPP_HEAP_ANALYSIS=0`. Currently the heap is idle (no runtime allocations);
   this report is infrastructure for future dynamic allocation monitoring.
 - **`debug_config.h`** — new header centralizing compile-time debug diagnostic
-  flags (`APP_STACK_WATERMARK`, `APP_HEAP_ANALYSIS`). These flags are independent
-  of the runtime log level — `LOG_LEVEL_NONE` does not suppress diagnostic output.
-  Sits alongside `rt_config.h` as a companion configuration header.
+  flags (`APP_STACK_WATERMARK`, `APP_HEAP_ANALYSIS`). Both default to
+  `APP_DEBUG_BUILD_ACTIVE` (1 in debug, 0 in release). Independent of the
+  runtime log level. Sits alongside `rt_config.h` as a companion configuration
+  header.
 
 Changed
 - **Stack watermark output format** — updated `[STACK]` delimiters from `===` to
   `---` style. Documentation now correctly describes the feature as reporting every
   ~1 s (was incorrectly documented as 5 s) and not gated by log level.
+- **Heap status output restructured** — "available" (core allocator free) is now
+  the primary line; heap free-list total and fragment count merged into one line;
+  "largest" dropped (only meaningful with fragmentation).
+
+Fixed
+- **Stack watermark reported garbage values for main and idle threads** — the
+  watermark function used `(tp + 1)` to compute working area end, which is only
+  correct for threads whose `thread_t` is embedded at the top of the WA buffer.
+  For the main thread (PSP) and idle thread, the `thread_t` lives inside the
+  static `os_instance_t ch0` struct, so `(tp + 1)` pointed into unrelated BSS
+  memory, producing nonsense totals (e.g. 8028 bytes for a 1024-byte PSP).
+  Fixed by using `tp->waend` which ChibiOS sets correctly for all thread types.
 
 Removed
 - **`scripts/check_memory_usage.sh`** — superseded by `scripts/analyse/memory_report.sh`.

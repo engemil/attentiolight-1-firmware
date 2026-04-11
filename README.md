@@ -472,10 +472,12 @@ over USB serial port **CDC0** (debug print stream):
 
 ```
 [STACK] --- Thread Stack Watermarks ---
-[STACK]  main              320 /  880 bytes (36%)
-[STACK]  button             92 /  760 bytes (12%)
-[STACK]  state_machine     408 /  960 bytes (42%)
-[STACK]  animation_thread  384 /  960 bytes (40%)
+[STACK]  main              320 / 1024 bytes (31%)
+[STACK]  idle              104 /  152 bytes (68%)
+[STACK]  button            196 /  984 bytes (19%)
+[STACK]  state_machine     248 / 1240 bytes (20%)
+[STACK]  animation_thread  344 / 1240 bytes (27%)
+[STACK]  usb_ap            656 /  984 bytes (66%)
 [STACK] -----------------------------------
 ```
 
@@ -522,10 +524,8 @@ alongside the stack watermarks:
 
 ```
 [HEAP] --- Heap Status ---
-[HEAP]  core free        : 11816 bytes
-[HEAP]  heap free total  : 11816 bytes
-[HEAP]  heap free largest: 11816 bytes
-[HEAP]  heap fragments   :     1
+[HEAP]  available        : 11800 bytes  (core allocator)
+[HEAP]  heap free total  :     0 bytes  (0 fragments)
 [HEAP]  integrity        : OK
 [HEAP] -----------------------
 ```
@@ -542,11 +542,12 @@ This flag is **independent of the runtime log level** — setting `LOG_LEVEL_NON
 does not suppress heap status output; only `APP_HEAP_ANALYSIS=0` does.
 
 **Fields:**
-- **core free** — remaining bytes in the ChibiOS core allocator region (between
-  `__heap_base__` and `__heap_end__` from the linker script).
-- **heap free total** — total free bytes across all heap fragments.
-- **heap free largest** — largest contiguous free block (relevant for allocations).
-- **heap fragments** — number of free fragments (1 = no fragmentation).
+- **available** — remaining bytes in the ChibiOS core allocator region (between
+  `__heap_base__` and `__heap_end__` from the linker script). This is the actual
+  free RAM budget.
+- **heap free total** — free bytes within the heap's own free-list, only populated
+  after `chHeapAlloc()` calls. Shows fragment count in parentheses (0 = no
+  allocations have been made; 1 = single contiguous free block).
 - **integrity** — result of `chHeapIntegrityCheck()`. Should always be `OK`;
   `CORRUPT` indicates memory corruption (buffer overflow, use-after-free, etc.).
 
