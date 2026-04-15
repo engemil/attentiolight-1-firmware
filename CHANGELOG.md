@@ -36,6 +36,15 @@ Changed
   (animation engine command type). Requires corresponding CLI update to parse
   the expanded response.
 
+- **Protocol cleanup: renamed GET_STATE to GET_STATUS, removed GET_CAPS and
+  GET_SESSION** — `AP_CMD_GET_STATE` (0x40) renamed to `AP_CMD_GET_STATUS` to
+  better reflect its purpose. `GET_CAPS` (0x41) removed entirely — its unique
+  field (`device_name`) is now included in the `GET_METADATA` response.
+  `GET_SESSION` (0x42) removed — session info (control mode, active controller)
+  was already present in the `GET_STATUS` response (bytes 5-6), making it
+  redundant. Metadata table expanded from 15 to 16 entries with the addition
+  of `device_name` (sourced from persistent settings).
+
 ---
 
 ## [Development] (2026-04-11)

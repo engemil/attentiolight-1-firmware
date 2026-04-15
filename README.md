@@ -366,6 +366,7 @@ EFL Region (8KB = 4 pages × 2KB)
 ```
 
 > **Note:** The `GET_METADATA` AP command aggregates data from multiple sources:
+> - `device_name` — User-assigned name from persistent settings
 > - `serial_number` — STM32 hardware UID register (alias for `chip_uid`)
 > - `chip_uid` — STM32 hardware UID register (read-only silicon, 24 hex chars)
 > - `firmware_version` — Application header struct
@@ -735,9 +736,7 @@ The firmware communicates over **CDC1** using the Attentio Protocol (AP), a pack
 | `SET_HSV` | 0x22 | LED | Set LED color (HSV) `[H:2,S,V]` |
 | `SET_BRIGHTNESS` | 0x23 | LED | Set LED brightness `[0-100]` |
 | `SET_EFFECT` | 0x30 | Effects | Set LED effect mode (placeholder) |
-| `GET_STATE` | 0x40 | Query | Query device state |
-| `GET_CAPS` | 0x41 | Query | Query device capabilities |
-| `GET_SESSION` | 0x42 | Query | Query session info |
+| `GET_STATUS` | 0x40 | Query | Query device status |
 | `GET_METADATA` | 0x43 | Query | Query device metadata (paginated) |
 | `METADATA_GET` | 0x44 | Query | Query single metadata field by key |
 | `SETTINGS_LIST` | 0x50 | Settings | List all settings |
@@ -775,7 +774,7 @@ The Multi-Interface Control Broker (MICB) provides session-based access control:
 - **STANDALONE** mode — device operates autonomously (button-driven state machine)
 - **REMOTE** mode — a host has claimed control via `CLAIM` command
 - Commands that modify device state (LED, power) require an active session
-- Query commands (`GET_*`, `SETTINGS_LIST/GET`) work without a session
+- Query commands (`GET_STATUS`, `GET_METADATA`, `SETTINGS_LIST/GET`) work without a session
 - `CLAIM` / `RELEASE` / takeover semantics support future multi-interface control (USB, BLE, WiFi)
 - **Button event forwarding** — when in REMOTE mode, physical button presses are forwarded to the controlling host as `EVT_BUTTON` (0x80) packets
 

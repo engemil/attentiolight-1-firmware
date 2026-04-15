@@ -94,9 +94,7 @@ SOFTWARE.
 #define AP_CMD_SET_EFFECT           0x30    /**< Set effect (TBD).         */
 
 /* Query (0x40-0x4F) — Host -> Device */
-#define AP_CMD_GET_STATE            0x40    /**< Request device state.     */
-#define AP_CMD_GET_CAPS             0x41    /**< Request capabilities.     */
-#define AP_CMD_GET_SESSION          0x42    /**< Request session info.     */
+#define AP_CMD_GET_STATUS           0x40    /**< Request device status.    */
 #define AP_CMD_GET_METADATA         0x43    /**< Request device metadata.  */
 #define AP_CMD_METADATA_GET         0x44    /**< Get single metadata field. */
 

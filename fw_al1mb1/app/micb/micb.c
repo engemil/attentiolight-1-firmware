@@ -393,7 +393,7 @@ static void cmd_set_brightness(micb_interface_id_t iface,
 
 /* --- Query commands --- */
 
-static void cmd_get_state(micb_interface_id_t iface) {
+static void cmd_get_status(micb_interface_id_t iface) {
     uint8_t payload[12];
     uint8_t r, g, b;
 
@@ -412,43 +412,6 @@ static void cmd_get_state(micb_interface_id_t iface) {
     payload[9]  = standalone_color_index;                    /* color_index 0-11  */
     payload[10] = standalone_brightness;                     /* standalone brightness 0-255 */
     payload[11] = (uint8_t)anim_thread_get_current_type();  /* anim_type         */
-
-    micb_respond_ok(iface, payload, sizeof(payload));
-}
-
-static void cmd_get_caps(micb_interface_id_t iface) {
-    uint8_t payload[64];
-    size_t idx = 0;
-
-    /* Protocol version. */
-    payload[idx++] = AP_PROTOCOL_VERSION;
-
-    /* Firmware version from app_header. */
-    payload[idx++] = (uint8_t)((app_header.version >> 16) & 0xFF);  /* major */
-    payload[idx++] = (uint8_t)((app_header.version >> 8)  & 0xFF);  /* minor */
-    payload[idx++] = (uint8_t)((app_header.version >> 0)  & 0xFF);  /* patch */
-
-    /* Device name from persistent data. */
-    const pd_data_t *pd = persistent_data_get();
-    const char *name = (pd != NULL) ? pd->device_name : "AttentioLight";
-    uint8_t name_len = (uint8_t)strlen(name);
-    payload[idx++] = name_len;
-    memcpy(&payload[idx], name, name_len);
-    idx += name_len;
-
-    /* Device model. */
-    uint8_t model_len = (uint8_t)strlen(DEVICE_MODEL);
-    payload[idx++] = model_len;
-    memcpy(&payload[idx], DEVICE_MODEL, model_len);
-    idx += model_len;
-
-    micb_respond_ok(iface, payload, (uint8_t)idx);
-}
-
-static void cmd_get_session(micb_interface_id_t iface) {
-    uint8_t payload[2];
-    payload[0] = (uint8_t)micb_session.mode;
-    payload[1] = (uint8_t)micb_session.active_controller;
 
     micb_respond_ok(iface, payload, sizeof(payload));
 }
@@ -521,7 +484,7 @@ static uint8_t u32_to_dec(char *buf, uint32_t v) {
  *          scratch buffer.  Caller must consume entries before scratch is
  *          reused.
  */
-#define METADATA_MAX_ENTRIES    15
+#define METADATA_MAX_ENTRIES    16
 
 __attribute__((noinline))
 static uint8_t metadata_build_table(md_entry_t *entries,
@@ -535,6 +498,15 @@ static uint8_t metadata_build_table(md_entry_t *entries,
     )
 
     /* --- Device identity --- */
+
+    {
+        const pd_data_t *pd = persistent_data_get();
+        const char *name = (pd != NULL) ? pd->device_name : "AttentioLight";
+        entries[n].key = "device_name";
+        entries[n].val = name;
+        entries[n].val_len = (uint8_t)strlen(name);
+        n++;
+    }
 
     entries[n].key = "device_model";
     entries[n].val = DEVICE_MODEL;
@@ -1123,9 +1095,7 @@ void micb_process_command(micb_interface_id_t iface, const ap_packet_t *pkt) {
     case AP_CMD_SET_BRIGHTNESS: cmd_set_brightness(iface, pkt); break;
 
     /* Query */
-    case AP_CMD_GET_STATE:      cmd_get_state(iface);           break;
-    case AP_CMD_GET_CAPS:       cmd_get_caps(iface);            break;
-    case AP_CMD_GET_SESSION:    cmd_get_session(iface);         break;
+    case AP_CMD_GET_STATUS:     cmd_get_status(iface);          break;
     case AP_CMD_GET_METADATA:   cmd_get_metadata(iface, pkt);   break;
     case AP_CMD_METADATA_GET:   cmd_metadata_get(iface, pkt);   break;
 
