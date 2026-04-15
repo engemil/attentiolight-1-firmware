@@ -1094,3 +1094,17 @@ bool anim_thread_is_running(void) {
 anim_cmd_type_t anim_thread_get_current_type(void) {
     return anim_state.current_type;
 }
+
+void anim_thread_get_target_rgb(uint8_t *r, uint8_t *g, uint8_t *b) {
+    if (r) *r = anim_state.target_r;
+    if (g) *g = anim_state.target_g;
+    if (b) *b = anim_state.target_b;
+}
+
+uint8_t anim_thread_get_brightness(void) {
+    return anim_state.brightness;
+}
+
+bool anim_thread_is_active(void) {
+    return anim_state.active;
+}

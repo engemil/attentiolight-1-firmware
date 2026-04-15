@@ -113,6 +113,19 @@ extern const app_sm_mode_ops_t mode_night_light_ops;
 /* External Control Mode */
 extern const app_sm_mode_ops_t mode_external_control_ops;
 
+/*===========================================================================*/
+/* Query Functions                                                           */
+/*===========================================================================*/
+
+/**
+ * @brief   Gets the current effects sub-mode.
+ * @details Only meaningful when the active standalone mode is
+ *          APP_SM_MODE_EFFECTS.
+ *
+ * @return  Current effects sub-mode.
+ */
+app_sm_effects_submode_t mode_effects_get_submode(void);
+
 #ifdef __cplusplus
 }
 #endif

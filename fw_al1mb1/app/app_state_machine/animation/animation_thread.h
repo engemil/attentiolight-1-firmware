@@ -381,6 +381,35 @@ bool anim_thread_is_running(void);
  */
 anim_cmd_type_t anim_thread_get_current_type(void);
 
+/**
+ * @brief   Gets the current target RGB color from the animation state.
+ *
+ * @param[out] r    Pointer to store red component (0-255).
+ * @param[out] g    Pointer to store green component (0-255).
+ * @param[out] b    Pointer to store blue component (0-255).
+ *
+ * @api
+ */
+void anim_thread_get_target_rgb(uint8_t *r, uint8_t *g, uint8_t *b);
+
+/**
+ * @brief   Gets the current brightness from the animation state.
+ *
+ * @return  Brightness level (0-255).
+ *
+ * @api
+ */
+uint8_t anim_thread_get_brightness(void);
+
+/**
+ * @brief   Checks if the animation is currently active.
+ *
+ * @return  true if animation is active, false otherwise.
+ *
+ * @api
+ */
+bool anim_thread_is_active(void);
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,6 +13,31 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-04-15)
+
+Added
+- **Animation state getters** — new public API functions in `animation_thread.c/.h`:
+  `anim_thread_get_target_rgb()`, `anim_thread_get_brightness()`, and
+  `anim_thread_is_active()`. These expose the previously file-local `anim_state`
+  fields so that other modules (e.g., MICB) can read the current animation target
+  color and brightness.
+- **Effects sub-mode getter** — `mode_effects_get_submode()` in `mode_effects.c`,
+  declared in `modes.h`. Exposes the currently active effects sub-mode
+  (Rainbow, Candle, Fire, etc.) which was previously `static` and inaccessible.
+
+Changed
+- **`GET_STATE` (0x40) response expanded from 8 to 12 bytes** — the response now
+  reports real device state instead of placeholder zeros. New payload layout:
+  `[system_state][r][g][b][brightness%][control_mode][active_controller]`
+  `[standalone_mode][effects_submode][color_index][standalone_brightness][anim_type]`.
+  RGB and brightness are sourced from the animation thread getters. Added
+  `effects_submode` (current effect when in Effects mode), `standalone_color_index`
+  (palette index 0-11), `standalone_brightness` (raw 0-255), and `anim_type`
+  (animation engine command type). Requires corresponding CLI update to parse
+  the expanded response.
+
+---
+
 ## [Development] (2026-04-11)
 
 Changed

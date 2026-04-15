@@ -38,6 +38,8 @@ SOFTWARE.
 #include "animation_thread.h"
 #include "persistent_data.h"
 #include "app_header.h"
+#include "modes.h"
+#include "standalone_state.h"
 
 #include "ch.h"
 #include "hal.h"
@@ -392,18 +394,24 @@ static void cmd_set_brightness(micb_interface_id_t iface,
 /* --- Query commands --- */
 
 static void cmd_get_state(micb_interface_id_t iface) {
-    uint8_t payload[8];
+    uint8_t payload[12];
+    uint8_t r, g, b;
 
-    payload[0] = (uint8_t)app_sm_get_system_state();    /* system_state */
-    /* Current RGB — not easily accessible from animation state.
-     * Send zeros for now. Future: expose current animation RGB. */
-    payload[1] = 0;    /* current_r */
-    payload[2] = 0;    /* current_g */
-    payload[3] = 0;    /* current_b */
-    payload[4] = 0;    /* brightness (0-100) */
-    payload[5] = (uint8_t)micb_session.mode;             /* control_mode */
-    payload[6] = (uint8_t)micb_session.active_controller;/* active_controller */
-    payload[7] = (uint8_t)app_sm_get_mode();             /* standalone_mode */
+    anim_thread_get_target_rgb(&r, &g, &b);
+
+    payload[0]  = (uint8_t)app_sm_get_system_state();       /* system_state      */
+    payload[1]  = r;                                        /* current_r         */
+    payload[2]  = g;                                        /* current_g         */
+    payload[3]  = b;                                        /* current_b         */
+    payload[4]  = (uint8_t)((anim_thread_get_brightness() * 100U) / 255U);
+                                                            /* brightness 0-100% */
+    payload[5]  = (uint8_t)micb_session.mode;               /* control_mode      */
+    payload[6]  = (uint8_t)micb_session.active_controller;  /* active_controller */
+    payload[7]  = (uint8_t)app_sm_get_mode();               /* standalone_mode   */
+    payload[8]  = (uint8_t)mode_effects_get_submode();      /* effects_submode   */
+    payload[9]  = standalone_color_index;                    /* color_index 0-11  */
+    payload[10] = standalone_brightness;                     /* standalone brightness 0-255 */
+    payload[11] = (uint8_t)anim_thread_get_current_type();  /* anim_type         */
 
     micb_respond_ok(iface, payload, sizeof(payload));
 }
