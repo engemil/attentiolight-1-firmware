@@ -380,14 +380,11 @@ static void cmd_set_brightness(micb_interface_id_t iface,
     LOG_DEBUG("MICB: SET_BRIGHTNESS(%u%%) from %s", brightness_pct,
               micb_interface_name(iface));
 
-    /*
-     * Convert percentage (0-100) to 0-255 range.
-     * This sets a solid color at the current RGB with new brightness.
-     * For now, we send a solid white at the given brightness as a
-     * brightness-only control. Future: track current remote RGB.
-     */
+    /* Convert percentage (0-100) to 0-255 and re-apply the current color. */
     uint8_t brightness_255 = (uint8_t)((brightness_pct * 255) / 100);
-    anim_thread_set_solid(255, 255, 255, brightness_255);
+    uint8_t r, g, b;
+    anim_thread_get_target_rgb(&r, &g, &b);
+    anim_thread_set_solid(r, g, b, brightness_255);
     micb_respond_ok(iface, NULL, 0);
 }
 

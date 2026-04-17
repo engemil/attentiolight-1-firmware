@@ -15,6 +15,13 @@ Note: Update `app_header.h` when publishing new version.
 
 ## [Development] (2026-04-17)
 
+Fixed
+
+- **SET_BRIGHTNESS (0x23) now preserves the current color** — previously hardcoded
+  RGB to white (255, 255, 255) when adjusting brightness. Now reads the current
+  target RGB via `anim_thread_get_target_rgb()` and re-applies it at the new
+  brightness level. If no color has been set, the target defaults to (0, 0, 0).
+
 Added
 
 - **`LOG_SYS` macro** — unconditional log macro in `app_log.h` that always prints
