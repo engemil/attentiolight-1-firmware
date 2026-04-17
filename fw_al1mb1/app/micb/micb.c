@@ -840,7 +840,7 @@ static void cmd_settings_list(micb_interface_id_t iface) {
 
     /* log_level setting. */
     {
-        const char *key = "loglevel";
+        const char *key = "default_loglevel";
         uint8_t kl = (uint8_t)strlen(key);
         char val_str[4];
         uint8_t lv = pd->log_level;
@@ -900,7 +900,7 @@ static void cmd_settings_get(micb_interface_id_t iface,
         memcpy(&payload[idx], pd->device_name, vl);
         idx += vl;
     }
-    else if (key_len == 8 && memcmp(key, "loglevel", 8) == 0) {
+    else if (key_len == 16 && memcmp(key, "default_loglevel", 16) == 0) {
         char val_str[4];
         uint8_t lv = pd->log_level;
         uint8_t vl;
@@ -968,7 +968,7 @@ static void cmd_settings_set(micb_interface_id_t iface,
                       persistent_data_result_str(result));
         }
     }
-    else if (key_len == 8 && memcmp(key, "loglevel", 8) == 0) {
+    else if (key_len == 16 && memcmp(key, "default_loglevel", 16) == 0) {
         /* Parse numeric value. */
         if (val_len != 1 || val[0] < '0' || val[0] > '4') {
             micb_respond_error(iface, AP_ERR_INVALID_PARAM);
@@ -982,7 +982,7 @@ static void cmd_settings_set(micb_interface_id_t iface,
         }
         result = persistent_data_save();
         if (result != PD_OK) {
-            LOG_ERROR("MICB: Failed to save loglevel: %s",
+            LOG_ERROR("MICB: Failed to save default_loglevel: %s",
                       persistent_data_result_str(result));
         }
         /* Also update runtime log level. */
@@ -1016,8 +1016,8 @@ static void cmd_log_set_level(micb_interface_id_t iface,
         return;
     }
 
-    LOG_INFO("MICB: LOG_SET_LEVEL(%u) from %s", level,
-             micb_interface_name(iface));
+    LOG_SYS("MICB: LOG_SET_LEVEL(%u) from %s", level,
+            micb_interface_name(iface));
 
     log_set_level(level);
     micb_respond_ok(iface, NULL, 0);
@@ -1026,7 +1026,7 @@ static void cmd_log_set_level(micb_interface_id_t iface,
 /* --- DFU command --- */
 
 static void cmd_dfu_enter(micb_interface_id_t iface) {
-    LOG_INFO("MICB: DFU_ENTER from %s — rebooting to bootloader",
+    LOG_SYS("MICB: DFU_ENTER from %s — rebooting to bootloader",
              micb_interface_name(iface));
 
     /* Send OK first so the host knows we accepted the command. */
@@ -1053,14 +1053,14 @@ void micb_init(void) {
 
     memset(micb_send_fns, 0, sizeof(micb_send_fns));
 
-    LOG_INFO("MICB: Initialized (mode=STANDALONE)");
+    LOG_SYS("MICB: Initialized (mode=STANDALONE)");
 }
 
 void micb_register_interface(micb_interface_id_t iface,
                              micb_send_fn_t send_fn) {
     if (iface < MICB_IF_COUNT) {
         micb_send_fns[iface] = send_fn;
-        LOG_INFO("MICB: Registered interface %s", micb_interface_name(iface));
+        LOG_SYS("MICB: Registered interface %s", micb_interface_name(iface));
     }
 }
 

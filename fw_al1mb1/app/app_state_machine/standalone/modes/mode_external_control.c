@@ -47,7 +47,7 @@ SOFTWARE.
 /*===========================================================================*/
 
 static void external_control_enter(void) {
-    LOG_DEBUG("MODE ExternalCtrl: enter waiting for external commands");
+    LOG_INFO("MODE ExternalCtrl: enter waiting for external commands");
     /* TO DO: Initialize ESP32 WiFi/BLE communication here */
     /* TO DO: Register command handlers for external color/animation control */
     /* Show a distinctive color to indicate external control mode */
@@ -56,18 +56,18 @@ static void external_control_enter(void) {
 }
 
 static void external_control_exit(void) {
-    LOG_DEBUG("MODE ExternalCtrl: exit");
+    LOG_INFO("MODE ExternalCtrl: exit");
     /* TO DO: Cleanup ESP32 communication and unregister command handlers */
 }
 
 static void external_control_on_short_press(void) {
-    LOG_DEBUG("MODE ExternalCtrl: short_press ignored (external control active)");
+    LOG_INFO("MODE ExternalCtrl: short_press ignored (external control active)");
     /* In external control mode, button presses are ignored */
     /* External commands take priority */
 }
 
 static void external_control_on_long_start(void) {
-    LOG_DEBUG("MODE ExternalCtrl: long_start");
+    LOG_INFO("MODE ExternalCtrl: long_start");
     /* No special action for long press start in this mode */
 }
 

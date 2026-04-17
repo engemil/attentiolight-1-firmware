@@ -237,6 +237,21 @@ uint8_t log_get_level(void);
         } \
     } while (0)
 
+/**
+ * @brief   Unconditional system log macro.
+ * @details Always prints regardless of g_log_level. Use sparingly for
+ *          messages that must always be visible (e.g. log level changes,
+ *          boot banners, critical confirmations).
+ *          Format: [SYS] <message>
+ *
+ * @param[in] fmt   Printf-style format string.
+ * @param[in] ...   Format arguments.
+ */
+#define LOG_SYS(fmt, ...) \
+    do { \
+        log_printf_timeout(LOG_PRINT_TIMEOUT, "[SYS] " fmt "\r\n", ##__VA_ARGS__); \
+    } while (0)
+
 /*===========================================================================*/
 /* Stack Watermark Analysis                                                  */
 /*===========================================================================*/

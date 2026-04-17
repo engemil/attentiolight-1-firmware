@@ -76,7 +76,7 @@ const uint8_t standalone_color_palette[APP_SM_COLOR_COUNT][3] = {
 /*===========================================================================*/
 
 static void solid_color_enter(void) {
-    LOG_DEBUG("MODE SolidColor: enter: color=%s brightness=%d",
+    LOG_INFO("MODE SolidColor: enter: color=%s brightness=%d",
              color_names[standalone_color_index], standalone_brightness);
     /* Display current color */
     anim_thread_set_solid(
@@ -88,7 +88,7 @@ static void solid_color_enter(void) {
 }
 
 static void solid_color_exit(void) {
-    LOG_DEBUG("MODE SolidColor: exit");
+    LOG_INFO("MODE SolidColor: exit");
     
 }
 
@@ -98,7 +98,7 @@ static void solid_color_on_short_press(void) {
     /* Cycle to next color */
     standalone_color_index = (standalone_color_index + 1) % APP_SM_COLOR_COUNT;
 
-    LOG_DEBUG("MODE SolidColor: color set from %s to %s",
+    LOG_INFO("MODE SolidColor: color set from %s to %s",
              color_names[old_idx], color_names[standalone_color_index]);
 
     /* Display new color */
@@ -111,7 +111,7 @@ static void solid_color_on_short_press(void) {
 }
 
 static void solid_color_on_long_start(void) {
-    LOG_DEBUG("MODE SolidColor: long_start");
+    LOG_INFO("MODE SolidColor: long_start");
     /* No special action for long press start in this mode */
 }
 

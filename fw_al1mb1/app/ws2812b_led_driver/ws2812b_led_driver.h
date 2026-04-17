@@ -116,7 +116,7 @@ uint8_t ws2812b_led_driver_set_color_rgb_and_render(uint8_t r, uint8_t g, uint8_
 /**
  * @brief   Driver status for debugging (non-blocking query).
  * @details This struct tracks driver state and statistics without
- *          requiring blocking debug prints that would disrupt timing.
+ *          requiring blocking serial prints that would disrupt timing.
  */
 typedef struct {
     uint32_t render_count;          /**< Total render calls              */

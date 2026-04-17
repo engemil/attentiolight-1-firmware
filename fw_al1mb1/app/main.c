@@ -152,7 +152,7 @@ void init_system(void) {
 */
 void init_application_systems(void){
 
-    LOG_INFO("MAIN initializing application...");
+    LOG_SYS("MAIN initializing application...");
 
     /*
      * Initialize device metadata storage (EFL page 0).
@@ -268,7 +268,7 @@ void init_application_systems(void){
     usb_adapter_start();
     LOG_DEBUG("MAIN usb_adapter_start() OK");
 
-    LOG_INFO("Initialized AttentioLight-1 by EngEmil.io");
+    LOG_SYS("Initialized AttentioLight-1 by EngEmil.io");
 }
 
 int main(void) {

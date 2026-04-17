@@ -70,7 +70,7 @@ static uint8_t current_level_index = 2;  /* Default to dim */
 /*===========================================================================*/
 
 static void night_light_enter(void) {
-    LOG_DEBUG("MODE NightLight: enter level=%s (%d)",
+    LOG_INFO("MODE NightLight: enter level=%s (%d)",
              level_names[current_level_index],
              night_brightness_levels[current_level_index]);
     /* Display warm color at current night light brightness */
@@ -83,7 +83,7 @@ static void night_light_enter(void) {
 }
 
 static void night_light_exit(void) {
-    LOG_DEBUG("MODE NightLight: exit");
+    LOG_INFO("MODE NightLight: exit");
     
 }
 
@@ -93,7 +93,7 @@ static void night_light_on_short_press(void) {
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % NIGHT_LIGHT_LEVELS;
 
-    LOG_DEBUG("MODE NightLight: level set from %s to %s (%d to %d)",
+    LOG_INFO("MODE NightLight: level set from %s to %s (%d to %d)",
              level_names[old_idx], level_names[current_level_index],
              night_brightness_levels[old_idx],
              night_brightness_levels[current_level_index]);
@@ -108,7 +108,7 @@ static void night_light_on_short_press(void) {
 }
 
 static void night_light_on_long_start(void) {
-    LOG_DEBUG("MODE NightLight: long_start");
+    LOG_INFO("MODE NightLight: long_start");
     /* No special action for long press start in this mode */
 }
 

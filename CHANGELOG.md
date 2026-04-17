@@ -13,6 +13,39 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-04-17)
+
+Added
+
+- **`LOG_SYS` macro** — unconditional log macro in `app_log.h` that always prints
+  regardless of `g_log_level`. Uses `[SYS]` tag. Intended for boot banners, log level
+  change confirmations, and critical system events that must always be visible.
+
+Changed
+
+- **Renamed settings key `loglevel` to `default_loglevel`** — the persistent log level
+  setting exposed via `SETTINGS_LIST/GET/SET` is now `default_loglevel` to distinguish
+  it from the runtime-only `LOG_SET_LEVEL` command. Breaking change for host tools
+  using the old key name.
+
+- **Mode log messages promoted from DEBUG to INFO** — all `MODE ...` log messages
+  (enter, exit, short_press, long_start) across all 8 standalone modes are now logged
+  at INFO level instead of DEBUG, making mode transitions visible at the default log
+  level.
+
+- **Boot and system messages promoted to LOG_SYS** — the following messages now always
+  print regardless of log level:
+  - `MAIN initializing application...` and `Initialized AttentioLight-1 by EngEmil.io`
+  - `MICB: Initialized (mode=STANDALONE)` and `MICB: Registered interface ...`
+  - `USB-AP adapter thread started`
+  - `MICB: DFU_ENTER from ...`
+  - `MICB: LOG_SET_LEVEL(...) from ...`
+
+- **Renamed "debug prints" to "serial prints"** — CDC0 references in `usbcfg.c`
+  comments, WS2812B driver docs, and README now use "serial prints".
+
+---
+
 ## [Development] (2026-04-15)
 
 Added

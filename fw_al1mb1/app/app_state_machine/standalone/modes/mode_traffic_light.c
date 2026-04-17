@@ -88,12 +88,12 @@ static void set_traffic_color(traffic_state_t state) {
 /*===========================================================================*/
 
 static void traffic_light_enter(void) {
-    LOG_DEBUG("MODE TrafficLight: enter state=%s", traffic_state_names[current_state]);
+    LOG_INFO("MODE TrafficLight: enter state=%s", traffic_state_names[current_state]);
     set_traffic_color(current_state);
 }
 
 static void traffic_light_exit(void) {
-    LOG_DEBUG("MODE TrafficLight: exit");
+    LOG_INFO("MODE TrafficLight: exit");
     
 }
 
@@ -114,13 +114,13 @@ static void traffic_light_on_short_press(void) {
             break;
     }
     
-    LOG_DEBUG("MODE TrafficLight: Set state from %s to %s",
+    LOG_INFO("MODE TrafficLight: Set state from %s to %s",
              traffic_state_names[old_state], traffic_state_names[current_state]);
     set_traffic_color(current_state);
 }
 
 static void traffic_light_on_long_start(void) {
-    LOG_DEBUG("MODE TrafficLight: long_start");
+    LOG_INFO("MODE TrafficLight: long_start");
     /* No special action for long press start in this mode */
 }
 

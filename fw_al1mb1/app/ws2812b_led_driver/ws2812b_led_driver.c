@@ -170,7 +170,7 @@ uint8_t ws2812b_led_driver_stop(void){
 }
 
 uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
-    /* Track last color (no debug print - timing critical) */
+    /* Track last color (no serial prints - timing critical) */
     driver_status.last_r = r;
     driver_status.last_g = g;
     driver_status.last_b = b;

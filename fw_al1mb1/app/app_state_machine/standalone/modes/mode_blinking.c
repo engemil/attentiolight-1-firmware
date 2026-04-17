@@ -73,7 +73,7 @@ static uint8_t current_speed_index = 2;  /* Default to Slow */
 /*===========================================================================*/
 
 static void blinking_enter(void) {
-    LOG_DEBUG("MODE Blinking: enter speed=%s (%dms)",
+    LOG_INFO("MODE Blinking: enter speed=%s (%dms)",
              speed_names[current_speed_index], blink_speeds[current_speed_index]);
     /* Start blinking animation with shared color */
     anim_thread_blink(
@@ -84,7 +84,7 @@ static void blinking_enter(void) {
 }
 
 static void blinking_exit(void) {
-    LOG_DEBUG("MODE Blinking: exit");
+    LOG_INFO("MODE Blinking: exit");
     
 }
 
@@ -94,7 +94,7 @@ static void blinking_on_short_press(void) {
     /* Cycle to next blink speed */
     current_speed_index = (current_speed_index + 1) % BLINK_SPEED_COUNT;
 
-    LOG_DEBUG("MODE Blinking: speed set from %s to %s (%dms to %dms)",
+    LOG_INFO("MODE Blinking: speed set from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              blink_speeds[old_idx], blink_speeds[current_speed_index]);
 
@@ -107,7 +107,7 @@ static void blinking_on_short_press(void) {
 }
 
 static void blinking_on_long_start(void) {
-    LOG_DEBUG("MODE Blinking: long_start");
+    LOG_INFO("MODE Blinking: long_start");
     /* No special action for long press start in this mode */
 }
 

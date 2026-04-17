@@ -70,7 +70,7 @@ static uint8_t current_speed_index = 2;  /* Default to Slow */
 /*===========================================================================*/
 
 static void pulsation_enter(void) {
-    LOG_DEBUG("MODE Pulsation: enter speed=%s (%dms period)",
+    LOG_INFO("MODE Pulsation: enter speed=%s (%dms period)",
              speed_names[current_speed_index], pulse_periods[current_speed_index]);
     /* Start pulse animation with shared color */
     anim_thread_pulse(
@@ -81,7 +81,7 @@ static void pulsation_enter(void) {
 }
 
 static void pulsation_exit(void) {
-    LOG_DEBUG("MODE Pulsation exit");
+    LOG_INFO("MODE Pulsation exit");
     
 }
 
@@ -91,7 +91,7 @@ static void pulsation_on_short_press(void) {
     /* Cycle to next pulse speed */
     current_speed_index = (current_speed_index + 1) % PULSE_SPEED_COUNT;
 
-    LOG_DEBUG("MODE Pulsation: speed from %s to %s (%dms to %dms)",
+    LOG_INFO("MODE Pulsation: speed from %s to %s (%dms to %dms)",
              speed_names[old_idx], speed_names[current_speed_index],
              pulse_periods[old_idx], pulse_periods[current_speed_index]);
 
@@ -104,7 +104,7 @@ static void pulsation_on_short_press(void) {
 }
 
 static void pulsation_on_long_start(void) {
-    LOG_DEBUG("MODE Pulsation: long_start");
+    LOG_INFO("MODE Pulsation: long_start");
     /* No special action for long press start in this mode */
 }
 

@@ -358,7 +358,7 @@ EFL Region (8KB = 4 pages × 2KB)
 │ Page 1: User Settings (2KB)     │  ← User-configurable, read-write
 │   - Header (magic, version)     │
 │   - device_name                 │
-│   - log_level                   │  ← Runtime log level (persisted across reboots)
+│   - log_level                   │  ← Default log level (persisted across reboots)
 │   - CRC32                       │
 ├─────────────────────────────────┤ 0x0801F000
 │ Page 2-3: Reserved (4KB)        │  ← Available for future use
@@ -392,7 +392,7 @@ EFL Region (8KB = 4 pages × 2KB)
 
 | Library | Description |
 |---------|-------------|
-| **usbcfg** | USB dual CDC/ACM configuration with IAD descriptors. Defines two virtual serial ports: CDC0 (debug prints) and CDC1 (Attentio Protocol interface). Manages USB device/configuration descriptors, endpoint configs, and driver lifecycle hooks. |
+| **usbcfg** | USB dual CDC/ACM configuration with IAD descriptors. Defines two virtual serial ports: CDC0 (serial prints) and CDC1 (Attentio Protocol interface). Manages USB device/configuration descriptors, endpoint configs, and driver lifecycle hooks. |
 | **portab** | Board portability abstraction layer. Maps logical driver names (`PORTAB_SDU1`, `PORTAB_SDU2`, `PORTAB_USB1`) to ChibiOS HAL instances. |
 | **hal_efl_stm32c0xx** | Custom Embedded Flash (EFL) driver for STM32C0xx. Required because STM32C0 is not yet supported in mainline ChibiOS EFL. |
 | (Work-in-progress) **ee_esp32_wifi_ble_if_driver** | ESP32 WiFi/BLE module GPIO interface (placeholder). Controls enable and boot pins for ESP32-C3 WROOM module. UART communication protocol not yet implemented. |
@@ -417,7 +417,7 @@ Log levels are now **runtime-configurable** (all log code is always compiled in)
 - `3` = INFO — + state/mode changes (default boot level)
 - `4` = DEBUG — everything (verbose)
 
-The boot default is loaded from persistent storage (`log_level` setting).
+The boot default is loaded from persistent storage (`default_loglevel` setting).
 Override at runtime via the `LOG_SET_LEVEL` AP command (no reboot required).
 
 `make debug` adds `-DAPP_DEBUG_BUILD=1` which enables ChibiOS stack overflow
@@ -469,7 +469,7 @@ in the debugger. Increase that thread's working area size in `app/rt_config.h`.
 #### 2. Runtime Stack Watermark Reporting (Serial Output)
 
 In debug builds, the main loop prints thread stack watermarks every ~1 second
-over USB serial port **CDC0** (debug print stream):
+over USB serial port **CDC0** (serial print stream):
 
 ```
 [STACK] --- Thread Stack Watermarks ---
@@ -808,7 +808,7 @@ ls -ls /dev/serial/by-id
 
 | Interface Number | Role | Description |
 |------------------|------|-------------|
-| `IF=00` (`...-if00`) | **CDC0** | Debug print stream (read-only) |
+| `IF=00` (`...-if00`) | **CDC0** | Serial print stream (read-only) |
 | `IF=02` (`...-if02`) | **CDC1** | Attentio Protocol interface (bidirectional) |
 
 Use `minicom` for serial monitoring in terminal. E.g. for `dev/ttyACM1`

@@ -21,7 +21,7 @@
    Dual CDC/ACM (IAD) configuration for AttentioLight-1.
    Based on ChibiOS USB_CDC_IAD testhal example.
 
-   CDC0 (PORTAB_SDU1): Debug print stream (device -> host)
+   CDC0 (PORTAB_SDU1): Serial print stream (device -> host)
    CDC1 (PORTAB_SDU2): Shell command interface (bidirectional)
 */
 
@@ -39,7 +39,7 @@ SerialUSBDriver PORTAB_SDU2;
 /*
  * Endpoints to be used for USBD1.
  *
- * CDC0 (debug prints):  EP1 = interrupt IN, EP2 = bulk IN+OUT
+ * CDC0 (serial prints):  EP1 = interrupt IN, EP2 = bulk IN+OUT
  * CDC1 (shell commands): EP3 = interrupt IN, EP4 = bulk IN+OUT
  */
 #define USB_INTERRUPT_REQUEST_EP_A      1
@@ -203,7 +203,7 @@ static const uint8_t vcom_configuration_descriptor_data[] = {
     0,                                      /* iConfiguration.              */
     0xC0,                                   /* bmAttributes (self powered). */
     50),                                    /* bMaxPower (100mA).           */
-  /* CDC0: Debug print stream (PORTAB_SDU1). */
+  /* CDC0: Serial print stream (PORTAB_SDU1). */
   IAD_CDC_IF_DESC_SET(
     USB_CDC_CIF_NUM0,
     USB_CDC_DIF_NUM0,
@@ -340,7 +340,7 @@ static const USBDescriptor *get_descriptor(USBDriver *usbp,
 }
 
 /*===========================================================================*/
-/* CDC0 endpoint configurations (debug prints).                              */
+/* CDC0 endpoint configurations (serial prints).                              */
 /*===========================================================================*/
 
 /**
@@ -459,7 +459,7 @@ static void usb_event(USBDriver *usbp, usbevent_t event) {
          Note, this callback is invoked from an ISR so I-Class functions
          must be used.*/
 
-      /* CDC0 endpoints (debug prints). */
+      /* CDC0 endpoints (serial prints). */
       usbInitEndpointI(usbp, USB_INTERRUPT_REQUEST_EP_A, &ep1config);
       usbInitEndpointI(usbp, USB_DATA_REQUEST_EP_A, &ep2config);
 
@@ -543,7 +543,7 @@ const USBConfig usbcfg = {
 };
 
 /*
- * Serial over USB driver configuration 1 (CDC0 - debug prints).
+ * Serial over USB driver configuration 1 (CDC0 - serial prints).
  */
 const SerialUSBConfig serusbcfg1 = {
   &PORTAB_USB1,

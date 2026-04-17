@@ -74,7 +74,7 @@ static uint8_t current_level_index = 3;  /* Default to 50% */
 /*===========================================================================*/
 
 static void brightness_enter(void) {
-    LOG_DEBUG("MODE Brightness: enter level=%s (%d)",
+    LOG_INFO("MODE Brightness: enter level=%s (%d)",
              brightness_names[current_level_index],
              brightness_levels[current_level_index]);
     /* Display current color at current brightness level */
@@ -86,7 +86,7 @@ static void brightness_enter(void) {
 }
 
 static void brightness_exit(void) {
-    LOG_DEBUG("MODE Brightness: exit standalone_brightness=%d",
+    LOG_INFO("MODE Brightness: exit standalone_brightness=%d",
              brightness_levels[current_level_index]);
     /* Update standalone brightness for other modes to use */
     standalone_brightness = brightness_levels[current_level_index];
@@ -98,7 +98,7 @@ static void brightness_on_short_press(void) {
     /* Cycle to next brightness level */
     current_level_index = (current_level_index + 1) % APP_SM_BRIGHTNESS_LEVELS;
 
-    LOG_DEBUG("MODE Brightness: level set from %s to %s (%d to %d)",
+    LOG_INFO("MODE Brightness: level set from %s to %s (%d to %d)",
              brightness_names[old_idx], brightness_names[current_level_index],
              brightness_levels[old_idx], brightness_levels[current_level_index]);
 
@@ -114,7 +114,7 @@ static void brightness_on_short_press(void) {
 }
 
 static void brightness_on_long_start(void) {
-    LOG_DEBUG("MODE Brightness: long_start");
+    LOG_INFO("MODE Brightness: long_start");
     /* No special action for long press start in this mode */
 }
 

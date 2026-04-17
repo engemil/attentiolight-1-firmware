@@ -160,13 +160,13 @@ static void start_current_submode(void) {
 /*===========================================================================*/
 
 static void effects_enter(void) {
-    LOG_DEBUG("MODE Effects: enter submode=%s", submode_names[current_submode]);
+    LOG_INFO("MODE Effects: enter submode=%s", submode_names[current_submode]);
     /* Start current effects submode */
     start_current_submode();
 }
 
 static void effects_exit(void) {
-    LOG_DEBUG("MODE Effects: exit");
+    LOG_INFO("MODE Effects: exit");
     
 }
 
@@ -177,7 +177,7 @@ static void effects_on_short_press(void) {
     current_submode = (app_sm_effects_submode_t)
                       ((current_submode + 1) % APP_SM_EFFECTS_COUNT);
 
-    LOG_DEBUG("MODE Effects: submode %s -> %s",
+    LOG_INFO("MODE Effects: submode %s -> %s",
              submode_names[old_submode], submode_names[current_submode]);
 
     /* Start new effect */
@@ -185,7 +185,7 @@ static void effects_on_short_press(void) {
 }
 
 static void effects_on_long_start(void) {
-    LOG_DEBUG("MODE Effects: long_start");
+    LOG_INFO("MODE Effects: long_start");
     /* No special action for long press start in this mode */
 }
 

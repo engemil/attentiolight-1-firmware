@@ -121,7 +121,7 @@ static THD_FUNCTION(usb_adapter_thread, arg) {
 
     chRegSetThreadName("usb_ap");
 
-    LOG_INFO("USB-AP adapter thread started");
+    LOG_SYS("USB-AP adapter thread started");
 
     uint8_t read_buf[USB_ADAPTER_READ_BUF_SIZE];
 
