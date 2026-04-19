@@ -773,6 +773,7 @@ The Multi-Interface Control Broker (MICB) provides session-based access control:
 
 - **STANDALONE** mode — device operates autonomously (button-driven state machine)
 - **REMOTE** mode — a host has claimed control via `CLAIM` command
+- **Session ID** — a `uint16_t` assigned on each `CLAIM` (monotonically incrementing, wraps 65535 → 1, 0 = no session). Returned in the CLAIM OK response (2 bytes, big-endian), included in `GET_STATUS` (bytes 12-13) and `EVT_SESSION_END` (bytes 1-2 after reason)
 - Commands that modify device state (LED, power) require an active session
 - Query commands (`GET_STATUS`, `GET_METADATA`, `SETTINGS_LIST/GET`) work without a session
 - `CLAIM` / `RELEASE` / takeover semantics support future multi-interface control (USB, BLE, WiFi)

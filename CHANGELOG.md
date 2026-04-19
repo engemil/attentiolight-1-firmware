@@ -13,6 +13,27 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-04-19)
+
+Added
+
+- **Session ID generation on CLAIM** — the MICB now assigns a monotonically incrementing
+  `uint16_t` session ID each time a remote interface claims control. The session ID is
+  generated on first claim (STANDALONE → REMOTE) and on takeover (new controller replaces
+  old). Value 0 is reserved for "no active session" (standalone mode); the counter wraps
+  from 65535 to 1, never producing 0.
+  - `micb_session_t` gains `session_id` and `session_counter` fields.
+  - **CLAIM OK response** now carries a 2-byte big-endian session ID payload (was empty).
+  - **GET_STATUS response** expanded from 12 to 14 bytes — session ID appended at bytes
+    12-13 (big-endian). Backward-compatible: older clients ignore the extra bytes.
+  - **EVT_SESSION_END event** payload expanded from 1 to 3 bytes:
+    `[reason:1][session_id_hi:1][session_id_lo:1]`. Allows the host to correlate the
+    ended session with the one it was tracking.
+  - Session ID is cleared to 0 on RELEASE, POWER_OFF, and any transition back to
+    STANDALONE mode.
+
+---
+
 ## [Development] (2026-04-17)
 
 Fixed

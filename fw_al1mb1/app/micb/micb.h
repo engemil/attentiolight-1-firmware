@@ -79,6 +79,8 @@ typedef enum {
 typedef struct {
     micb_control_mode_t mode;               /**< Current control mode.     */
     micb_interface_id_t active_controller;  /**< Who has control.          */
+    uint16_t            session_id;         /**< Active session ID (0=none).*/
+    uint16_t            session_counter;    /**< Monotonic session counter. */
 } micb_session_t;
 
 /**

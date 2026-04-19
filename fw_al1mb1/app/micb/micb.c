@@ -144,6 +144,11 @@ static void micb_enter_remote(micb_interface_id_t iface) {
 
     micb_session.mode = MICB_MODE_REMOTE;
     micb_session.active_controller = iface;
+    micb_session.session_counter++;
+    if (micb_session.session_counter == 0) {
+        micb_session.session_counter = 1;
+    }
+    micb_session.session_id = micb_session.session_counter;
 
     /* Tell the state machine we're entering external control. */
     app_sm_external_control_enter();
@@ -162,6 +167,7 @@ static void micb_exit_remote(void) {
 
     micb_session.mode = MICB_MODE_STANDALONE;
     micb_session.active_controller = MICB_IF_STANDALONE;
+    micb_session.session_id = 0;
 
     /* Tell the state machine to resume standalone operation. */
     app_sm_external_control_exit();
@@ -173,9 +179,12 @@ static void micb_exit_remote(void) {
 static void micb_send_session_end(micb_interface_id_t iface,
                                    ap_session_end_reason_t reason) {
     static uint8_t evt_buf[AP_MAX_PACKET_SIZE];
-    uint8_t payload = (uint8_t)reason;
+    uint8_t payload[3];
+    payload[0] = (uint8_t)reason;
+    payload[1] = (uint8_t)(micb_session.session_id >> 8);   /* session_id BE hi */
+    payload[2] = (uint8_t)(micb_session.session_id & 0xFF); /* session_id BE lo */
     size_t n = ap_build_event(evt_buf, sizeof(evt_buf),
-                              AP_CMD_EVT_SESSION_END, &payload, 1);
+                              AP_CMD_EVT_SESSION_END, payload, sizeof(payload));
     if (n > 0) {
         micb_send_to(iface, evt_buf, n);
     }
@@ -234,9 +243,18 @@ static void cmd_claim(micb_interface_id_t iface) {
         micb_send_session_end(micb_session.active_controller,
                               AP_SESSION_END_TAKEOVER);
         micb_session.active_controller = iface;
+        micb_session.session_counter++;
+        if (micb_session.session_counter == 0) {
+            micb_session.session_counter = 1;
+        }
+        micb_session.session_id = micb_session.session_counter;
     }
 
-    micb_respond_ok(iface, NULL, 0);
+    /* Respond with 2-byte session ID (big-endian). */
+    uint8_t sid_payload[2];
+    sid_payload[0] = (uint8_t)(micb_session.session_id >> 8);
+    sid_payload[1] = (uint8_t)(micb_session.session_id & 0xFF);
+    micb_respond_ok(iface, sid_payload, sizeof(sid_payload));
 }
 
 static void cmd_release(micb_interface_id_t iface) {
@@ -279,6 +297,7 @@ static void cmd_power_off(micb_interface_id_t iface) {
                               AP_SESSION_END_POWEROFF);
         micb_session.mode = MICB_MODE_STANDALONE;
         micb_session.active_controller = MICB_IF_STANDALONE;
+        micb_session.session_id = 0;
         app_sm_external_control_exit();
     }
 
@@ -391,7 +410,7 @@ static void cmd_set_brightness(micb_interface_id_t iface,
 /* --- Query commands --- */
 
 static void cmd_get_status(micb_interface_id_t iface) {
-    uint8_t payload[12];
+    uint8_t payload[14];
     uint8_t r, g, b;
 
     anim_thread_get_target_rgb(&r, &g, &b);
@@ -409,6 +428,8 @@ static void cmd_get_status(micb_interface_id_t iface) {
     payload[9]  = standalone_color_index;                    /* color_index 0-11  */
     payload[10] = standalone_brightness;                     /* standalone brightness 0-255 */
     payload[11] = (uint8_t)anim_thread_get_current_type();  /* anim_type         */
+    payload[12] = (uint8_t)(micb_session.session_id >> 8);  /* session_id BE hi  */
+    payload[13] = (uint8_t)(micb_session.session_id & 0xFF);/* session_id BE lo  */
 
     micb_respond_ok(iface, payload, sizeof(payload));
 }
@@ -1047,6 +1068,8 @@ static void cmd_dfu_enter(micb_interface_id_t iface) {
 void micb_init(void) {
     micb_session.mode = MICB_MODE_STANDALONE;
     micb_session.active_controller = MICB_IF_STANDALONE;
+    micb_session.session_id = 0;
+    micb_session.session_counter = 0;
 
     memset(micb_send_fns, 0, sizeof(micb_send_fns));
 
