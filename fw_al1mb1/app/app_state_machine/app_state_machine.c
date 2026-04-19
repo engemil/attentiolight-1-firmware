@@ -109,7 +109,7 @@ static const char* mode_names[] = {
     "Brightness",
     "Blinking",
     "Pulsation",
-    "Animation",
+    "Effects",
     "Traffic Light",
     "Night Light"
 };
@@ -313,9 +313,6 @@ uint8_t app_sm_init(void) {
     /* Initialize mailbox */
     chMBObjectInit(&input_mailbox, input_mailbox_buffer, APP_SM_INPUT_QUEUE_SIZE);
 
-    /* Initialize modes */
-    modes_init();
-
     driver_state = APP_SM_STATE_STOPPED;
     LOG_DEBUG("SM init OK");
     return 0;
@@ -387,10 +384,6 @@ app_sm_mode_t app_sm_get_mode(void) {
     return current_mode;
 }
 
-app_sm_driver_state_t app_sm_get_driver_state(void) {
-    return driver_state;
-}
-
 bool app_sm_is_external_control_active(void) {
     return external_control_active;
 }
@@ -413,13 +406,6 @@ const char* app_sm_system_state_name(app_sm_system_state_t state) {
 const char* app_sm_mode_name(app_sm_mode_t mode) {
     if (mode < APP_SM_MODE_COUNT) {
         return mode_names[mode];
-    }
-    return APP_SM_UNKNOWN;
-}
-
-const char* app_sm_input_name(app_sm_input_t input) {
-    if (input <= APP_SM_INPUT_MODE_TRANSITION_COMPLETE) {
-        return input_names[input];
     }
     return APP_SM_UNKNOWN;
 }

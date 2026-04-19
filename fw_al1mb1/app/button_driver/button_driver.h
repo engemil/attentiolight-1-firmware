@@ -58,7 +58,7 @@ SOFTWARE.
 #define BTN_EVT_NAME_LONG_PRESS_RELEASE     "BTN_LONG_PRESS_RELEASE"
 #define BTN_EVT_NAME_EXTENDED_PRESS_START   "BTN_EXTENDED_PRESS_START"
 #define BTN_EVT_NAME_EXTENDED_PRESS_RELEASE "BTN_EXTENDED_PRESS_RELEASE"
-#define BNT_EVT_UNKNOWN_EVENT               "BTN_UNKNOWN"
+#define BTN_EVT_UNKNOWN_EVENT               "BTN_UNKNOWN"
 
 /*===========================================================================*/
 /* Driver Data Types                                                         */
@@ -151,25 +151,6 @@ uint8_t button_stop(void);
  * @api
  */
 uint8_t button_register_callback(button_callback_t callback);
-
-/**
- * @brief   Returns current button pressed state.
- * @details Reads the debounced button state, not the raw GPIO.
- *
- * @return  true if button is currently pressed, false otherwise.
- *
- * @api
- */
-bool button_is_pressed(void);
-
-/**
- * @brief   Returns the current driver state.
- *
- * @return  Current driver state (UNINIT, STOPPED, or RUNNING).
- *
- * @api
- */
-button_driver_state_t button_get_state(void);
 
 /**
  * @brief   Returns the event name as a string.

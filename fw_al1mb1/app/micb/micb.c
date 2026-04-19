@@ -36,6 +36,7 @@ SOFTWARE.
 #include "app_log.h"
 #include "app_state_machine.h"
 #include "animation_thread.h"
+#include "animation_helpers.h"
 #include "persistent_data.h"
 #include "app_header.h"
 #include "modes.h"
@@ -91,10 +92,33 @@ static const char * const interface_names[] = {
     [MICB_IF_WIFI]       = "WiFi",
 };
 
-static const char * const mode_names[] = {
-    [MICB_MODE_STANDALONE] = "STANDALONE",
-    [MICB_MODE_REMOTE]     = "REMOTE",
-};
+/*===========================================================================*/
+/* Helper: format integer to decimal string                                  */
+/*===========================================================================*/
+
+/**
+ * @brief   Format a uint8_t as a decimal string.
+ *
+ * @param[in]  value    Value to format.
+ * @param[out] buf      Output buffer (must be at least 4 bytes).
+ *
+ * @return  Number of characters written (1-3).
+ */
+static uint8_t uint8_to_str(uint8_t value, char *buf) {
+    if (value >= 100) {
+        buf[0] = '0' + (value / 100);
+        buf[1] = '0' + ((value / 10) % 10);
+        buf[2] = '0' + (value % 10);
+        return 3;
+    } else if (value >= 10) {
+        buf[0] = '0' + (value / 10);
+        buf[1] = '0' + (value % 10);
+        return 2;
+    } else {
+        buf[0] = '0' + value;
+        return 1;
+    }
+}
 
 /*===========================================================================*/
 /* Helper: send response to interface                                        */
@@ -353,31 +377,13 @@ static void cmd_set_hsv(micb_interface_id_t iface, const ap_packet_t *pkt) {
     }
 
     /*
-     * Convert HSV to RGB.
-     * H: 0-359, S: 0-100, V: 0-100
+     * Convert HSV to RGB using shared helper.
+     * H: 0-359, S: 0-100, V: 0-100 → scale S,V to 0-255 for hsv_to_rgb().
      */
     uint8_t r, g, b;
-    if (s == 0) {
-        r = g = b = (uint8_t)((v * 255) / 100);
-    }
-    else {
-        uint16_t region = h / 60;
-        uint16_t remainder = (h - (region * 60)) * 6;
-
-        uint8_t p = (uint8_t)((v * (100 - s) * 255) / 10000);
-        uint8_t q = (uint8_t)((v * (10000 - s * remainder) * 255) / 1000000);
-        uint8_t t = (uint8_t)((v * (10000 - s * (360 - remainder)) * 255) / 1000000);
-        uint8_t val = (uint8_t)((v * 255) / 100);
-
-        switch (region) {
-        case 0:  r = val; g = t;   b = p;   break;
-        case 1:  r = q;   g = val; b = p;   break;
-        case 2:  r = p;   g = val; b = t;   break;
-        case 3:  r = p;   g = q;   b = val; break;
-        case 4:  r = t;   g = p;   b = val; break;
-        default: r = val; g = p;   b = q;   break;
-        }
-    }
+    uint8_t s255 = (uint8_t)((s * 255) / 100);
+    uint8_t v255 = (uint8_t)((v * 255) / 100);
+    hsv_to_rgb(h, s255, v255, &r, &g, &b);
 
     anim_thread_set_solid(r, g, b, 255);
     micb_respond_ok(iface, NULL, 0);
@@ -861,16 +867,7 @@ static void cmd_settings_list(micb_interface_id_t iface) {
         const char *key = "default_loglevel";
         uint8_t kl = (uint8_t)strlen(key);
         char val_str[4];
-        uint8_t lv = pd->log_level;
-        uint8_t vl;
-        if (lv >= 10) {
-            val_str[0] = '0' + (lv / 10);
-            val_str[1] = '0' + (lv % 10);
-            vl = 2;
-        } else {
-            val_str[0] = '0' + lv;
-            vl = 1;
-        }
+        uint8_t vl = uint8_to_str(pd->log_level, val_str);
         if ((idx + 1 + kl + 1 + vl) <= AP_MAX_PAYLOAD_SIZE) {
             payload[idx++] = kl;
             memcpy(&payload[idx], key, kl); idx += kl;
@@ -920,16 +917,7 @@ static void cmd_settings_get(micb_interface_id_t iface,
     }
     else if (key_len == 16 && memcmp(key, "default_loglevel", 16) == 0) {
         char val_str[4];
-        uint8_t lv = pd->log_level;
-        uint8_t vl;
-        if (lv >= 10) {
-            val_str[0] = '0' + (lv / 10);
-            val_str[1] = '0' + (lv % 10);
-            vl = 2;
-        } else {
-            val_str[0] = '0' + lv;
-            vl = 1;
-        }
+        uint8_t vl = uint8_to_str(pd->log_level, val_str);
         payload[idx++] = vl;
         memcpy(&payload[idx], val_str, vl);
         idx += vl;
@@ -1154,33 +1142,13 @@ void micb_forward_button_event(ap_button_event_t event) {
     }
 }
 
-const micb_session_t *micb_get_session(void) {
-    return &micb_session;
-}
-
 micb_control_mode_t micb_get_mode(void) {
     return micb_session.mode;
-}
-
-micb_interface_id_t micb_get_active_controller(void) {
-    return micb_session.active_controller;
-}
-
-bool micb_is_controller(micb_interface_id_t iface) {
-    return (micb_session.mode == MICB_MODE_REMOTE &&
-            micb_session.active_controller == iface);
 }
 
 const char *micb_interface_name(micb_interface_id_t iface) {
     if (iface < MICB_IF_COUNT) {
         return interface_names[iface];
-    }
-    return "UNKNOWN";
-}
-
-const char *micb_mode_name(micb_control_mode_t mode) {
-    if (mode <= MICB_MODE_REMOTE) {
-        return mode_names[mode];
     }
     return "UNKNOWN";
 }

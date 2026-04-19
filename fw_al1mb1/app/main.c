@@ -29,7 +29,7 @@ SOFTWARE.
 #include "portab.h"
 #include "usbcfg.h"
 #include "ws2812b_led_driver.h"
-//#include "ee_esp32_wifi_ble_if_driver.h"
+
 #include "button_driver.h"
 #include "animation_thread.h"
 #include "app_state_machine.h"
@@ -139,9 +139,6 @@ void init_system(void) {
      */
     /* TO DO: Enable ESP32 driver and integrate with external control mode. */
     /* TO DO: Implement UART communication protocol with ESP32-C3. */
-    //init_ee_esp32_wifi_ble_if_driver();
-    //disable_ee_esp32_wifi_ble_if_driver();
-    //set_program_mode_ee_esp32_wifi_ble_if_driver();
 
     /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
     sdStart(&SD2, &serial_cfg);

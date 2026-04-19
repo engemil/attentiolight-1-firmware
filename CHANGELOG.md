@@ -15,6 +15,66 @@ Note: Update `app_header.h` when publishing new version.
 
 ## [Development] (2026-04-19)
 
+Changed
+
+- **Extracted shared CRC32 utility** — deduplicated CRC32 calculation from
+  `persistent_data.c` and `device_metadata.c` into `crc32_util.c/.h`.
+
+- **Unified HSV-to-RGB conversion** — `micb.c` now calls the shared `hsv_to_rgb()` from
+  `animation_helpers.h` (with S/V scaling from 0-100 to 0-255 range) instead of
+  maintaining its own inline implementation.
+
+- **Deduplicated log level formatting** — added `uint8_to_str()` helper in `micb.c` to
+  replace repeated integer-to-string formatting for log level responses.
+
+- **Added `static` to internal symbols** — `pwm_buf`, `pwm_zero_buf`, and
+  `ws2812b_led_driver_reset_render()` in `ws2812b_led_driver.c` are now `static`,
+  matching their file-local usage.
+
+Fixed
+
+- **Fixed `BNT_EVT` → `BTN_EVT` typo** in `button_driver.h` macro prefix and the
+  `BNT_EVT_UNKNOWN_EVENT` reference in `button_driver.c`.
+
+- **Fixed reserved header guard** — `_WS2812B_LED_DRIVER_` → `WS2812B_LED_DRIVER_H`.
+
+- **Fixed copyright year** — 2025 → 2026 in `ws2812b_led_driver.c` and `.h`.
+
+- **Fixed mode name mismatch** — `"Animation"` → `"Effects"` in the mode name array
+  in `app_state_machine.c` to match `mode_effects_ops.name`.
+
+Removed
+
+- **Dead function removal (19 functions):**
+  - `state_boot_process`, `state_powerup_process`, `state_powerdown_process`,
+    `state_off_process` — empty process stubs from system states.
+  - `modes_init`, `modes_get_ops` — unused mode management functions.
+  - `device_metadata_get`, `device_metadata_is_initialized` — unused metadata queries.
+  - `persistent_data_load`, `persistent_data_factory_reset`,
+    `persistent_data_is_initialized` — unused persistent data functions.
+  - `button_is_pressed`, `button_get_state` — unused button driver queries.
+  - `anim_thread_is_active` — unused animation thread query.
+  - `micb_get_session`, `micb_get_active_controller`, `micb_is_controller`,
+    `micb_mode_name` — unused MICB accessor functions.
+  - `app_sm_get_driver_state`, `app_sm_input_name` — unused state machine queries.
+
+- **Removed unused `app_sm_color_t` struct** from `app_state_machine.h`.
+
+- **Removed unused `mode_names` array** from `micb.c` (leftover from `micb_mode_name`
+  removal).
+
+- **Removed `mode_external_control` dead code** — deleted `mode_external_control.c`,
+  removed extern declaration from `modes.h`, cleaned up commented-out references in
+  `modes.c`, and removed from `Makefile`.
+
+- **Removed commented-out code** — cleaned up stale commented-out lines across
+  `main.c`, `ws2812b_led_driver.c`, `mode_effects.c`, `mode_traffic_light.c`, and
+  `mode_brightness.c`.
+
+---
+
+## [Development] (2026-04-19)
+
 Added
 
 - **Session ID generation on CLAIM** — the MICB now assigns a monotonically incrementing

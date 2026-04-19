@@ -41,7 +41,6 @@ SOFTWARE.
 /* Mode Registry                                                             */
 /*===========================================================================*/
 
-/* TO DO: Add &mode_external_control_ops when ESP32 WiFi/BLE integration is complete. */
 /**
  * @brief   Array of mode operations, indexed by app_sm_mode_t.
  */
@@ -52,17 +51,12 @@ static const app_sm_mode_ops_t* mode_registry[APP_SM_MODE_COUNT] = {
     &mode_pulsation_ops,
     &mode_effects_ops,
     &mode_traffic_light_ops,
-    &mode_night_light_ops//,
-    //&mode_external_control_ops
+    &mode_night_light_ops
 };
 
 /*===========================================================================*/
 /* Public Functions                                                          */
 /*===========================================================================*/
-
-void modes_init(void) {
-    /* Modes don't require initialization currently */
-}
 
 void modes_enter_current(void) {
     if (current_mode < APP_SM_MODE_COUNT) {
@@ -98,11 +92,4 @@ void modes_on_long_start(void) {
             ops->on_long_start();
         }
     }
-}
-
-const app_sm_mode_ops_t* modes_get_ops(app_sm_mode_t mode) {
-    if (mode < APP_SM_MODE_COUNT) {
-        return mode_registry[mode];
-    }
-    return NULL;
 }

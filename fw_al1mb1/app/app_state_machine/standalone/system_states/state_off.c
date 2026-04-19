@@ -236,11 +236,6 @@ void state_off_enter(void) {
 #endif
 }
 
-void state_off_process(app_sm_input_t input) {
-    (void)input;
-    /* Nothing, ignore all inputs */
-}
-
 void state_off_exit(void) {
     /* Nothing special needed - system already restored in state_off_enter() */
 }

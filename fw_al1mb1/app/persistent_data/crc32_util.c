@@ -23,35 +23,26 @@ SOFTWARE.
 */
 
 /**
- * @file    state_boot.c
- * @brief   Boot state implementation.
- *
- * @details The boot state handles system initialization. It immediately
- *          transitions to the powerup state once initialization is complete.
+ * @file    crc32_util.c
+ * @brief   Shared CRC32 utility (IEEE 802.3 polynomial).
  */
 
-#include "system_states.h"
-#include "animation_thread.h"
-#include "app_log.h"
+#include "crc32_util.h"
 
+uint32_t crc32_calc(const void *data, size_t len) {
+    const uint8_t *p = (const uint8_t *)data;
+    uint32_t crc = 0xFFFFFFFFU;
 
-/*===========================================================================*/
-/* Boot State Implementation                                                 */
-/*===========================================================================*/
+    while (len--) {
+        crc ^= *p++;
+        for (int i = 0; i < 8; i++) {
+            if (crc & 1) {
+                crc = (crc >> 1) ^ 0xEDB88320U;
+            } else {
+                crc >>= 1;
+            }
+        }
+    }
 
-void state_boot_enter(void) {
-    LOG_DEBUG("state_boot_enter()");
-
-    /*
-     * Boot state just signals the transition to powerup.
-     */
-
-    /* Boot is instant - signal transition to powerup */
-    LOG_DEBUG("posting BOOT_COMPLETE input...");
-    app_sm_process_input(APP_SM_INPUT_BOOT_COMPLETE);
-    LOG_DEBUG("state_boot_enter() done");
-}
-
-void state_boot_exit(void) {
-
+    return ~crc;
 }

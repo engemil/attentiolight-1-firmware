@@ -401,14 +401,6 @@ uint8_t button_register_callback(button_callback_t callback) {
     return 0;
 }
 
-bool button_is_pressed(void) {
-    return btn_pressed;
-}
-
-button_driver_state_t button_get_state(void) {
-    return driver_state;
-}
-
 const char* button_event_name(button_event_t event) {
     switch (event) {
     case BTN_EVT_NONE:
@@ -424,6 +416,6 @@ const char* button_event_name(button_event_t event) {
     case BTN_EVT_EXTENDED_PRESS_RELEASE:
         return BTN_EVT_NAME_EXTENDED_PRESS_RELEASE;
     default:
-        return BNT_EVT_UNKNOWN_EVENT;
+        return BTN_EVT_UNKNOWN_EVENT;
     }
 }

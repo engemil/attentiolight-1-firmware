@@ -136,15 +136,6 @@ typedef enum {
 } app_sm_driver_state_t;
 
 /**
- * @brief   RGB color structure.
- */
-typedef struct {
-    uint8_t r;                  /**< Red component (0-255)                  */
-    uint8_t g;                  /**< Green component (0-255)                */
-    uint8_t b;                  /**< Blue component (0-255)                 */
-} app_sm_color_t;
-
-/**
  * @brief   Mode operations interface.
  * @details Each mode implements this interface for consistent handling.
  */
@@ -224,15 +215,6 @@ app_sm_system_state_t app_sm_get_system_state(void);
 app_sm_mode_t app_sm_get_mode(void);
 
 /**
- * @brief   Gets the driver state.
- *
- * @return  Current driver state (UNINIT, STOPPED, or RUNNING).
- *
- * @api
- */
-app_sm_driver_state_t app_sm_get_driver_state(void);
-
-/**
  * @brief   Checks if external control is active.
  *
  * @return  true if external control is active, false otherwise.
@@ -278,17 +260,6 @@ const char* app_sm_system_state_name(app_sm_system_state_t state);
  * @api
  */
 const char* app_sm_mode_name(app_sm_mode_t mode);
-
-/**
- * @brief   Gets the name of an input event.
- *
- * @param[in] input     The input event.
- *
- * @return  String name of the input.
- *
- * @api
- */
-const char* app_sm_input_name(app_sm_input_t input);
 
 /**
  * @brief   Gets the button event callback for the state machine.

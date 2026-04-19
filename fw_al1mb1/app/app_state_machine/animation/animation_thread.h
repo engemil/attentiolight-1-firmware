@@ -401,15 +401,6 @@ void anim_thread_get_target_rgb(uint8_t *r, uint8_t *g, uint8_t *b);
  */
 uint8_t anim_thread_get_brightness(void);
 
-/**
- * @brief   Checks if the animation is currently active.
- *
- * @return  true if animation is active, false otherwise.
- *
- * @api
- */
-bool anim_thread_is_active(void);
-
 #ifdef __cplusplus
 }
 #endif

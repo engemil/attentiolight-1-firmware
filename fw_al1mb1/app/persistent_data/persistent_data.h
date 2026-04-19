@@ -172,25 +172,6 @@ pd_result_t persistent_data_set_log_level(uint8_t level);
  */
 pd_result_t persistent_data_save(void);
 
-/**
- * @brief   Reload settings from EFL storage.
- * @note    Discards any unsaved changes in RAM cache.
- * @pre     persistent_data_init() must have been called.
- *
- * @return  Result code indicating success or failure reason.
- */
-pd_result_t persistent_data_load(void);
-
-/**
- * @brief   Reset all settings to factory defaults.
- * @note    Loads defaults into RAM cache and saves to flash.
- *          Does NOT affect device metadata (separate EFL page).
- * @pre     persistent_data_init() must have been called.
- *
- * @return  Result code indicating success or failure reason.
- */
-pd_result_t persistent_data_factory_reset(void);
-
 /** @} */
 
 /**
@@ -206,13 +187,6 @@ pd_result_t persistent_data_factory_reset(void);
  * @return  String describing the result.
  */
 const char *persistent_data_result_str(pd_result_t result);
-
-/**
- * @brief   Check if the module is initialized.
- *
- * @return  true if initialized, false otherwise.
- */
-bool persistent_data_is_initialized(void);
 
 /** @} */
 

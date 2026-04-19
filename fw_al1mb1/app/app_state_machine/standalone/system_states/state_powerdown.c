@@ -74,11 +74,6 @@ void state_powerdown_enter(void) {
             powerdown_timer_cb, NULL);
 }
 
-void state_powerdown_process(app_sm_input_t input) {
-    (void)input;
-    /* Nothing, ignore all inputs */
-}
-
 void state_powerdown_exit(void) {
     /* Cancel timer if still running */
     chVTReset(&powerdown_timer);

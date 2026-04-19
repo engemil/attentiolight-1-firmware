@@ -186,11 +186,11 @@ CSRC = $(ALLCSRC) \
        app/app_state_machine/standalone/modes/mode_effects.c \
        app/app_state_machine/standalone/modes/mode_traffic_light.c \
        app/app_state_machine/standalone/modes/mode_night_light.c \
-       app/app_state_machine/standalone/modes/mode_external_control.c \
        app/app_log.c \
        app/attentio_protocol/attentio_protocol.c \
        app/micb/micb.c \
        app/usb_adapter/usb_adapter.c \
+       app/persistent_data/crc32_util.c \
        app/persistent_data/device_metadata.c \
        app/persistent_data/persistent_data.c \
        app_header/app_header.c

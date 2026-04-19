@@ -34,6 +34,7 @@ SOFTWARE.
 
 #include "persistent_data.h"
 #include "persistent_data_defaults.h"
+#include "crc32_util.h"
 #include "hal.h"
 #include "efl_storage.h"
 #include <string.h>
@@ -114,22 +115,11 @@ static const char * const pd_result_strings[] = {
  *
  * @return  CRC32 value.
  */
+/**
+ * @brief   CRC32 calculation — delegates to shared utility.
+ */
 static uint32_t pd_crc32(const void *data, size_t len) {
-    const uint8_t *p = (const uint8_t *)data;
-    uint32_t crc = 0xFFFFFFFFU;
-
-    while (len--) {
-        crc ^= *p++;
-        for (int i = 0; i < 8; i++) {
-            if (crc & 1) {
-                crc = (crc >> 1) ^ 0xEDB88320U;
-            } else {
-                crc >>= 1;
-            }
-        }
-    }
-
-    return ~crc;
+    return crc32_calc(data, len);
 }
 
 /**
@@ -327,49 +317,11 @@ pd_result_t persistent_data_save(void) {
     return pd_efl_write(&storage);
 }
 
-pd_result_t persistent_data_load(void) {
-    pd_storage_t storage;
-    pd_result_t result;
-
-    if (!pd_initialized) {
-        return PD_ERROR_NOT_INIT;
-    }
-
-    result = pd_efl_read(&storage);
-    if (result != PD_OK) {
-        return result;
-    }
-
-    if (!pd_validate_storage(&storage)) {
-        pd_load_defaults();
-        return PD_ERROR_CRC;
-    }
-
-    memcpy(&pd_cache, &storage.data, sizeof(pd_data_t));
-
-    return PD_OK;
-}
-
-pd_result_t persistent_data_factory_reset(void) {
-    if (!pd_initialized) {
-        return PD_ERROR_NOT_INIT;
-    }
-
-    pd_load_defaults();
-
-    /* Save defaults to flash immediately */
-    return persistent_data_save();
-}
-
 const char *persistent_data_result_str(pd_result_t result) {
     if ((size_t)result < sizeof(pd_result_strings) / sizeof(pd_result_strings[0])) {
         return pd_result_strings[result];
     }
     return "Unknown error";
-}
-
-bool persistent_data_is_initialized(void) {
-    return pd_initialized;
 }
 
 /** @} */

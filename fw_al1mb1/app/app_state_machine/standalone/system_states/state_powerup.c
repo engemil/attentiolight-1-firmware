@@ -70,11 +70,6 @@ void state_powerup_enter(void) {
             powerup_timer_cb, NULL);
 }
 
-void state_powerup_process(app_sm_input_t input) {
-    (void)input;
-    /* Nothing, ignore all inputs */
-}
-
 void state_powerup_exit(void) {
     /* Cancel timer if still running */
     chVTReset(&powerup_timer);

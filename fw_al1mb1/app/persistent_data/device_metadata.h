@@ -122,22 +122,6 @@ md_result_t device_metadata_init(void);
 /** @} */
 
 /**
- * @name    Data access
- * @{
- */
-
-/**
- * @brief   Get pointer to the metadata structure.
- * @note    Returns a const pointer. Metadata is read-only.
- * @pre     device_metadata_init() must have been called.
- *
- * @return  Pointer to the metadata structure, or NULL if not initialized.
- */
-const md_data_t *device_metadata_get(void);
-
-/** @} */
-
-/**
  * @name    Utility functions
  * @{
  */
@@ -150,13 +134,6 @@ const md_data_t *device_metadata_get(void);
  * @return  String describing the result.
  */
 const char *device_metadata_result_str(md_result_t result);
-
-/**
- * @brief   Check if the module is initialized.
- *
- * @return  true if initialized, false otherwise.
- */
-bool device_metadata_is_initialized(void);
 
 /** @} */
 

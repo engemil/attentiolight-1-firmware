@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 EngEmil
+Copyright (c) 2026 EngEmil
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,8 @@ SOFTWARE.
  * 
  */
 
-#ifndef _WS2812B_LED_DRIVER_
-#define _WS2812B_LED_DRIVER_
+#ifndef WS2812B_LED_DRIVER_H
+#define WS2812B_LED_DRIVER_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -143,4 +143,4 @@ const ws2812b_status_t* ws2812b_led_driver_get_status(void);
 }
 #endif
 
-#endif /* _WS2812B_LED_DRIVER_ */
+#endif /* WS2812B_LED_DRIVER_H */

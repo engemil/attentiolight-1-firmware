@@ -46,11 +46,6 @@ extern "C" {
 void state_boot_enter(void);
 
 /**
- * @brief   Boot state - process input.
- */
-void state_boot_process(app_sm_input_t input);
-
-/**
  * @brief   Boot state - exit handler.
  */
 void state_boot_exit(void);
@@ -59,11 +54,6 @@ void state_boot_exit(void);
  * @brief   Powerup state - enter handler.
  */
 void state_powerup_enter(void);
-
-/**
- * @brief   Powerup state - process input.
- */
-void state_powerup_process(app_sm_input_t input);
 
 /**
  * @brief   Powerup state - exit handler.
@@ -91,11 +81,6 @@ void state_active_exit(void);
 void state_powerdown_enter(void);
 
 /**
- * @brief   Powerdown state - process input.
- */
-void state_powerdown_process(app_sm_input_t input);
-
-/**
  * @brief   Powerdown state - exit handler.
  */
 void state_powerdown_exit(void);
@@ -104,11 +89,6 @@ void state_powerdown_exit(void);
  * @brief   Off state - enter handler.
  */
 void state_off_enter(void);
-
-/**
- * @brief   Off state - process input.
- */
-void state_off_process(app_sm_input_t input);
 
 /**
  * @brief   Off state - exit handler.

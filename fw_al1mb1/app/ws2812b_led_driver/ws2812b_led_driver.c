@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2025 EngEmil
+Copyright (c) 2026 EngEmil
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -81,11 +81,11 @@ static ws2812b_status_t driver_status = {0};
 )
 
 
-const uint8_t pwm_zero_buf = 0;
-uint8_t pwm_buf[PWM_BUFFER_SIZE] = {0}; // Ensure last value is untouched (always zero).
-static const stm32_dma_stream_t *dma_stream; //= NULL; // Global DMA stream pointer
+static const uint8_t pwm_zero_buf = 0;
+static uint8_t pwm_buf[PWM_BUFFER_SIZE] = {0}; // Ensure last value is untouched (always zero).
+static const stm32_dma_stream_t *dma_stream;
 static volatile bool dma_ready = true;
-//static volatile bool driver_started = false; // Track if driver already started
+
 
 
 static const PWMConfig pwm_cfg = {
@@ -186,7 +186,7 @@ uint8_t ws2812b_led_driver_set_color_rgb(uint8_t r, uint8_t g, uint8_t b) {
     return 0;
 }
 
-uint8_t ws2812b_led_driver_reset_render(void){
+static uint8_t ws2812b_led_driver_reset_render(void){
 
     while (!dma_ready) {
         driver_status.dma_wait_count++;

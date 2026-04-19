@@ -56,11 +56,6 @@ extern const uint8_t standalone_color_palette[APP_SM_COLOR_COUNT][3];
 /*===========================================================================*/
 
 /**
- * @brief   Initializes all modes.
- */
-void modes_init(void);
-
-/**
  * @brief   Enters the current mode.
  */
 void modes_enter_current(void);
@@ -79,11 +74,6 @@ void modes_on_short_press(void);
  * @brief   Handles long press start for current mode.
  */
 void modes_on_long_start(void);
-
-/**
- * @brief   Gets mode operations for a specific mode.
- */
-const app_sm_mode_ops_t* modes_get_ops(app_sm_mode_t mode);
 
 /*===========================================================================*/
 /* Individual Mode Declarations                                              */
@@ -109,9 +99,6 @@ extern const app_sm_mode_ops_t mode_traffic_light_ops;
 
 /* Night Light Mode */
 extern const app_sm_mode_ops_t mode_night_light_ops;
-
-/* External Control Mode */
-extern const app_sm_mode_ops_t mode_external_control_ops;
 
 /*===========================================================================*/
 /* Query Functions                                                           */

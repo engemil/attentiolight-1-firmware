@@ -147,33 +147,11 @@ void micb_process_command(micb_interface_id_t iface, const ap_packet_t *pkt);
 void micb_forward_button_event(ap_button_event_t event);
 
 /**
- * @brief   Get the current session state.
- *
- * @return  Pointer to the current session state (read-only).
- */
-const micb_session_t *micb_get_session(void);
-
-/**
  * @brief   Get the current control mode.
  *
  * @return  Current control mode (STANDALONE or REMOTE).
  */
 micb_control_mode_t micb_get_mode(void);
-
-/**
- * @brief   Get the active controller interface.
- *
- * @return  Active controller interface ID.
- */
-micb_interface_id_t micb_get_active_controller(void);
-
-/**
- * @brief   Check if an interface is the active controller.
- *
- * @param[in] iface     Interface to check.
- * @return  true if the interface is the active controller.
- */
-bool micb_is_controller(micb_interface_id_t iface);
 
 /**
  * @brief   Get the name string for an interface ID.
@@ -182,14 +160,6 @@ bool micb_is_controller(micb_interface_id_t iface);
  * @return  Human-readable interface name.
  */
 const char *micb_interface_name(micb_interface_id_t iface);
-
-/**
- * @brief   Get the name string for a control mode.
- *
- * @param[in] mode      Control mode.
- * @return  Human-readable mode name.
- */
-const char *micb_mode_name(micb_control_mode_t mode);
 
 #ifdef __cplusplus
 }

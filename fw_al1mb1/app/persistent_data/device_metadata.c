@@ -34,6 +34,7 @@ SOFTWARE.
  */
 
 #include "device_metadata.h"
+#include "crc32_util.h"
 #include "hal.h"
 #include "efl_storage.h"
 #include <string.h>
@@ -113,22 +114,11 @@ static const char * const md_result_strings[] = {
  *
  * @return  CRC32 value.
  */
+/**
+ * @brief   CRC32 calculation — delegates to shared utility.
+ */
 static uint32_t md_crc32(const void *data, size_t len) {
-    const uint8_t *p = (const uint8_t *)data;
-    uint32_t crc = 0xFFFFFFFFU;
-
-    while (len--) {
-        crc ^= *p++;
-        for (int i = 0; i < 8; i++) {
-            if (crc & 1) {
-                crc = (crc >> 1) ^ 0xEDB88320U;
-            } else {
-                crc >>= 1;
-            }
-        }
-    }
-
-    return ~crc;
+    return crc32_calc(data, len);
 }
 
 /**
@@ -221,22 +211,11 @@ md_result_t device_metadata_init(void) {
     return MD_OK;
 }
 
-const md_data_t *device_metadata_get(void) {
-    if (!md_initialized) {
-        return NULL;
-    }
-    return &md_cache;
-}
-
 const char *device_metadata_result_str(md_result_t result) {
     if ((size_t)result < sizeof(md_result_strings) / sizeof(md_result_strings[0])) {
         return md_result_strings[result];
     }
     return "Unknown error";
-}
-
-bool device_metadata_is_initialized(void) {
-    return md_initialized;
 }
 
 /** @} */
