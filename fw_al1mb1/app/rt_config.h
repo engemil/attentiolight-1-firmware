@@ -56,7 +56,7 @@ SOFTWARE.
  * @details Low priority - button processing is not timing critical.
  */
 #ifndef RT_BUTTON_THREAD_PRIORITY
-#define RT_BUTTON_THREAD_PRIORITY           (LOWPRIO + 1)
+#define RT_BUTTON_THREAD_PRIORITY           (NORMALPRIO + 1)
 #endif
 
 /**
@@ -64,7 +64,7 @@ SOFTWARE.
  * @details Normal priority - handles mode transitions and events.
  */
 #ifndef RT_STATE_MACHINE_THREAD_PRIORITY
-#define RT_STATE_MACHINE_THREAD_PRIORITY    (NORMALPRIO)
+#define RT_STATE_MACHINE_THREAD_PRIORITY    (NORMALPRIO + 2)
 #endif
 
 /**
@@ -73,7 +73,7 @@ SOFTWARE.
  *          Must be higher than state machine to prevent animation stutter.
  */
 #ifndef RT_ANIMATION_THREAD_PRIORITY
-#define RT_ANIMATION_THREAD_PRIORITY        (NORMALPRIO + 1)
+#define RT_ANIMATION_THREAD_PRIORITY        (NORMALPRIO + 2)
 #endif
 
 /**
@@ -82,7 +82,7 @@ SOFTWARE.
  *          Same level as animation — both need timely execution.
  */
 #ifndef RT_USB_ADAPTER_THREAD_PRIORITY
-#define RT_USB_ADAPTER_THREAD_PRIORITY      (NORMALPRIO + 1)
+#define RT_USB_ADAPTER_THREAD_PRIORITY      (NORMALPRIO)
 #endif
 
 /** @} */

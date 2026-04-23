@@ -13,6 +13,29 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-04-23)
+
+Fixed
+
+- **Animation Flicker Fix** — fixed a visual glitch where animations (like Candle or Fire)
+  would briefly drop to near-zero brightness when transitioning to a darker state.
+  The issue was caused by an unsigned integer underflow in `two_phase_transition_u8()` 
+  when subtracting a larger value from a smaller one. Changed the calculations to use 
+  `int32_t` to properly handle negative differences before reapplying them as `uint8_t`.
+
+Changed
+
+- **Inverted Thread Priorities** — adjusted thread priorities in `rt_config.h` to
+  prevent priority inversion. Previously, the Animation Thread (`NORMALPRIO + 1`) 
+  preempted the Button Thread (`LOWPRIO + 1`), causing significant input latency when 
+  the CPU was busy rendering. 
+  The new hierarchy prioritizes input and logic over rendering:
+  - **Button Thread:** `HIGHPRIO - 2`
+  - **State Machine Thread:** `NORMALPRIO + 2`
+  - **Animation Thread:** `NORMALPRIO`
+
+---
+
 ## [Development] (2026-04-19)
 
 Changed

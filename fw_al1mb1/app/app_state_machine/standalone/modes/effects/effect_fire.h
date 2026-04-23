@@ -52,14 +52,6 @@ extern "C" {
 #define APP_SM_FIRE_PERIOD_MS           60
 #endif
 
-/**
- * @brief   Fire effect randomness range in milliseconds.
- * @details Flicker period varies randomly within this range.
- */
-#ifndef APP_SM_FIRE_RANDOM_RANGE_MS
-#define APP_SM_FIRE_RANDOM_RANGE_MS     100
-#endif
-
 /*===========================================================================*/
 /* Effect Interface                                                          */
 /*===========================================================================*/

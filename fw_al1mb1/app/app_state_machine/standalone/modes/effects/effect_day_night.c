@@ -41,7 +41,7 @@ void process_day_night(const anim_state_t *state) {
     uint32_t cycle_pos = state->elapsed_ms % state->period_ms;
 
     /* Calculate progress through cycle as 0-65535 (16-bit) for maximum precision */
-    uint32_t progress_16bit = (cycle_pos * 65536UL) / state->period_ms;
+    uint32_t progress_16bit = (uint32_t)(((uint64_t)cycle_pos * 65536ULL) / (uint64_t)state->period_ms);
     
     /* 12 Waypoints for smooth day/night cycle:
      * 

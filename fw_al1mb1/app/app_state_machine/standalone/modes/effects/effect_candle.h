@@ -52,14 +52,6 @@ extern "C" {
 #define APP_SM_CANDLE_PERIOD_MS         100
 #endif
 
-/**
- * @brief   Candle flicker randomness range in milliseconds.
- * @details Flicker period varies from (base - range/2) to (base + range/2).
- */
-#ifndef APP_SM_CANDLE_RANDOM_RANGE_MS
-#define APP_SM_CANDLE_RANDOM_RANGE_MS   80
-#endif
-
 /*===========================================================================*/
 /* Effect Interface                                                          */
 /*===========================================================================*/

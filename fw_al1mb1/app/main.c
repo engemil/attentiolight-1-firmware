@@ -90,14 +90,6 @@ static void button_event_wrapper(button_event_t event) {
 }
 
 
-/* Serial Configuration for Virtual COM Port */
-static SerialConfig serial_cfg = {
-    .speed  = 115200,           // Baud rate
-    .cr1    = 0,                // No parity, 8-bit data (default)
-    .cr2    = 0,                // No specific control settings
-    .cr3    = 0                 // No hardware flow control
-};
-
 /*
  * System initialization.
 */
@@ -140,8 +132,6 @@ void init_system(void) {
     /* TO DO: Enable ESP32 driver and integrate with external control mode. */
     /* TO DO: Implement UART communication protocol with ESP32-C3. */
 
-    /* Configure Serial Driver SD2 (USART2) for Virtual COM Port */
-    sdStart(&SD2, &serial_cfg);
 }
 
 /*

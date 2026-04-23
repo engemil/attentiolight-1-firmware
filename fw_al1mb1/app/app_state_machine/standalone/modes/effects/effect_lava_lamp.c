@@ -38,31 +38,16 @@ void process_lava_lamp(const anim_state_t *state) {
     /* Use pre-computed elapsed_ms from animation thread */
     uint32_t elapsed = state->elapsed_ms;
     uint32_t cycle_pos = elapsed % state->period_ms;
-    uint32_t half_period = state->period_ms / 2;
 
     /* === Primary hue oscillation: triangle wave 0-45-0 (red to orange, no yellow) === */
-    uint16_t base_hue;
-    if (cycle_pos < half_period) {
-        /* Rising: 0 -> 45 (red to orange) */
-        base_hue = (uint16_t)((cycle_pos * 45) / half_period);
-    } else {
-        /* Falling: 45 -> 0 (orange to red) */
-        base_hue = (uint16_t)(45 - (((cycle_pos - half_period) * 45) / half_period));
-    }
+    uint16_t base_hue = (uint16_t)triangle_wave_u8(cycle_pos, state->period_ms, 0, 45);
     
     /* === Secondary slower wave: triangle wave ±10 degrees for organic variation === */
     uint32_t slow_period = state->period_ms * 3;
     uint32_t slow_cycle = elapsed % slow_period;
-    uint32_t slow_half = slow_period / 2;
     int16_t wave_offset;
     
-    if (slow_cycle < slow_half) {
-        /* Rising: -10 -> +10 */
-        wave_offset = -10 + (int16_t)((slow_cycle * 20) / slow_half);
-    } else {
-        /* Falling: +10 -> -10 */
-        wave_offset = 10 - (int16_t)(((slow_cycle - slow_half) * 20) / slow_half);
-    }
+    wave_offset = (int16_t)triangle_wave_u8(slow_cycle, slow_period, 0, 20) - 10;
     
     /* Combine and clamp hue to 0-45 range (no yellow/green) */
     int16_t hue = (int16_t)base_hue + wave_offset;
@@ -71,23 +56,14 @@ void process_lava_lamp(const anim_state_t *state) {
     
     /* === Saturation: triangle wave 220-255-220 for organic look === */
     uint8_t saturation;
-    if (cycle_pos < half_period) {
-        saturation = 220 + (uint8_t)((cycle_pos * 35) / half_period);
-    } else {
-        saturation = 255 - (uint8_t)(((cycle_pos - half_period) * 35) / half_period);
-    }
+    saturation = triangle_wave_u8(cycle_pos, state->period_ms, 220, 255);
     
     /* === Brightness: triangle wave 85-100-85 for lava blob effect === */
     uint32_t bright_period = state->period_ms * 2 / 3;  /* Slightly different rate */
     uint32_t bright_cycle = elapsed % bright_period;
-    uint32_t bright_half = bright_period / 2;
     uint8_t brightness_factor;
     
-    if (bright_cycle < bright_half) {
-        brightness_factor = 85 + (uint8_t)((bright_cycle * 15) / bright_half);
-    } else {
-        brightness_factor = 100 - (uint8_t)(((bright_cycle - bright_half) * 15) / bright_half);
-    }
+    brightness_factor = triangle_wave_u8(bright_cycle, bright_period, 85, 100);
     
     uint8_t r, g, b;
     hsv_to_rgb((uint16_t)hue, saturation, 255, &r, &g, &b);

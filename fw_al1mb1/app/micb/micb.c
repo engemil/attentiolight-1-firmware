@@ -104,7 +104,7 @@ static const char * const interface_names[] = {
  *
  * @return  Number of characters written (1-3).
  */
-static uint8_t uint8_to_str(uint8_t value, char *buf) {
+static uint8_t u8_to_dec(char *buf, uint8_t value) {
     if (value >= 100) {
         buf[0] = '0' + (value / 100);
         buf[1] = '0' + ((value / 10) % 10);
@@ -458,19 +458,6 @@ typedef struct {
     const char *val;
     uint8_t     val_len;
 } md_entry_t;
-
-/**
- * @brief   Format a uint8 as a 1-3 digit decimal string.
- * @return  Number of characters written (no NUL terminator).
- */
-__attribute__((noinline))
-static uint8_t u8_to_dec(char *buf, uint8_t v) {
-    uint8_t n = 0;
-    if (v >= 100) { buf[n++] = '0' + (v / 100); v %= 100; }
-    if (n > 0 || v >= 10) { buf[n++] = '0' + (v / 10); v %= 10; }
-    buf[n++] = '0' + v;
-    return n;
-}
 
 /**
  * @brief   Format a uint32 as a decimal string.
@@ -867,7 +854,7 @@ static void cmd_settings_list(micb_interface_id_t iface) {
         const char *key = "default_loglevel";
         uint8_t kl = (uint8_t)strlen(key);
         char val_str[4];
-        uint8_t vl = uint8_to_str(pd->log_level, val_str);
+        uint8_t vl = u8_to_dec(val_str, pd->log_level);
         if ((idx + 1 + kl + 1 + vl) <= AP_MAX_PAYLOAD_SIZE) {
             payload[idx++] = kl;
             memcpy(&payload[idx], key, kl); idx += kl;
@@ -917,7 +904,7 @@ static void cmd_settings_get(micb_interface_id_t iface,
     }
     else if (key_len == 16 && memcmp(key, "default_loglevel", 16) == 0) {
         char val_str[4];
-        uint8_t vl = uint8_to_str(pd->log_level, val_str);
+        uint8_t vl = u8_to_dec(val_str, pd->log_level);
         payload[idx++] = vl;
         memcpy(&payload[idx], val_str, vl);
         idx += vl;

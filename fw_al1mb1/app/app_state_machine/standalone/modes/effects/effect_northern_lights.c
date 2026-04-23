@@ -89,24 +89,12 @@ void process_northern_lights(const anim_state_t *state) {
     
     /* Primary slow wave: oscillates in green range (90-140 hue) */
     uint32_t slow_cycle_pos = elapsed % state->period_ms;
-    uint32_t half_period = state->period_ms / 2;
-    uint16_t slow_hue_offset;
-    if (slow_cycle_pos < half_period) {
-        slow_hue_offset = (slow_cycle_pos * 40) / half_period;
-    } else {
-        slow_hue_offset = 40 - (((slow_cycle_pos - half_period) * 40) / half_period);
-    }
+    uint16_t slow_hue_offset = triangle_wave_u8(slow_cycle_pos, state->period_ms, 0, 40);
     
     /* Secondary faster wave: adds subtle hue variation (±15 degrees) */
     uint32_t fast_period = state->period_ms / 4;
     uint32_t fast_cycle_pos = elapsed % fast_period;
-    uint32_t fast_half = fast_period / 2;
-    int16_t fast_hue_offset;
-    if (fast_cycle_pos < fast_half) {
-        fast_hue_offset = (fast_cycle_pos * 15) / fast_half;
-    } else {
-        fast_hue_offset = 15 - (((fast_cycle_pos - fast_half) * 30) / fast_half);
-    }
+    int16_t fast_hue_offset = (int16_t)triangle_wave_u8(fast_cycle_pos, fast_period, 0, 30) - 15;
     
     /* Combine hue: base green (100) + offsets */
     int16_t hue = 100 + (int16_t)slow_hue_offset + fast_hue_offset;
@@ -118,24 +106,12 @@ void process_northern_lights(const anim_state_t *state) {
     /* Base aurora brightness wave: 50-100% during active phase */
     uint32_t bright_period = state->period_ms * 2 / 3;
     uint32_t bright_pos = elapsed % bright_period;
-    uint32_t bright_half = bright_period / 2;
-    uint8_t aurora_brightness;
-    if (bright_pos < bright_half) {
-        aurora_brightness = 50 + ((bright_pos * 50) / bright_half);
-    } else {
-        aurora_brightness = 100 - (((bright_pos - bright_half) * 50) / bright_half);
-    }
+    uint8_t aurora_brightness = triangle_wave_u8(bright_pos, bright_period, 50, 100);
     
     /* Fast flutter overlay: ±12% for shimmer effect */
     uint32_t flutter_period = state->period_ms / 7;
     uint32_t flutter_pos = elapsed % flutter_period;
-    uint32_t flutter_half = flutter_period / 2;
-    int8_t flutter;
-    if (flutter_pos < flutter_half) {
-        flutter = (int8_t)((flutter_pos * 12) / flutter_half);
-    } else {
-        flutter = (int8_t)(12 - (((flutter_pos - flutter_half) * 24) / flutter_half));
-    }
+    int8_t flutter = (int8_t)triangle_wave_u8(flutter_pos, flutter_period, 0, 24) - 12;
     
     int16_t active_brightness = (int16_t)aurora_brightness + flutter;
     if (active_brightness < 40) active_brightness = 40;

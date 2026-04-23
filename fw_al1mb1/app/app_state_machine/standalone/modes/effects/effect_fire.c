@@ -41,24 +41,21 @@ void process_fire(const anim_state_t *state) {
     /* === Slow base undulation (like glowing embers, ~2 second cycle) === */
     uint32_t base_period = 2000;  /* 2 seconds */
     uint32_t base_pos = elapsed % base_period;
-    uint8_t base_brightness;
-    
-    /* Gentle triangle wave undulation between 70% and 90% */
-    if (base_pos < base_period / 2) {
-        base_brightness = 70 + ((base_pos * 20) / (base_period / 2));
-    } else {
-        base_brightness = 90 - (((base_pos - base_period / 2) * 20) / (base_period / 2));
-    }
+    uint8_t base_brightness = triangle_wave_u8(base_pos, base_period, 70, 90);
     
     /* === Random flicker/flare events (every 0.5-2 seconds) === */
-    uint32_t half_sec_tick = elapsed / 500;
-    effect_random_seed = half_sec_tick * 6361 + 17;
-    uint32_t rand_interval = effect_random();
-    
-    /* Determine flicker interval: random 500-2000ms */
-    uint32_t flicker_interval = 500 + (rand_interval % 1500);
-    uint32_t anchor_time = (elapsed / flicker_interval) * flicker_interval;
-    uint32_t time_since_anchor = elapsed - anchor_time;
+    uint32_t flicker_interval;
+    uint32_t anchor_time;
+    uint32_t time_since_anchor;
+    effect_random_window(elapsed,
+                         500,
+                         6361,
+                         17,
+                         500,
+                         1500,
+                         &flicker_interval,
+                         &anchor_time,
+                         &time_since_anchor);
     
     /* Flicker duration: ~200ms total (quick flare up + settle down) */
     #define FIRE_FLARE_MS       80
@@ -76,18 +73,12 @@ void process_fire(const anim_state_t *state) {
         uint8_t flare_max = base_brightness + flare_boost;
         if (flare_max > 100) flare_max = 100;
         
-        if (time_since_anchor < FIRE_FLARE_MS) {
-            /* Quick flare up */
-            uint32_t flare_progress = (time_since_anchor * 100) / FIRE_FLARE_MS;
-            final_brightness = base_brightness + 
-                               ((flare_max - base_brightness) * flare_progress) / 100;
-        } else {
-            /* Slower settle back down */
-            uint32_t settle_elapsed = time_since_anchor - FIRE_FLARE_MS;
-            uint32_t settle_progress = (settle_elapsed * 100) / FIRE_SETTLE_MS;
-            final_brightness = flare_max - 
-                               ((flare_max - base_brightness) * settle_progress) / 100;
-        }
+        final_brightness = two_phase_transition_u8(base_brightness,
+                                                   flare_max,
+                                                   base_brightness,
+                                                   time_since_anchor,
+                                                   FIRE_FLARE_MS,
+                                                   FIRE_SETTLE_MS);
     }
     
     #undef FIRE_FLARE_MS

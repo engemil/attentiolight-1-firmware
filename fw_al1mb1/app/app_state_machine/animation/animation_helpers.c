@@ -61,6 +61,37 @@ uint32_t effect_random(void) {
     return (effect_random_seed >> 16) & 0x7FFF;
 }
 
+void effect_random_window(uint32_t elapsed_ms,
+                          uint32_t tick_ms,
+                          uint32_t seed_mul,
+                          uint32_t seed_add,
+                          uint32_t min_interval_ms,
+                          uint32_t range_interval_ms,
+                          uint32_t *interval_ms,
+                          uint32_t *anchor_ms,
+                          uint32_t *since_anchor_ms) {
+    uint32_t tick = elapsed_ms / tick_ms;
+    effect_random_seed = tick * seed_mul + seed_add;
+    uint32_t rnd = effect_random();
+
+    uint32_t chosen_interval = min_interval_ms;
+    if (range_interval_ms > 0) {
+        chosen_interval += rnd % range_interval_ms;
+    }
+
+    uint32_t chosen_anchor = (elapsed_ms / chosen_interval) * chosen_interval;
+
+    if (interval_ms != NULL) {
+        *interval_ms = chosen_interval;
+    }
+    if (anchor_ms != NULL) {
+        *anchor_ms = chosen_anchor;
+    }
+    if (since_anchor_ms != NULL) {
+        *since_anchor_ms = elapsed_ms - chosen_anchor;
+    }
+}
+
 /*===========================================================================*/
 /* Color Conversion                                                          */
 /*===========================================================================*/
@@ -91,6 +122,45 @@ void hsv_to_rgb(uint16_t h, uint8_t s, uint8_t v,
 
 uint8_t apply_brightness(uint8_t color, uint8_t brightness) {
     return (uint8_t)(((uint16_t)color * brightness) / 255);
+}
+
+uint8_t triangle_wave_u8(uint32_t pos,
+                         uint32_t period,
+                         uint8_t min_value,
+                         uint8_t max_value) {
+    if (period < 2 || max_value <= min_value) {
+        return min_value;
+    }
+
+    uint32_t half = period / 2;
+    uint32_t span = (uint32_t)max_value - min_value;
+
+    if (pos < half) {
+        return (uint8_t)(min_value + ((pos * span) / half));
+    }
+
+    return (uint8_t)(max_value - (((pos - half) * span) / half));
+}
+
+uint8_t two_phase_transition_u8(uint8_t start,
+                                uint8_t mid,
+                                uint8_t end,
+                                uint32_t since_anchor_ms,
+                                uint32_t phase1_ms,
+                                uint32_t phase2_ms) {
+    if (since_anchor_ms < phase1_ms) {
+        int32_t progress = (int32_t)((since_anchor_ms * 100U) / phase1_ms);
+        int32_t diff = (int32_t)mid - (int32_t)start;
+        return (uint8_t)((int32_t)start + ((diff * progress) / 100));
+    }
+
+    uint32_t phase2_elapsed = since_anchor_ms - phase1_ms;
+    if (phase2_elapsed > phase2_ms) {
+        phase2_elapsed = phase2_ms;
+    }
+    int32_t progress = (int32_t)((phase2_elapsed * 100U) / phase2_ms);
+    int32_t diff = (int32_t)end - (int32_t)mid;
+    return (uint8_t)((int32_t)mid + ((diff * progress) / 100));
 }
 
 /*===========================================================================*/

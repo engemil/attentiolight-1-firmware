@@ -93,32 +93,17 @@ void process_ocean(const anim_state_t *state) {
     uint32_t wave_end = wave_starts[current_wave + 1];
     uint32_t wave_duration = wave_end - wave_start;
     uint32_t wave_pos = cycle_pos - wave_start;
-    uint32_t wave_half = wave_duration / 2;
     
     /* Random peak height for this wave (80-100%) */
     uint8_t wave_peak = 80 + ((rand_heights >> (current_wave * 3)) % 21);
     
     /* Triangle wave: 20% -> peak -> 20% */
-    uint8_t primary_factor;
-    if (wave_pos < wave_half) {
-        /* Rising */
-        primary_factor = 20 + ((wave_pos * (wave_peak - 20)) / wave_half);
-    } else {
-        /* Falling */
-        primary_factor = wave_peak - (((wave_pos - wave_half) * (wave_peak - 20)) / wave_half);
-    }
+    uint8_t primary_factor = triangle_wave_u8(wave_pos, wave_duration, 20, wave_peak);
     
     /* Secondary wave: faster ripple overlay (±12%) for surface texture */
     uint32_t ripple_period = state->period_ms / 7;  /* 7x faster ripple */
     uint32_t ripple_pos = elapsed % ripple_period;
-    uint32_t ripple_half = ripple_period / 2;
-    int8_t ripple_offset;
-    
-    if (ripple_pos < ripple_half) {
-        ripple_offset = (int8_t)((ripple_pos * 12) / ripple_half);
-    } else {
-        ripple_offset = (int8_t)(12 - (((ripple_pos - ripple_half) * 24) / ripple_half));
-    }
+    int8_t ripple_offset = (int8_t)triangle_wave_u8(ripple_pos, ripple_period, 0, 24) - 12;
     
     /* Combine waves with clamping */
     int16_t brightness_factor = (int16_t)primary_factor + ripple_offset;

@@ -62,6 +62,29 @@ extern uint32_t effect_random_seed;
  */
 uint32_t effect_random(void);
 
+/**
+ * @brief   Build a randomized event window anchored to elapsed time.
+ *
+ * @param[in] elapsed_ms        Elapsed animation time.
+ * @param[in] tick_ms           Coarse tick size for reseeding randomness.
+ * @param[in] seed_mul          Seed multiplier.
+ * @param[in] seed_add          Seed addend.
+ * @param[in] min_interval_ms   Minimum interval in milliseconds.
+ * @param[in] range_interval_ms Additional randomized interval range.
+ * @param[out] interval_ms      Chosen interval length.
+ * @param[out] anchor_ms        Interval anchor time.
+ * @param[out] since_anchor_ms  Elapsed time since anchor.
+ */
+void effect_random_window(uint32_t elapsed_ms,
+                          uint32_t tick_ms,
+                          uint32_t seed_mul,
+                          uint32_t seed_add,
+                          uint32_t min_interval_ms,
+                          uint32_t range_interval_ms,
+                          uint32_t *interval_ms,
+                          uint32_t *anchor_ms,
+                          uint32_t *since_anchor_ms);
+
 /*===========================================================================*/
 /* Color Conversion                                                          */
 /*===========================================================================*/
@@ -88,6 +111,40 @@ void hsv_to_rgb(uint16_t h, uint8_t s, uint8_t v,
  * @return  Brightness-adjusted color component.
  */
 uint8_t apply_brightness(uint8_t color, uint8_t brightness);
+
+/**
+ * @brief   Integer triangle wave mapped to [min_value, max_value].
+ *
+ * @param[in] pos         Position in cycle.
+ * @param[in] period      Full cycle period (must be > 0).
+ * @param[in] min_value   Minimum output value.
+ * @param[in] max_value   Maximum output value.
+ *
+ * @return  Triangle-wave sample value.
+ */
+uint8_t triangle_wave_u8(uint32_t pos,
+                         uint32_t period,
+                         uint8_t min_value,
+                         uint8_t max_value);
+
+/**
+ * @brief   Two-phase linear transition through an intermediate value.
+ *
+ * @param[in] start             Start value.
+ * @param[in] mid               Midpoint value reached at phase split.
+ * @param[in] end               End value after second phase.
+ * @param[in] since_anchor_ms   Elapsed time within event.
+ * @param[in] phase1_ms         First phase duration.
+ * @param[in] phase2_ms         Second phase duration.
+ *
+ * @return  Interpolated value.
+ */
+uint8_t two_phase_transition_u8(uint8_t start,
+                                uint8_t mid,
+                                uint8_t end,
+                                uint32_t since_anchor_ms,
+                                uint32_t phase1_ms,
+                                uint32_t phase2_ms);
 
 /*===========================================================================*/
 /* Rendering                                                                 */
