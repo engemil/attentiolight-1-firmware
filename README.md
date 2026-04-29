@@ -20,6 +20,20 @@ This is the source code (firmware) for the **AttentioLight-1 MainBoard-1** (`al1
 - Dual USB CDC/ACM interface with IAD (Interface Association Descriptors): CDC0 for debug output, CDC1 for Attentio Protocol (AP) interface and external control.
 - Attentio Protocol (AP) on CDC1 with binary packet framing for session-based device control.
 
+## USB VID/PID
+
+This project uses a dedicated USB Vendor ID and Product ID granted through [pid.codes](https://pid.codes/):
+
+| Field | Value |
+|-------|-------|
+| VID | `0x1209` (pid.codes open-source VID) |
+| PID | `0xEEA1` (AttentioLight-1) |
+| Grant | [https://pid.codes/1209/EEA1/](https://pid.codes/1209/EEA1/) |
+
+The application writes its VID/PID into the app header at `0x08004000`. The bootloader reads these values from the header and uses them as its own USB identity in DFU mode, so the device presents the same VID/PID regardless of whether it is in normal or bootloader mode.
+
+If no valid application header is present (blank/erased board), the bootloader falls back to the STM32 DFU identifiers (`0x0483:0xDF11`).
+
 
 ## Table of Contents
 
@@ -674,10 +688,10 @@ One-time setup scripts for configuring Linux host permissions. Must be run with 
 | Script | Description |
 |--------|-------------|
 | `dialout_group.sh` | Adds current user to the `dialout` group for serial device access (e.g. `/dev/ttyACM0`) |
-| `udevusb_stlink.sh` | Creates udev rules for ST-LINK debuggers and STM32 DFU mode, allowing non-root USB access |
+| `udev_rules_attentio.sh` | Creates udev rules for ST-LINK debuggers, STM32 DFU mode, and Attentio USB devices (`1209:eea1`), allowing non-root USB access |
 
 ```bash
-sudo ./scripts/system/udevusb_stlink.sh
+sudo ./scripts/system/udev_rules_attentio.sh
 sudo ./scripts/system/dialout_group.sh
 # Log out and back in to apply group changes
 ```
@@ -796,8 +810,9 @@ AP command (using `attentio-cli` or direct packet).
 ### Identifying USB Bootloader/Normal mode
 
 Check which mode we are in with: `lsusb`
-- In normal operation, expect: `Bus 001 Device 051: ID 0483:df11 EngEmil.io AttentioLight-1`
-- In bootloader, expect: `Bus 001 Device 054: ID 0483:df11 EngEmil.io Bootloader DFU Mode`
+- In normal operation, expect: `Bus 001 Device 051: ID 1209:eea1 EngEmil.io AttentioLight-1`
+- In bootloader (with valid app header), expect: `Bus 001 Device 054: ID 1209:eea1 EngEmil.io Bootloader DFU Mode`
+- In bootloader (blank/erased board), expect: `Bus 001 Device 054: ID 0483:df11 EngEmil.io Bootloader DFU Mode`
 
 ### Identifying USB CDC Ports
 

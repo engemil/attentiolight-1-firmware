@@ -54,10 +54,10 @@ extern const app_header_t app_header;
 
 /* USB VID/PID - customize these or use defaults (STMicroelectronics DFU) */
 #ifndef USB_VID
-#define USB_VID             0x0483      /* STMicroelectronics */
+#define USB_VID             0x1209      /* pid.codes open-source VID */
 #endif
 #ifndef USB_PID
-#define USB_PID             0xDF11      /* DFU mode */
+#define USB_PID             0xEEA1      /* AttentioLight-1 */
 #endif
 
 #endif /* APP_HEADER_H */
