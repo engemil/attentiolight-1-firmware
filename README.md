@@ -814,6 +814,9 @@ Check which mode we are in with: `lsusb`
 - In bootloader (with valid app header), expect: `Bus 001 Device 054: ID 1209:eea1 EngEmil.io Bootloader DFU Mode`
 - In bootloader (blank/erased board), expect: `Bus 001 Device 054: ID 0483:df11 EngEmil.io Bootloader DFU Mode`
 
+NB! Due to `0x1209` is [pid.codes](https://pid.codes/1209/EEA1/) Vendor ID, it actually might show up on Linux computers as, e.g.: `Bus 001 Device 051: ID 1209:eea1 Generic AttentioLight-1`.
+
+
 ### Identifying USB CDC Ports
 
 The device exposes two USB CDC/ACM virtual serial ports. The `/dev/ttyACMx` numbers are **not stable** and depend on enumeration order. To identify which port is which:
