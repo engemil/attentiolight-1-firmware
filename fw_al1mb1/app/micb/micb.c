@@ -174,8 +174,11 @@ static void micb_enter_remote(micb_interface_id_t iface) {
     }
     micb_session.session_id = micb_session.session_counter;
 
-    /* Tell the state machine we're entering external control. */
-    app_sm_external_control_enter();
+    /*
+     * Note: button-event suppression while in REMOTE is now enforced upstream
+     * by `button_event_wrapper()` in main.c, based on `micb_get_mode()`.
+     * No state-machine notification is required here.
+     */
 
     /* Set azure blue indicator via animation engine. */
     anim_thread_set_solid(REMOTE_INDICATOR_R, REMOTE_INDICATOR_G,
@@ -193,8 +196,12 @@ static void micb_exit_remote(void) {
     micb_session.active_controller = MICB_IF_STANDALONE;
     micb_session.session_id = 0;
 
-    /* Tell the state machine to resume standalone operation. */
-    app_sm_external_control_exit();
+    /*
+     * Restore the standalone animation for the currently selected mode so
+     * the device visibly returns to user control (otherwise the azure
+     * REMOTE indicator would linger until the next mode change).
+     */
+    modes_enter_current();
 }
 
 /**
@@ -302,13 +309,16 @@ static void cmd_ping(micb_interface_id_t iface) {
 
 static void cmd_power_on(micb_interface_id_t iface) {
     LOG_INFO("MICB: POWER_ON from %s", micb_interface_name(iface));
+
     /*
-     * If the device is in OFF/low-power state, we need to wake it up.
-     * Use the state machine's process_input to simulate a power-on event.
-     * For now, send OK — the actual wake-up mechanism depends on the
-     * system state.
+     * Only meaningful when the device is currently OFF (low-power mode).
+     * In OFF the SM wakes on BTN_LONG_START, so synthesize that input.
+     * In any other state the device is already powered on -> just ACK.
      */
-    app_sm_process_input(APP_SM_INPUT_BTN_SHORT);
+    if (app_sm_get_system_state() == APP_SM_SYS_OFF) {
+        app_sm_process_input(APP_SM_INPUT_BTN_LONG_START);
+    }
+
     micb_respond_ok(iface, NULL, 0);
 }
 
@@ -322,7 +332,11 @@ static void cmd_power_off(micb_interface_id_t iface) {
         micb_session.mode = MICB_MODE_STANDALONE;
         micb_session.active_controller = MICB_IF_STANDALONE;
         micb_session.session_id = 0;
-        app_sm_external_control_exit();
+        /*
+         * No need to "exit external control" on the SM here; the SM no
+         * longer tracks REMOTE mode. The upcoming POWERDOWN transition
+         * will tear down the active state regardless.
+         */
     }
 
     /* Respond OK, then trigger power down. */

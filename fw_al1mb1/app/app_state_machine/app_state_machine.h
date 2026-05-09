@@ -114,11 +114,6 @@ typedef enum {
     APP_SM_INPUT_BTN_EXTENDED_START,    /**< Extended press threshold       */
     APP_SM_INPUT_BTN_EXTENDED_RELEASE,  /**< Released after extended press  */
 
-    /* External control inputs */
-    APP_SM_INPUT_EXT_CTRL_ENTER,        /**< Enter external control mode    */
-    APP_SM_INPUT_EXT_CTRL_EXIT,         /**< Exit external control mode     */
-    APP_SM_INPUT_EXT_COMMAND,           /**< External command received      */
-
     /* System inputs */
     APP_SM_INPUT_BOOT_COMPLETE,         /**< Boot sequence finished         */
     APP_SM_INPUT_POWERUP_COMPLETE,      /**< Powerup animation finished     */
@@ -213,31 +208,6 @@ app_sm_system_state_t app_sm_get_system_state(void);
  * @api
  */
 app_sm_mode_t app_sm_get_mode(void);
-
-/**
- * @brief   Checks if external control is active.
- *
- * @return  true if external control is active, false otherwise.
- *
- * @api
- */
-bool app_sm_is_external_control_active(void);
-
-/**
- * @brief   Enters external control mode.
- * @details Saves current mode and allows external commands.
- *
- * @api
- */
-void app_sm_external_control_enter(void);
-
-/**
- * @brief   Exits external control mode.
- * @details Restores previous mode.
- *
- * @api
- */
-void app_sm_external_control_exit(void);
 
 /**
  * @brief   Gets the name of a system state.

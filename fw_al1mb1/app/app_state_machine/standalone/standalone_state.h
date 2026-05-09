@@ -27,8 +27,8 @@ SOFTWARE.
  * @brief   Standalone mode shared state declarations.
  *
  * @details Declares the global variables that are shared across standalone
- *          modes (brightness, color index, current mode, external control
- *          flag). These are defined in standalone_state.c.
+ *          modes (brightness, color index, current mode). These are defined
+ *          in standalone_state.c.
  */
 
 #ifndef STANDALONE_STATE_H
@@ -49,16 +49,6 @@ extern "C" {
  * @brief   Current operational mode.
  */
 extern app_sm_mode_t current_mode;
-
-/**
- * @brief   External control active flag.
- */
-extern bool external_control_active;
-
-/**
- * @brief   Saved mode before external control.
- */
-extern app_sm_mode_t saved_mode_before_external;
 
 /**
  * @brief   Standalone brightness level (0-255).

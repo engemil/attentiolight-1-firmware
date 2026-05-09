@@ -43,16 +43,6 @@ SOFTWARE.
 app_sm_mode_t current_mode = APP_SM_DEFAULT_MODE;
 
 /**
- * @brief   External control active flag.
- */
-bool external_control_active = false;
-
-/**
- * @brief   Saved mode before external control.
- */
-app_sm_mode_t saved_mode_before_external = APP_SM_DEFAULT_MODE;
-
-/**
  * @brief   Standalone brightness level.
  */
 uint8_t standalone_brightness = APP_SM_DEFAULT_BRIGHTNESS;

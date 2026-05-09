@@ -70,22 +70,83 @@ static ap_button_event_t map_button_event(button_event_t event) {
 static button_callback_t sm_button_callback = NULL;
 
 /**
+ * @brief   Decide whether a button event should be processed locally by the
+ *          state machine while a host has claimed REMOTE control.
+ * @details In REMOTE mode the physical button must NOT change color, mode,
+ *          brightness, blink/pulse speed, etc. The only events that are
+ *          allowed to reach the standalone state machine are:
+ *
+ *          - EXTENDED_START / EXTENDED_RELEASE: always allowed so the user
+ *            can force the device off via a 5+s press, even if a host has
+ *            claimed control.
+ *          - LONG_PRESS_START while the device is OFF: allowed so the user
+ *            can wake the device from low-power mode (the session is already
+ *            torn down by POWER_OFF, but this path is defensive).
+ *
+ *          All other events (SHORT_PRESS, LONG_PRESS_START in ACTIVE,
+ *          LONG_PRESS_RELEASE) are dropped before reaching the SM so they
+ *          cannot trigger mode/color changes or the white long-press flash.
+ *
+ * @param[in] event     Button event from the button driver.
+ * @return  true if the event should be delivered to the state machine.
+ */
+static bool sm_should_receive_in_remote(button_event_t event) {
+    switch (event) {
+    case BTN_EVT_EXTENDED_PRESS_START:
+    case BTN_EVT_EXTENDED_PRESS_RELEASE:
+        /* Always allow extended-press path -> power-down. */
+        return true;
+    case BTN_EVT_LONG_PRESS_START:
+        /* Only allow long-press to reach the SM when device is OFF (wake). */
+        return (app_sm_get_system_state() == APP_SM_SYS_OFF);
+    default:
+        /* SHORT_PRESS, LONG_PRESS_RELEASE, etc. are suppressed in REMOTE. */
+        return false;
+    }
+}
+
+/**
  * @brief   Button event wrapper callback.
- * @details Routes button events to:
- *          1. The state machine (always — handles power off, mode changes).
- *          2. The MICB (when in REMOTE mode — forwards as AP event to host).
+ * @details Routes button events based on the current MICB session mode:
+ *
+ *          - STANDALONE: deliver to the state machine for full standalone
+ *            behavior. Nothing is forwarded to a host (no claimer exists).
+ *          - REMOTE: only deliver power-related events to the state machine
+ *            (see sm_should_receive_in_remote()), and ALWAYS forward the
+ *            event to the controlling host as an AP_CMD_EVT_BUTTON packet
+ *            so the host can react if it wants to.
+ *
+ *          MICB session mode is the single source of truth here; the
+ *          standalone SM no longer needs an `external_control_active` flag
+ *          to gate inputs because the inputs simply never arrive.
  *
  * @param[in] event     Button event from the button driver.
  */
 static void button_event_wrapper(button_event_t event) {
-    /* Always route to state machine for standalone behavior. */
-    if (sm_button_callback != NULL) {
-        sm_button_callback(event);
-    }
+    bool is_remote = (micb_get_mode() == MICB_MODE_REMOTE);
 
-    /* Additionally forward to MICB if in REMOTE mode. */
-    if (micb_get_mode() == MICB_MODE_REMOTE) {
+    if (is_remote) {
+        /*
+         * Forward to host FIRST, then feed the SM. The SM-feed for events
+         * such as BTN_EVT_EXTENDED_PRESS_START can synchronously trigger a
+         * powerdown sequence which flips micb_session.mode from REMOTE to
+         * STANDALONE before this function returns. If we forwarded after
+         * the SM call, micb_forward_button_event() would early-return
+         * because mode != REMOTE and the host would never see the event.
+         */
         micb_forward_button_event(map_button_event(event));
+
+        if (sm_should_receive_in_remote(event)) {
+            if (sm_button_callback != NULL) {
+                sm_button_callback(event);
+            }
+        }
+    }
+    else {
+        /* STANDALONE: full standalone behavior, no host to forward to. */
+        if (sm_button_callback != NULL) {
+            sm_button_callback(event);
+        }
     }
 }
 

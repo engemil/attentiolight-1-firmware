@@ -13,6 +13,69 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-05-09)
+
+Changed
+
+- **REMOTE-mode button gating moved to `button_event_wrapper()`** — when a
+  host has claimed control (MICB session in REMOTE mode), the button driver
+  callback in `main.c` now decides per-event whether the local state machine
+  should see the press, instead of relying on a flag inside the standalone
+  SM. `EXTENDED_PRESS_START` / `EXTENDED_PRESS_RELEASE` are always delivered
+  to the SM (so the user can always force a powerdown via 5+s press), and
+  `LONG_PRESS_START` is delivered only when the device is `OFF` (wake-from-
+  low-power path). All other events (`SHORT_PRESS`, `LONG_PRESS_RELEASE`,
+  `LONG_PRESS_START` while ACTIVE) are dropped before reaching the SM, so
+  they cannot change color/mode/brightness or trigger the white long-press
+  feedback flash while a host is in control.
+
+- **Forward-then-feed order in `button_event_wrapper()`** — in REMOTE mode
+  the button event is now forwarded to the host (`micb_forward_button_event()`)
+  *before* the SM is invoked. The SM-feed for `BTN_EVT_EXTENDED_PRESS_START`
+  can synchronously trigger a powerdown sequence which flips the MICB
+  session mode from REMOTE to STANDALONE; if forwarding happened after the
+  SM call, `micb_forward_button_event()` would early-return and the host
+  would never see the EXTENDED-press event that caused the powerdown.
+
+- **`micb_exit_remote()` restores the standalone animation directly** —
+  calls `modes_enter_current()` so the device visibly returns to user
+  control instead of leaving the azure REMOTE indicator on screen until the
+  next mode change. Replaces the previous `app_sm_external_control_exit()`
+  call.
+
+- **`cmd_power_on` now wakes only when the device is OFF** — previously
+  injected `BTN_SHORT` unconditionally (which acted as a mode-change in
+  ACTIVE state). Now checks `app_sm_get_system_state() == APP_SM_SYS_OFF`
+  and synthesizes `BTN_LONG_START` (the wake input the SM actually expects)
+  only in that case; otherwise it just ACKs.
+
+Removed
+
+- **Standalone-SM "external control" tracking — fully deleted.** MICB
+  session mode (`micb_get_mode()`) is now the single source of truth for
+  whether a host has claimed the device; the SM no longer needs a parallel
+  flag to decide what to do with button inputs (the inputs simply never
+  arrive in REMOTE mode). Removed:
+  - `bool external_control_active` and `app_sm_mode_t saved_mode_before_external`
+    from `standalone_state.{c,h}`.
+  - `app_sm_is_external_control_active()`, `app_sm_external_control_enter()`,
+    `app_sm_external_control_exit()` from `app_state_machine.{c,h}`.
+  - SM input enum variants `APP_SM_INPUT_EXT_CTRL_ENTER`,
+    `APP_SM_INPUT_EXT_CTRL_EXIT`, `APP_SM_INPUT_EXT_COMMAND` (and the
+    matching `input_names[]` strings).
+  - The `EXT_CTRL_ENTER` / `EXT_CTRL_EXIT` cases (and the `external_control_active`
+    gate around `BTN_SHORT` / `BTN_LONG_START` / `BTN_LONG_RELEASE`) in
+    `state_active.c::state_active_process()`. The `external_control_active = false`
+    line in `state_active_exit()` is gone for the same reason.
+  - The `app_sm_external_control_enter()` call in `micb_enter_remote()` and
+    the `app_sm_external_control_exit()` calls in `micb_exit_remote()` and
+    `cmd_power_off()` in `micb.c`.
+
+  Net diff: ~118 lines deleted vs ~113 lines added (mostly comments
+  documenting the new contract).
+
+---
+
 ## [Development] (2026-04-23)
 
 Fixed

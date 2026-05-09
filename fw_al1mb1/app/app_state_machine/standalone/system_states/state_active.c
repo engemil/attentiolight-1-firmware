@@ -84,28 +84,30 @@ void state_active_enter(void) {
 }
 
 void state_active_process(app_sm_input_t input) {
+    /*
+     * NOTE on REMOTE mode: button events that would change mode/color
+     * (SHORT_PRESS, LONG_PRESS_START, LONG_PRESS_RELEASE) are filtered out
+     * upstream by `button_event_wrapper()` in main.c when MICB is in REMOTE
+     * mode, so they never reach this handler. EXTENDED_START is still
+     * delivered here so the user can power off the device with a 5+s press
+     * even while a host has claimed control.
+     */
     switch (input) {
         case APP_SM_INPUT_BTN_SHORT:
-            if (!external_control_active) {
-                /* Delegate to current mode */
-                modes_on_short_press();
-            }
+            /* Delegate to current mode */
+            modes_on_short_press();
             break;
 
         case APP_SM_INPUT_BTN_LONG_START:
-            if (!external_control_active) {
-                /* Show feedback that mode change is coming */
-                show_long_press_feedback();
-                /* Delegate to mode for any mode-specific handling */
-                modes_on_long_start();
-            }
+            /* Show feedback that mode change is coming */
+            show_long_press_feedback();
+            /* Delegate to mode for any mode-specific handling */
+            modes_on_long_start();
             break;
 
         case APP_SM_INPUT_BTN_LONG_RELEASE:
-            if (!external_control_active) {
-                /* Go to next mode */
-                goto_next_mode();
-            }
+            /* Go to next mode */
+            goto_next_mode();
             break;
 
         case APP_SM_INPUT_BTN_EXTENDED_START:
@@ -117,22 +119,6 @@ void state_active_process(app_sm_input_t input) {
             /* Not used */
             break;
 
-        case APP_SM_INPUT_EXT_CTRL_ENTER:
-            if (!external_control_active) {
-                saved_mode_before_external = current_mode;
-                external_control_active = true;
-                /* External control mode doesn't exit current mode visually */
-            }
-            break;
-
-        case APP_SM_INPUT_EXT_CTRL_EXIT:
-            if (external_control_active) {
-                external_control_active = false;
-                /* Restore previous mode's animation */
-                modes_enter_current();
-            }
-            break;
-
         default:
             break;
     }
@@ -141,5 +127,4 @@ void state_active_process(app_sm_input_t input) {
 void state_active_exit(void) {
     /* Exit current mode */
     modes_exit_current();
-    external_control_active = false;
 }

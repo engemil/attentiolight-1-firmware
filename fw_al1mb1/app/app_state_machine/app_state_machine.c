@@ -121,9 +121,6 @@ static const char* input_names[] = {
     BTN_EVT_NAME_LONG_PRESS_RELEASE,
     BTN_EVT_NAME_EXTENDED_PRESS_START,
     BTN_EVT_NAME_EXTENDED_PRESS_RELEASE,
-    "EXT_CTRL_ENTER",
-    "EXT_CTRL_EXIT",
-    "EXT_COMMAND",
     "BOOT_COMPLETE",
     "POWERUP_COMPLETE",
     "POWERDOWN_COMPLETE",
@@ -382,18 +379,6 @@ app_sm_system_state_t app_sm_get_system_state(void) {
 
 app_sm_mode_t app_sm_get_mode(void) {
     return current_mode;
-}
-
-bool app_sm_is_external_control_active(void) {
-    return external_control_active;
-}
-
-void app_sm_external_control_enter(void) {
-    app_sm_process_input(APP_SM_INPUT_EXT_CTRL_ENTER);
-}
-
-void app_sm_external_control_exit(void) {
-    app_sm_process_input(APP_SM_INPUT_EXT_CTRL_EXIT);
 }
 
 const char* app_sm_system_state_name(app_sm_system_state_t state) {
