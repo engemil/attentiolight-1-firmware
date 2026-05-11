@@ -13,6 +13,14 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-05-11)
+
+Changed
+
+- **Renamed metadata key** `protocol_version` → `attentio_protocol_version` — the old name
+  was ambiguous; the new name is self-documenting and consistent with the Attentio namespace.
+  **Breaking:** any external tooling that looks up the key by name must be updated.
+
 ## [Development] (2026-05-09)
 
 Changed

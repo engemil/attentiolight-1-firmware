@@ -617,7 +617,7 @@ static uint8_t metadata_build_table(md_entry_t *entries,
         char *pvbuf = SCRATCH_ALLOC(4);
         if (pvbuf != NULL) {
             uint8_t pvlen = u8_to_dec(pvbuf, AP_PROTOCOL_VERSION);
-            entries[n].key = "protocol_version";
+            entries[n].key = "attentio_protocol_version";
             entries[n].val = pvbuf;
             entries[n].val_len = pvlen;
             n++;

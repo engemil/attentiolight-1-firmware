@@ -387,7 +387,7 @@ EFL Region (8KB = 4 pages × 2KB)
 > - `device_model`, `hardware_revision`, `board` — Board BSP (`board.h`)
 > - `build_date`, `build_time`, `compiler` — Compile-time defines
 > - `chibios_kernel`, `architecture`, `core_variant`, `platform`, `chibios_port_info` — ChibiOS
-> - `protocol_version` — AP protocol version string
+> - `attentio_protocol_version` — AP protocol version string
 > - `uptime` — Device uptime in seconds
 
 ### Metadata vs Settings
