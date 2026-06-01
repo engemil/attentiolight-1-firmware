@@ -13,6 +13,51 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-06-02)
+
+STM32↔ESP32 UART link. Implemented the STM32 side of the `al1_link`
+transport to the ESP32-C3 wireless module and verified a bidirectional round-trip
+on real hardware (CDC0 shows the module's 1 Hz `tick=N` heartbeat with `crc=0`).
+
+Added
+
+- `app/al1_link_driver/`, ChibiOS runtime for the wireless-module UART link on
+  **USART1, 921600 8N1, via the DMA-based UART driver (`UARTD1`)**.
+  `al1_frame.{c,h}` and `crc16_ccitt.{c,h}` are ported identical from the ESP32
+  `al1_link` component so both ends share one wire format
+  (`[SYNC][VER][CHANNEL][SEQ][LEN][PAYLOAD][CRC16]`, CRC-16/CCITT-FALSE).
+  `al1_link_driver.c` adds the RX thread (`uartReceiveTimeout`) + parser dispatch
+  and `al1_link_send()` (`uartSendTimeout`).
+- Link bring-up traffic in `app/main.c`: 1 Hz `LOG` heartbeat to the module, RX
+  `LOG` frames surfaced on CDC0, and a per-second RX diagnostic line
+  (`AL1 rx_bytes/frames/crc/ver/len/resync | tx`). Raw-byte counter +
+  `al1_link_get_rx_bytes()` distinguishes "nothing arriving" from
+  "arriving but not framing".
+
+Changed
+
+- `cfg/mcuconf.h`, USART1 moved from the SERIAL driver to the **UART (DMA)
+  driver**: `STM32_SERIAL_USE_USART1 = FALSE`, `STM32_UART_USE_USART1 = TRUE`
+  (USART2 stays on SERIAL for the STLINK VCP).
+- `cfg/halconf.h`, `HAL_USE_UART = TRUE` and `UART_USE_WAIT = TRUE` (the link
+  uses the synchronous `uartReceiveTimeout` / `uartSendTimeout` API).
+- `app/main.c`, brings the link up after enabling the ESP32 module.
+- `Makefile`, builds `app/al1_link_driver/` (`-DAL1_LINK_MAX_PAYLOAD=512` to cap
+  the link buffer for the C071's 24 KB SRAM).
+- `app/rt_config.h`, link thread working-area size and priority.
+
+Fixed
+
+- `boards/AL1_MB1/board.h`, **WBM_TX/WBM_RX alternate function AF2 → AF0.** On
+  PB6/PB7, AF2 selects TIM16/TIM17; USART1 is **AF0** (datasheet DS14693). The
+  link UART was never actually routed before this fix.
+- **Inbound link frames dropped at 921600 → moved the link RX/TX to DMA.** The
+  IRQ-driven SERIAL path lost bytes because the per-byte USART1 RX interrupt was
+  starved by the higher-priority WS2812B timer IRQs, overrunning the 1-byte data
+  register (RX stuck at 1 parsed frame, CRC failing on every subsequent frame).
+  The DMA UART path (`UARTD1`, RX FIFO enabled) has no per-byte interrupt and
+  receives cleanly under LED contention.
+
 ## [Development] (2026-05-11)
 
 Changed

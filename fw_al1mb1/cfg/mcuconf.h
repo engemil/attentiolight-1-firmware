@@ -174,6 +174,9 @@
 /*
  * SERIAL driver system settings.
  */
+/* USART1 is driven by the UART (DMA) driver for the al1_link wireless-module
+ * link, see STM32_UART_USE_USART1 below. USART2 stays on the SERIAL driver
+ * (STLINK VCP). The same USART cannot be claimed by both drivers. */
 #define STM32_SERIAL_USE_USART1             FALSE
 #define STM32_SERIAL_USE_USART2             TRUE
 
@@ -204,7 +207,7 @@
 /*
  * UART driver system settings.
  */
-#define STM32_UART_USE_USART1               FALSE
+#define STM32_UART_USE_USART1               TRUE
 #define STM32_UART_USE_USART2               FALSE
 #define STM32_UART_USART1_RX_DMA_STREAM     STM32_DMA_STREAM_ID_ANY
 #define STM32_UART_USART1_TX_DMA_STREAM     STM32_DMA_STREAM_ID_ANY

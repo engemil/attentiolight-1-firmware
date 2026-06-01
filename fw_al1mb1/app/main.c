@@ -29,6 +29,7 @@ SOFTWARE.
 #include "portab.h"
 #include "usbcfg.h"
 #include "ws2812b_led_driver.h"
+#include "ee_esp32_wifi_ble_if_driver.h"
 
 #include "button_driver.h"
 #include "animation_thread.h"
@@ -36,6 +37,7 @@ SOFTWARE.
 #include "app_log.h"
 #include "micb.h"
 #include "usb_adapter.h"
+#include "al1_link_driver.h"
 
 /* Persistent Data Storage (EFL (Embedded Flash)) */
 #include "device_metadata.h"
@@ -187,12 +189,6 @@ void init_system(void) {
     usbStart(serusbcfg1.usbp, &usbcfg);
     usbConnectBus(serusbcfg1.usbp);
 
-    /*
-     * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
-     */
-    /* TO DO: Enable ESP32 driver and integrate with external control mode. */
-    /* TO DO: Implement UART communication protocol with ESP32-C3. */
-
 }
 
 /*
@@ -316,6 +312,15 @@ void init_application_systems(void){
     usb_adapter_start();
     LOG_DEBUG("MAIN usb_adapter_start() OK");
 
+    /*
+     * Initialize the wireless-module UART link (USART1). The link thread is
+     * started later in main(), after the ESP32 is powered on, so the module is
+     * enumerating by the time we begin reading frames.
+     */
+    LOG_DEBUG("MAIN al1_link_init()...");
+    al1_link_init();
+    LOG_DEBUG("MAIN al1_link_init() OK");
+
     LOG_SYS("Initialized AttentioLight-1 by EngEmil.io");
 }
 
@@ -331,15 +336,52 @@ int main(void) {
     init_application_systems();
 
     /*
-     * Main thread: idle loop.
+     * Initializes EngEmil ESP32 Wifi Bluetooth Interface Driver.
+     */
+    init_ee_esp32_wifi_ble_if_driver();
+
+    /*
+     * Start the wireless-module UART link now that the ESP32 is enabled.
+     * Brings up USART1 + the RX thread; the 1 Hz LOG heartbeat is driven below.
+     */
+    al1_link_start();
+
+    /*
+     * Main thread: drives the wireless-module link heartbeat.
      *
-     * Application work is handled by dedicated threads:
+     * Other application work is handled by dedicated threads:
      * - Button driver thread (input)
      * - State machine thread (standalone logic)
      * - Animation thread (LED rendering)
      * - USB adapter thread (AP protocol handling)
+     * - AL1 link thread (wireless-module UART RX)
      */
+    uint32_t al1_tick = 0;
+    char al1_msg[48];
     while (true) {
+
+        /* 1 Hz LOG heartbeat to the wireless module over the link. */
+        int al1_n = chsnprintf(al1_msg, sizeof(al1_msg),
+                               "mb1 alive tick=%u", (unsigned)al1_tick++);
+        if (al1_n > 0) {
+            al1_link_send(AL1_CH_LOG, (const uint8_t *)al1_msg, (uint16_t)al1_n);
+        }
+
+        /*
+         * Link RX diagnostic (CDC0). rx_bytes counts raw bytes on USART1;
+         * frames counts those that passed framing+CRC. rx_bytes climbing while
+         * frames stays 0 => bytes arrive but don't frame (baud/CRC or TX/RX
+         * swap); rx_bytes==0 => nothing arriving from the ESP32.
+         */
+        {
+            al1_link_stats_t s;
+            al1_link_get_stats(&s);
+            LOG_INFO("AL1 rx_bytes=%u frames=%u crc=%u ver=%u len=%u resync=%u | tx=%u",
+                     (unsigned)al1_link_get_rx_bytes(),
+                     (unsigned)s.rx_frames, (unsigned)s.rx_crc_err,
+                     (unsigned)s.rx_ver_err, (unsigned)s.rx_len_err,
+                     (unsigned)s.rx_resync, (unsigned)s.tx_frames);
+        }
 
 #if (APP_STACK_WATERMARK == 1)
         /* Periodically print thread stack watermarks (peak usage).

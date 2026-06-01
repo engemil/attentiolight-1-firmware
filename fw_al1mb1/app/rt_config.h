@@ -79,10 +79,19 @@ SOFTWARE.
 /**
  * @brief   USB adapter thread priority.
  * @details Above normal priority for responsive protocol handling.
- *          Same level as animation — both need timely execution.
+ *          Same level as animation, both need timely execution.
  */
 #ifndef RT_USB_ADAPTER_THREAD_PRIORITY
 #define RT_USB_ADAPTER_THREAD_PRIORITY      (NORMALPRIO)
+#endif
+
+/**
+ * @brief   AL1 link (ESP32 wireless module) thread priority.
+ * @details Normal priority, UART RX parsing for the wireless-module link.
+ *          Same tier as the USB adapter; both are interface readers.
+ */
+#ifndef AL1_LINK_THREAD_PRIORITY
+#define AL1_LINK_THREAD_PRIORITY            (NORMALPRIO)
 #endif
 
 /** @} */
@@ -130,13 +139,25 @@ SOFTWARE.
  * @brief   USB adapter thread working area size.
  * @details Needs space for:
  *          - 64-byte read buffer (stack-local)
- *          - AP parser context (~260 bytes, static — not on stack)
+ *          - AP parser context (~260 bytes, static, not on stack)
  *          - micb_process_command() call chain (uses static resp_buf)
  *          - LOG_* printf buffer (256 bytes on stack)
  *          256 base + _RT_DEBUG_EXTRA should be sufficient.
  */
 #ifndef RT_USB_ADAPTER_THREAD_WA_SIZE
 #define RT_USB_ADAPTER_THREAD_WA_SIZE   (256 + _RT_DEBUG_EXTRA)
+#endif
+
+/**
+ * @brief   AL1 link thread working area size.
+ * @details Needs space for:
+ *          - 64-byte read buffer (stack-local)
+ *          - al1_parser_t context (large, kept static, not on stack)
+ *          - LOG_* printf buffer (256 bytes on stack)
+ *          256 base + _RT_DEBUG_EXTRA matches the USB adapter thread.
+ */
+#ifndef AL1_LINK_THREAD_WA_SIZE
+#define AL1_LINK_THREAD_WA_SIZE         (256 + _RT_DEBUG_EXTRA)
 #endif
 
 /**

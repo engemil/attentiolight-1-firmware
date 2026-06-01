@@ -189,7 +189,10 @@
  * @brief   Enables the UART subsystem.
  */
 #if !defined(HAL_USE_UART) || defined(__DOXYGEN__)
-#define HAL_USE_UART                        FALSE
+/* Enabled for the al1_link wireless-module link on USART1 (UARTD1): the UART
+ * driver uses DMA for RX/TX, which (unlike the IRQ-driven SERIAL driver) does
+ * not lose bytes at 921600 when higher-priority (e.g. WS2812B timer) IRQs run. */
+#define HAL_USE_UART                        TRUE
 #endif
 
 /**
@@ -525,7 +528,9 @@
  * @note    Disabling this option saves both code and data space.
  */
 #if !defined(UART_USE_WAIT) || defined(__DOXYGEN__)
-#define UART_USE_WAIT                       FALSE
+/* Enabled: the al1_link driver uses the blocking uartReceiveTimeout() /
+ * uartSendTimeout() synchronous API from its RX/TX thread. */
+#define UART_USE_WAIT                       TRUE
 #endif
 
 /**

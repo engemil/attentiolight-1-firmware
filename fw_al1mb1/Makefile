@@ -190,6 +190,9 @@ CSRC = $(ALLCSRC) \
        app/attentio_protocol/attentio_protocol.c \
        app/micb/micb.c \
        app/usb_adapter/usb_adapter.c \
+       app/al1_link_driver/al1_link_driver.c \
+       app/al1_link_driver/al1_frame.c \
+       app/al1_link_driver/crc16_ccitt.c \
        app/persistent_data/crc32_util.c \
        app/persistent_data/device_metadata.c \
        app/persistent_data/persistent_data.c \
@@ -223,7 +226,9 @@ CPPWARN = -Wall -Wextra -Wundef
 #
 
 # List all user C define here, like -D_DEBUG=1
-UDEFS = -DCRT0_VTOR_INIT=1
+# AL1_LINK_MAX_PAYLOAD: cap the wireless-module link payload buffer to fit the
+# C071's 24 KB SRAM (the wire format allows up to 4096; we don't need that here).
+UDEFS = -DCRT0_VTOR_INIT=1 -DAL1_LINK_MAX_PAYLOAD=512
 
 # Define ASM defines here
 UADEFS = -DCRT0_VTOR_INIT=1
@@ -242,6 +247,7 @@ UINCDIR = ./app_header \
           ./app/attentio_protocol \
           ./app/micb \
           ./app/usb_adapter \
+          ./app/al1_link_driver \
           ./app/persistent_data
 
 # List the user directory to look for the libraries here

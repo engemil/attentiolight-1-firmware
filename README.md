@@ -67,7 +67,7 @@ If no valid application header is present (blank/erased board), the bootloader f
   - [Memory Usage](#memory-usage)
 - [Attentio Protocol (AP)](#attentio-protocol-ap)
 - [Troubleshooting](#troubleshooting)
-  - [Identifying CDC Ports](#identifying-cdc-ports)
+  - [Identifying USB CDC Ports](#identifying-usb-cdc-ports)
 - [Bugs and Issues](#bugs-and-issues)
 - [Additional Sources](#additional-sources)
 - [License](#license)
@@ -409,7 +409,8 @@ EFL Region (8KB = 4 pages × 2KB)
 | **usbcfg** | USB dual CDC/ACM configuration with IAD descriptors. Defines two virtual serial ports: CDC0 (serial prints) and CDC1 (Attentio Protocol interface). Manages USB device/configuration descriptors, endpoint configs, and driver lifecycle hooks. |
 | **portab** | Board portability abstraction layer. Maps logical driver names (`PORTAB_SDU1`, `PORTAB_SDU2`, `PORTAB_USB1`) to ChibiOS HAL instances. |
 | **hal_efl_stm32c0xx** | Custom Embedded Flash (EFL) driver for STM32C0xx. Required because STM32C0 is not yet supported in mainline ChibiOS EFL. |
-| (Work-in-progress) **ee_esp32_wifi_ble_if_driver** | ESP32 WiFi/BLE module GPIO interface (placeholder). Controls enable and boot pins for ESP32-C3 WROOM module. UART communication protocol not yet implemented. |
+| **ee_esp32_wifi_ble_if_driver** | ESP32 WiFi/BLE module GPIO interface. Controls the enable and boot-select pins for the ESP32-C3 WROOM module. The UART link protocol itself lives in `app/al1_link_driver/` (see below). |
+| **al1_link_driver** (`app/`) | UART link transport to the ESP32-C3 wireless module over **USART1 (PB6/PB7, AF0), 921600 8N1, DMA-based (`UARTD1`)**. Shares the wire format (`al1_frame` + `crc16_ccitt`, CRC-16/CCITT-FALSE) verbatim with the ESP32 `al1_link` component; multiplexes channels (`AP_CTRL` / `LOG` / `EVT` / `BULK` / `KEEPALIVE`). The Attentio Protocol rides inside the `AP_CTRL` channel (bridge to MICB is a later phase). |
 
 > Note that the driver/library placement structure is a bit messy at the moment. With two approaches, one is simply having the drivers under the `app` folder, the other approach (for these) is the `libs`-folder. It is for subject to change in the future.
 
@@ -516,7 +517,7 @@ Each line shows `used / total bytes (percent)`. The "used" value is the
 - **> 85%** — Dangerous, increase the working area size immediately.
 - **100%** — Stack has overflowed (the stack check above should catch this first).
 
-To monitor, connect to the USB serial CDC0 debug port (see [Identifying CDC Ports](#identifying-cdc-ports)):
+To monitor, connect to the USB serial CDC0 debug port (see [Identifying USB CDC Ports](#identifying-usb-cdc-ports)):
 ```bash
 minicom -D /dev/ttyACMx -b 115200
 ```

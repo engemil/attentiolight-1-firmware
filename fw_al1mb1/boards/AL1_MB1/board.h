@@ -349,8 +349,8 @@
  * PB3  - PIN3                      (input pullup).
  * PB4  - PIN4                      (input pullup).
  * PB5  - PIN5                      (input pullup).
- * PB6  - WBM_TX                    (alternate 2).
- * PB7  - WBM_RX                    (alternate 2).
+ * PB6  - WBM_TX                    (USART1_TX, alternate 0).
+ * PB7  - WBM_RX                    (USART1_RX, alternate 0).
  * PB8  - WBM_EN                    (output pullup low speed, ODR low).
  * PB9  - WBM_BOOT_OPT              (output floating opendrain low speed).
  * PB10 - PIN10                     (input pullup).
@@ -446,8 +446,8 @@
                                      PIN_AFIO_AF(GPIOB_PIN3, 0U) |          \
                                      PIN_AFIO_AF(GPIOB_PIN4, 0U) |          \
                                      PIN_AFIO_AF(GPIOB_PIN5, 0U) |          \
-                                     PIN_AFIO_AF(GPIOB_WBM_TX, 2U) |        \
-                                     PIN_AFIO_AF(GPIOB_WBM_RX, 2U))
+                                     PIN_AFIO_AF(GPIOB_WBM_TX, 0U) |        \
+                                     PIN_AFIO_AF(GPIOB_WBM_RX, 0U))
 #define VAL_GPIOB_AFRH              (PIN_AFIO_AF(GPIOB_WBM_EN, 0U) |        \
                                      PIN_AFIO_AF(GPIOB_WBM_BOOT_OPT, 0U) |  \
                                      PIN_AFIO_AF(GPIOB_PIN10, 0U) |         \
