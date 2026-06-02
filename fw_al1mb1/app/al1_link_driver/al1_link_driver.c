@@ -36,6 +36,8 @@ SOFTWARE.
 #include "al1_link_driver.h"
 #include "app_log.h"
 #include "rt_config.h"
+#include "attentio_protocol.h"
+#include "micb.h"
 
 #include "ch.h"
 #include "hal.h"
@@ -82,6 +84,12 @@ static uint8_t           al1_tx_buf[AL1_LINK_OVERHEAD + AL1_LINK_MAX_PAYLOAD];
 /** @brief RX thread working area. */
 static THD_WORKING_AREA(wa_al1_link_thread, AL1_LINK_THREAD_WA_SIZE);
 
+/** @brief AP parser for the AP_CTRL channel (BLE interface stream). */
+static ap_parser_t       al1_ap_parser;
+
+/** @brief Scratch for AP error responses sent back over AP_CTRL. */
+static uint8_t           al1_ap_err_buf[AP_MIN_PACKET_SIZE + 1];
+
 /**
  * @brief   USART1 UART (DMA) config: 921600 8N1.
  * @details Callbacks unused (we use the blocking uartReceiveTimeout /
@@ -105,6 +113,63 @@ static const UARTConfig al1_uartcfg = {
 };
 
 /*===========================================================================*/
+/* AP_CTRL <-> MICB bridge                                                    */
+/*===========================================================================*/
+
+/**
+ * @brief   MICB send callback for the BLE interface.
+ * @details MICB hands us a complete AP packet (response or event) for the
+ *          active BLE controller; we ship it to the wireless module on the
+ *          AP_CTRL channel, where the ESP32 routes it to the owning client.
+ */
+static void al1_link_ap_send(const uint8_t *data, size_t len) {
+    if (data == NULL || len == 0) {
+        return;
+    }
+    al1_link_send(AL1_CH_AP_CTRL, data, (uint16_t)len);
+}
+
+/**
+ * @brief   Feed AP_CTRL payload bytes into the AP parser, dispatching complete
+ *          packets to the MICB as the BLE interface (mirrors usb_adapter.c).
+ */
+static void al1_ap_ctrl_rx(const uint8_t *payload, uint16_t len) {
+    for (uint16_t i = 0; i < len; i++) {
+        ap_parse_result_t r = ap_parse_byte(&al1_ap_parser, payload[i]);
+
+        switch (r) {
+        case AP_PARSE_COMPLETE:
+            micb_process_command(MICB_IF_BLE, &al1_ap_parser.pkt);
+            ap_parser_reset(&al1_ap_parser);
+            break;
+
+        case AP_PARSE_ERR_CRC: {
+            size_t n = ap_build_error(al1_ap_err_buf, sizeof(al1_ap_err_buf),
+                                      AP_ERR_CRC_FAIL);
+            if (n > 0) {
+                al1_link_send(AL1_CH_AP_CTRL, al1_ap_err_buf, (uint16_t)n);
+            }
+            break; /* parser auto-resets on error */
+        }
+
+        case AP_PARSE_ERR_LEN:
+        case AP_PARSE_ERR_OVERFLOW: {
+            size_t n = ap_build_error(al1_ap_err_buf, sizeof(al1_ap_err_buf),
+                                      AP_ERR_INVALID_PARAM);
+            if (n > 0) {
+                al1_link_send(AL1_CH_AP_CTRL, al1_ap_err_buf, (uint16_t)n);
+            }
+            break; /* parser auto-resets on error */
+        }
+
+        case AP_PARSE_NEED_MORE:
+        default:
+            break;
+        }
+    }
+}
+
+/*===========================================================================*/
 /* RX frame dispatch                                                         */
 /*===========================================================================*/
 
@@ -122,12 +187,8 @@ static void al1_on_frame(uint8_t channel, uint8_t seq,
         break;
 
     case AL1_CH_AP_CTRL:
-        /*
-         * Phase 2: no AP<->MICB bridge yet. Echo the payload back as a LOG
-         * frame so an AP_CTRL probe can be seen round-tripping end to end.
-         */
-        LOG_INFO("WMOD AP_CTRL[seq=%u] len=%u (echo)", seq, len);
-        al1_link_send(AL1_CH_LOG, payload, len);
+        /* Attentio Protocol from a BLE client -> MICB (via the ESP32 bridge). */
+        al1_ap_ctrl_rx(payload, len);
         break;
 
     default:
@@ -175,6 +236,12 @@ void al1_link_init(void) {
     al1_rx_bytes = 0;
     chMtxObjectInit(&al1_tx_mtx);
     al1_parser_init(&al1_rx_parser, al1_on_frame, NULL, &al1_stats);
+
+    /* AP_CTRL carries the Attentio Protocol for BLE clients; parse it and
+     * register the BLE interface so MICB can push responses/events back. */
+    ap_parser_init(&al1_ap_parser);
+    micb_register_interface(MICB_IF_BLE, al1_link_ap_send);
+
     LOG_DEBUG("AL1 link initialized");
 }
 

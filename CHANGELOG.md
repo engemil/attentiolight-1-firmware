@@ -15,6 +15,39 @@ Note: Update `app_header.h` when publishing new version.
 
 ## [Development] (2026-06-02)
 
+BLE control bridge (MICB ⇄ wireless module). Wired the `al1_link` `AP_CTRL`
+channel into the MICB so Attentio Protocol commands from a BLE client (relayed by
+the ESP32) are handled like the USB path, and added system-state-change events.
+Build-verified (`make`).
+
+Added
+
+- `app/al1_link_driver/al1_link_driver.c`, AP_CTRL ⇄ MICB adapter: inbound
+  `AP_CTRL` payloads are fed through an `ap_parser` and dispatched with
+  `micb_process_command(MICB_IF_BLE, …)`; a send callback (`al1_link_ap_send`) is
+  registered via `micb_register_interface(MICB_IF_BLE, …)` so MICB
+  responses/events return to the module over `AP_CTRL`. Replaces the test
+  AP_CTRL loopback echo.
+- `app/attentio_protocol/`, `ap_cmd_requires_claim()`, the single authoritative
+  set of claim-required commands, now shared with the ESP32 bridge (which
+  pre-gates non-controlling BLE clients with the identical list).
+- `EVT_STATE_CHANGE`: a system-state transition hook on the state machine
+  (`app_sm_set_state_change_callback`, fired in `transition_to_state`) and
+  `micb_forward_state_change()`, which emits `AP_CMD_EVT_STATE_CHANGE` (payload
+  `[old_state, new_state]`) to the active controller.
+
+Changed
+
+- `app/micb/micb.c`, `micb_cmd_requires_claim` now delegates to the shared
+  `ap_cmd_requires_claim`; `micb.h` includes `app_state_machine.h`.
+- `app/main.c`, registers `micb_forward_state_change` with the state machine
+  before `app_sm_start()`.
+- `app/attentio_protocol/attentio_protocol.h`, documented the `EVT_*` payloads.
+
+---
+
+## [Development] (2026-06-02)
+
 STM32↔ESP32 UART link. Implemented the STM32 side of the `al1_link`
 transport to the ESP32-C3 wireless module and verified a bidirectional round-trip
 on real hardware (CDC0 shows the module's 1 Hz `tick=N` heartbeat with `crc=0`).

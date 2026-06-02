@@ -68,6 +68,11 @@ SOFTWARE.
 static volatile app_sm_system_state_t system_state = APP_SM_SYS_BOOT;
 
 /**
+ * @brief   Optional observer notified on each top-level state transition.
+ */
+static app_sm_state_change_cb_t state_change_cb;
+
+/**
  * @brief   Driver state.
  */
 static volatile app_sm_driver_state_t driver_state = APP_SM_STATE_UNINIT;
@@ -172,6 +177,10 @@ button_callback_t app_sm_get_button_event_callback(void) {
     return on_button_event;
 }
 
+void app_sm_set_state_change_callback(app_sm_state_change_cb_t cb) {
+    state_change_cb = cb;
+}
+
 /**
  * @brief   Transitions to a new system state.
  */
@@ -204,6 +213,11 @@ static void transition_to_state(app_sm_system_state_t new_state) {
 
     /* Update state */
     system_state = new_state;
+
+    /* Notify observers (e.g. MICB -> remote controller) of the transition. */
+    if (state_change_cb != NULL && new_state != old_state) {
+        state_change_cb(old_state, new_state);
+    }
 
     LOG_DEBUG("SM ENTER state: %s", system_state_names[new_state]);
 

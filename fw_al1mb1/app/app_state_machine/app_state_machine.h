@@ -242,6 +242,29 @@ const char* app_sm_mode_name(app_sm_mode_t mode);
  */
 button_callback_t app_sm_get_button_event_callback(void);
 
+/**
+ * @brief   System-state transition callback.
+ * @details Invoked after every real top-level state transition, in the state
+ *          machine's processing context. Lets an observer (e.g. the MICB) report
+ *          transitions to a remote controller without the SM depending on the
+ *          protocol layer. Keep the handler short; it may run from a command or
+ *          button processing path.
+ *
+ * @param[in] old_state     State left.
+ * @param[in] new_state     State entered.
+ */
+typedef void (*app_sm_state_change_cb_t)(app_sm_system_state_t old_state,
+                                         app_sm_system_state_t new_state);
+
+/**
+ * @brief   Registers a system-state transition callback (NULL to clear).
+ *
+ * @param[in] cb    Callback to invoke on each transition.
+ *
+ * @api
+ */
+void app_sm_set_state_change_callback(app_sm_state_change_cb_t cb);
+
 #ifdef __cplusplus
 }
 #endif

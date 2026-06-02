@@ -230,3 +230,26 @@ size_t ap_build_event(uint8_t *buf, size_t buf_size,
                       const uint8_t *payload, uint8_t payload_len) {
     return ap_build_packet(buf, buf_size, event_cmd, payload, payload_len);
 }
+
+/*===========================================================================*/
+/* Access control                                                            */
+/*===========================================================================*/
+
+bool ap_cmd_requires_claim(uint8_t cmd) {
+    switch (cmd) {
+    /* LED control */
+    case AP_CMD_LED_OFF:
+    case AP_CMD_SET_RGB:
+    case AP_CMD_SET_HSV:
+    case AP_CMD_SET_BRIGHTNESS:
+    case AP_CMD_SET_EFFECT:
+    /* Power control */
+    case AP_CMD_POWER_ON:
+    case AP_CMD_POWER_OFF:
+    /* Settings write */
+    case AP_CMD_SETTINGS_SET:
+        return true;
+    default:
+        return false;
+    }
+}

@@ -48,6 +48,7 @@ SOFTWARE.
 #include <stdbool.h>
 
 #include "attentio_protocol.h"
+#include "app_state_machine.h"
 
 /*===========================================================================*/
 /* Types                                                                     */
@@ -145,6 +146,20 @@ void micb_process_command(micb_interface_id_t iface, const ap_packet_t *pkt);
  * @param[in] event     Button event type (ap_button_event_t).
  */
 void micb_forward_button_event(ap_button_event_t event);
+
+/**
+ * @brief   Forward a system-state transition to the active remote controller.
+ * @details Registered with the state machine via
+ *          app_sm_set_state_change_callback(); on each transition it packages an
+ *          AP STATE_CHANGE event (payload [old_state, new_state]) and sends it to
+ *          the active controller. Does nothing in STANDALONE mode (no remote
+ *          controller to notify). Signature matches app_sm_state_change_cb_t.
+ *
+ * @param[in] old_state     State left.
+ * @param[in] new_state     State entered.
+ */
+void micb_forward_state_change(app_sm_system_state_t old_state,
+                               app_sm_system_state_t new_state);
 
 /**
  * @brief   Get the current control mode.

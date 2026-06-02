@@ -297,6 +297,12 @@ void init_application_systems(void){
     LOG_DEBUG("MAIN button callback registered");
 
     /*
+     * Report state transitions to the active remote controller (MICB). Set
+     * before app_sm_start() so the initial BOOT->POWERUP is observable.
+     */
+    app_sm_set_state_change_callback(micb_forward_state_change);
+
+    /*
      * Start Application State Machine.
      */
     LOG_DEBUG("MAIN app_sm_start()...");

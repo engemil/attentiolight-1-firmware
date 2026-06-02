@@ -111,9 +111,9 @@ SOFTWARE.
 #define AP_CMD_DFU_ENTER            0x70    /**< Enter DFU bootloader.     */
 
 /* Events (0x80-0x8F) — Device -> Host */
-#define AP_CMD_EVT_BUTTON           0x80    /**< Button event.             */
-#define AP_CMD_EVT_STATE_CHANGE     0x81    /**< State change event.       */
-#define AP_CMD_EVT_SESSION_END      0x82    /**< Session ended event.      */
+#define AP_CMD_EVT_BUTTON           0x80    /**< Button event. Payload: [ap_button_event_t]. */
+#define AP_CMD_EVT_STATE_CHANGE     0x81    /**< System-state change. Payload: [old_state, new_state] (device system-state enum). */
+#define AP_CMD_EVT_SESSION_END      0x82    /**< Session ended event. Payload: [ap_session_end_reason_t]. */
 
 /* Responses (0xF0-0xFF) — Device -> Host */
 #define AP_CMD_OK                   0xF0    /**< Success response.         */
@@ -321,6 +321,19 @@ size_t ap_build_error(uint8_t *buf, size_t buf_size, ap_error_t error_code);
 size_t ap_build_event(uint8_t *buf, size_t buf_size,
                       uint8_t event_cmd,
                       const uint8_t *payload, uint8_t payload_len);
+
+/**
+ * @brief   Whether a command may only be issued by the active controller.
+ * @details Commands that mutate device state (LED, power, settings-write)
+ *          require a claim; session control (CLAIM/RELEASE/PING) and queries
+ *          do not. The single authoritative list, shared by the MICB (which
+ *          enforces it) and the ESP32 wireless bridge (which pre-gates it so
+ *          one BLE client cannot drive the device while another holds control).
+ *
+ * @param[in] cmd   AP command ID.
+ * @return          true if the command requires an active claim.
+ */
+bool ap_cmd_requires_claim(uint8_t cmd);
 
 #ifdef __cplusplus
 }

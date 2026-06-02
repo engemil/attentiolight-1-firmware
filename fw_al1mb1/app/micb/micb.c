@@ -232,22 +232,9 @@ static void micb_send_session_end(micb_interface_id_t iface,
  * @return  true if the command requires a claim.
  */
 static bool micb_cmd_requires_claim(uint8_t cmd) {
-    switch (cmd) {
-    /* LED control */
-    case AP_CMD_LED_OFF:
-    case AP_CMD_SET_RGB:
-    case AP_CMD_SET_HSV:
-    case AP_CMD_SET_BRIGHTNESS:
-    case AP_CMD_SET_EFFECT:
-    /* Power control */
-    case AP_CMD_POWER_ON:
-    case AP_CMD_POWER_OFF:
-    /* Settings write */
-    case AP_CMD_SETTINGS_SET:
-        return true;
-    default:
-        return false;
-    }
+    /* The claim-required set is owned by the shared AP core so the ESP32
+     * wireless bridge gates on the identical list (see attentio_protocol.c). */
+    return ap_cmd_requires_claim(cmd);
 }
 
 /*===========================================================================*/
@@ -1138,6 +1125,21 @@ void micb_forward_button_event(ap_button_event_t event) {
     uint8_t payload = (uint8_t)event;
     size_t n = ap_build_event(evt_buf, sizeof(evt_buf),
                               AP_CMD_EVT_BUTTON, &payload, 1);
+    if (n > 0) {
+        micb_send_to(micb_session.active_controller, evt_buf, n);
+    }
+}
+
+void micb_forward_state_change(app_sm_system_state_t old_state,
+                               app_sm_system_state_t new_state) {
+    if (micb_session.mode != MICB_MODE_REMOTE) {
+        return;
+    }
+
+    static uint8_t evt_buf[AP_MAX_PACKET_SIZE];
+    uint8_t payload[2] = { (uint8_t)old_state, (uint8_t)new_state };
+    size_t n = ap_build_event(evt_buf, sizeof(evt_buf),
+                              AP_CMD_EVT_STATE_CHANGE, payload, sizeof(payload));
     if (n > 0) {
         micb_send_to(micb_session.active_controller, evt_buf, n);
     }
