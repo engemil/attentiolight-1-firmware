@@ -13,6 +13,24 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-06-03)
+
+Cleanup. Removed the STM32↔ESP32 link bring-up diagnostics from the main loop now
+that the link is verified.
+
+Changed
+
+- `fw_al1mb1/app/main.c`, the main thread keeps only the debug-build housekeeping
+  (stack-watermark / heap-analysis); `al1_link_init()` / `al1_link_start()` are
+  unchanged so AP control over the link/BLE still works.
+
+Removed
+
+- The 1 Hz `mb1 alive tick=N` LOG heartbeat and the `AL1 rx_bytes/frames/crc/...`
+  link-stats diagnostic print.
+
+---
+
 ## [Development] (2026-06-02)
 
 BLE control bridge (MICB ⇄ wireless module). Wired the `al1_link` `AP_CTRL`

@@ -348,46 +348,21 @@ int main(void) {
 
     /*
      * Start the wireless-module UART link now that the ESP32 is enabled.
-     * Brings up USART1 + the RX thread; the 1 Hz LOG heartbeat is driven below.
+     * Brings up USART1 + the RX thread.
      */
     al1_link_start();
 
     /*
-     * Main thread: drives the wireless-module link heartbeat.
+     * Main thread: periodic housekeeping (debug-build diagnostics).
      *
-     * Other application work is handled by dedicated threads:
+     * Application work is handled by dedicated threads:
      * - Button driver thread (input)
      * - State machine thread (standalone logic)
      * - Animation thread (LED rendering)
      * - USB adapter thread (AP protocol handling)
      * - AL1 link thread (wireless-module UART RX)
      */
-    uint32_t al1_tick = 0;
-    char al1_msg[48];
     while (true) {
-
-        /* 1 Hz LOG heartbeat to the wireless module over the link. */
-        int al1_n = chsnprintf(al1_msg, sizeof(al1_msg),
-                               "mb1 alive tick=%u", (unsigned)al1_tick++);
-        if (al1_n > 0) {
-            al1_link_send(AL1_CH_LOG, (const uint8_t *)al1_msg, (uint16_t)al1_n);
-        }
-
-        /*
-         * Link RX diagnostic (CDC0). rx_bytes counts raw bytes on USART1;
-         * frames counts those that passed framing+CRC. rx_bytes climbing while
-         * frames stays 0 => bytes arrive but don't frame (baud/CRC or TX/RX
-         * swap); rx_bytes==0 => nothing arriving from the ESP32.
-         */
-        {
-            al1_link_stats_t s;
-            al1_link_get_stats(&s);
-            LOG_INFO("AL1 rx_bytes=%u frames=%u crc=%u ver=%u len=%u resync=%u | tx=%u",
-                     (unsigned)al1_link_get_rx_bytes(),
-                     (unsigned)s.rx_frames, (unsigned)s.rx_crc_err,
-                     (unsigned)s.rx_ver_err, (unsigned)s.rx_len_err,
-                     (unsigned)s.rx_resync, (unsigned)s.tx_frames);
-        }
 
 #if (APP_STACK_WATERMARK == 1)
         /* Periodically print thread stack watermarks (peak usage).
