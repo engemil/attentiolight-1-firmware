@@ -78,6 +78,11 @@ static uint8_t           al1_tx_seq[256];
 /** @brief Serializes frame build + UART write across senders. */
 static mutex_t           al1_tx_mtx;
 
+/** @brief True once al1_link_start() has brought up USART1 and the mutex.
+ *         Lets al1_link_send() be safely called (and silently drop) before
+ *         the link is up — e.g. early-boot LOG_* via log_printf_timeout(). */
+static bool              al1_link_ready;
+
 /** @brief TX scratch buffer (guarded by al1_tx_mtx). */
 static uint8_t           al1_tx_buf[AL1_LINK_OVERHEAD + AL1_LINK_MAX_PAYLOAD];
 
@@ -182,8 +187,12 @@ static void al1_on_frame(uint8_t channel, uint8_t seq,
 
     switch (channel) {
     case AL1_CH_LOG:
-        /* Surface the wireless module's log text on CDC0. */
-        LOG_INFO("WMOD LOG[seq=%u]: %.*s", seq, (int)len, (const char *)payload);
+        /* Surface the wireless module's log text on CDC0. Demoted from INFO to
+         * DEBUG so it's off the UART-RX hot path at the default log level —
+         * every LOG_* here can block up to LOG_PRINT_TIMEOUT on CDC0 when no
+         * USB host is enumerated, which stalls AP_CTRL dispatch. Enable with
+         * `attentio loglevel 4` when ESP32-side logs are needed. */
+        LOG_DEBUG("WMOD LOG[seq=%u]: %.*s", seq, (int)len, (const char *)payload);
         break;
 
     case AL1_CH_AP_CTRL:
@@ -255,10 +264,17 @@ void al1_link_start(void) {
     chThdCreateStatic(wa_al1_link_thread, sizeof(wa_al1_link_thread),
                       AL1_LINK_THREAD_PRIORITY, al1_link_thread, NULL);
 
+    al1_link_ready = true;
     LOG_DEBUG("AL1 link started");
 }
 
 int al1_link_send(uint8_t channel, const uint8_t *payload, uint16_t len) {
+    /* Silently drop if the link hasn't been started yet (early-boot LOG_*
+     * via log_printf_timeout, or any caller before al1_link_start()). */
+    if (!al1_link_ready) {
+        return -1;
+    }
+
     if (len > AL1_LINK_MAX_PAYLOAD) {
         al1_stats.tx_drops++;
         return -1;

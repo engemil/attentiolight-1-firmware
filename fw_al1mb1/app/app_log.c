@@ -26,13 +26,18 @@ SOFTWARE.
  * @file    app_log.c
  * @brief   Logging system implementation.
  *
- * @details Provides runtime-configurable log output to CDC0 (USB serial).
+ * @details Provides runtime-configurable log output to CDC0 (USB serial)
+ *          when a USB host has enumerated the device, and otherwise forwards
+ *          each line over the wireless-module UART link (AL1_CH_LOG) so logs
+ *          remain visible on `idf.py monitor` during BLE-only operation.
+ *
  *          The log level is loaded from persistent storage at boot and can
  *          be changed at runtime via AP command.
  */
 
 #include "app_log.h"
 #include "persistent_data.h"
+#include "al1_link_driver.h"
 #include <stdarg.h>
 
 /*===========================================================================*/
@@ -63,7 +68,31 @@ void log_printf_timeout(sysinterval_t timeout, const char *fmt, ...) {
     va_end(ap);
 
     if (len > 0) {
-        chnWriteTimeout(&LOG_SERIAL_DRIVER, (uint8_t*)buf, (size_t)len, timeout);
+        /*
+         * Route by USB enumeration state.
+         *
+         * ChibiOS only sets serusbcfg1.usbp->state == USB_ACTIVE once a USB
+         * host has enumerated the device (the CONFIGURED event in the USB
+         * event handler). With no host — e.g. powered from a dumb charger —
+         * the SDU is never configured and chnWriteTimeout() to CDC0 blocks
+         * for the full timeout (200 ms) per line because there is no IN
+         * endpoint being ACKed. That stall, when it hits the al1_link UART
+         * RX thread (which both re-logs ESP32 frames and dispatches AP_CTRL
+         * to the MICB), overruns the UART RX FIFO and corrupts/loses BLE AP
+         * frames — manifesting host-side as a 3 s command timeout.
+         *
+         * When USB is enumerated, write to CDC0 as before (reliable, and the
+         * host reads the logs). When USB is not enumerated, forward the line
+         * best-effort over AL1_CH_LOG to the ESP32 so it surfaces on
+         * `idf.py monitor` without blocking the caller: al1_link_send queues a
+         * frame and returns immediately.
+         */
+        if (serusbcfg1.usbp->state == USB_ACTIVE) {
+            chnWriteTimeout(&LOG_SERIAL_DRIVER, (uint8_t*)buf, (size_t)len, timeout);
+        }
+        else {
+            (void)al1_link_send(AL1_CH_LOG, (const uint8_t*)buf, (uint16_t)len);
+        }
     }
 }
 

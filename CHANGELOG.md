@@ -13,6 +13,41 @@ Note: Update `app_header.h` when publishing new version.
 
 ---
 
+## [Development] (2026-06-20)
+
+Fix: BLE-only connectivity (USB not enumerated by a host). The device was
+unresponsive over BLE when powered from a dumb charger (USB power, no host
+enumeration): `attentio --ble status` and presets timed out after 3 s, while
+USB-to-PC worked. Root cause: thread starvation. The `usb_adapter_thread` and
+`al1_link_thread` both run at NORMALPRIO, and `CH_CFG_TIME_QUANTUM = 0` (no
+round-robin). When no USB host has enumerated the device, the SDU's input queue
+is suspended and `chnReadTimeout()` on CDC1 returns 0 immediately (MSG_RESET)
+instead of blocking for 100 ms — so the `usb_adapter_thread` busy-loops without
+ever yielding, permanently starving the `al1_link_thread` (USART1 RX → MICB
+dispatch). BLE AP_CTRL frames forwarded by the ESP32 are never parsed, the CLAIM
+never reaches the MICB, and the host times out. With USB to a PC, the SDU is
+resumed, `chnReadTimeout` blocks naturally, and the `al1_link_thread` gets CPU
+time. The higher-priority threads (button, state machine, animation) preempt the
+busy-loop, so standalone mode works on a dumb charger — only BLE is starved.
+
+Changed
+
+- `fw_al1mb1/app/usb_adapter/usb_adapter.c`: the `usb_adapter_thread` now sleeps
+  10 ms when `chnReadTimeout` returns 0, yielding to the `al1_link_thread` at the
+  same priority. When USB is enumerated, `chnReadTimeout` blocks for 100 ms
+  (natural yield), so the sleep never triggers and USB-AP latency is unchanged.
+  This is the core fix.
+- `fw_al1mb1/app/app_log.c`: `log_printf_timeout()` now routes by USB enumeration
+  state. When `serusbcfg1.usbp->state == USB_ACTIVE`, writes to CDC0 as before.
+  When USB is not enumerated, forwards log lines over `AL1_CH_LOG` to the ESP32
+  (visible on `idf.py monitor`). Provides BLE-only log visibility.
+- `fw_al1mb1/app/al1_link_driver/al1_link_driver.c`: added a `al1_link_ready`
+  guard flag so `al1_link_send()` safely returns -1 if called before
+  `al1_link_start()`. Demoted the ESP32 `AL1_CH_LOG` forward from `LOG_INFO` to
+  `LOG_DEBUG`.
+
+---
+
 ## [Development] (2026-06-03)
 
 Cleanup. Removed the STM32↔ESP32 link bring-up diagnostics from the main loop now

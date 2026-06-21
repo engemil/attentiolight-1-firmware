@@ -173,6 +173,28 @@ static THD_FUNCTION(usb_adapter_thread, arg) {
                 break;
             }
         }
+
+        /*
+         * Yield when no data was received.
+         *
+         * When no USB host has enumerated the device, the SDU's input queue
+         * is suspended and chnReadTimeout() returns 0 immediately (MSG_RESET)
+         * instead of blocking for the 100 ms timeout. Without this yield, the
+         * thread busy-loops at NORMALPRIO. ChibiOS is configured with
+         * CH_CFG_TIME_QUANTUM = 0 (no round-robin), so a non-yielding thread
+         * at NORMALPRIO permanently starves all other NORMALPRIO threads —
+         * critically the al1_link thread (USART1 RX → MICB), which never gets
+         * to process BLE AP_CTRL frames. This is the root cause of the BLE-only
+         * 3 s timeout: the CLAIM reaches the ESP32 and is forwarded over UART,
+         * but the STM32's al1_link thread never runs to parse and dispatch it.
+         *
+         * With USB enumerated, chnReadTimeout() blocks for up to 100 ms on
+         * each call (yielding naturally), so this sleep never triggers in that
+         * case — USB-AP latency is unchanged.
+         */
+        if (n == 0) {
+            chThdSleepMilliseconds(10);
+        }
     }
 }
 
